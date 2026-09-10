@@ -1,0 +1,43 @@
+---
+interface Props {
+  /** Rótulos das abas, na mesma ordem dos painéis (elementos com data-painel). */
+  abas: { id: string; rotulo: string }[];
+  rotuloLista: string;
+}
+const { abas, rotuloLista } = Astro.props;
+---
+
+<div data-abas>
+  <div role="tablist" aria-label={rotuloLista} class="flex flex-wrap gap-2">
+    {
+      abas.map((aba, i) => (
+        <button
+          type="button"
+          role="tab"
+          data-aba={aba.id}
+          aria-selected={i === 0 ? "true" : "false"}
+          class="cursor-pointer rounded-full border border-verde-medio/40 bg-white px-4 py-1 text-tabela font-semibold text-verde-escuro transition-colors hover:border-verde-medio aria-selected:border-verde-escuro aria-selected:bg-verde-escuro aria-selected:text-white"
+        >
+          {aba.rotulo}
+        </button>
+      ))
+    }
+  </div>
+  <div class="mt-2.5">
+    <slot />
+  </div>
+</div>
+
+<script>
+  // Sem JS todos os painéis ficam visíveis; o script apenas reduz para uma aba por vez.
+  document.querySelectorAll<HTMLElement>("[data-abas]").forEach((grupo) => {
+    const abas = [...grupo.querySelectorAll<HTMLButtonElement>("[data-aba]")];
+    const painels = [...grupo.querySelectorAll<HTMLElement>("[data-painel]")];
+    const mostrar = (id: string) => {
+      abas.forEach((b) => b.setAttribute("aria-selected", String(b.dataset.aba === id)));
+      painels.forEach((p) => (p.hidden = p.dataset.painel !== id));
+    };
+    abas.forEach((b) => b.addEventListener("click", () => mostrar(b.dataset.aba!)));
+    if (abas[0]?.dataset.aba) mostrar(abas[0].dataset.aba);
+  });
+</script>

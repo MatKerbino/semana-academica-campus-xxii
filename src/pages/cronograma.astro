@@ -1,0 +1,64 @@
+---
+import { url } from "../lib/url";
+import { ArrowRight, Clock, MapPin } from "@lucide/astro";
+import Abas from "../components/Abas.astro";
+import PaginaCabecalho from "../components/PaginaCabecalho.astro";
+import Base from "../layouts/Base.astro";
+import { atividades, dias, rotulosTipo } from "../data/evento";
+---
+
+<Base titulo="Cronograma" ativo="/cronograma">
+  <PaginaCabecalho
+    titulo="Cronograma do evento"
+    descricao="Programação completa dos quatro dias. Selecione um dia e clique em uma atividade para abrir sua página com a descrição detalhada."
+    trilha={[{ href: "/", rotulo: "Início" }]}
+  />
+
+  <Abas rotuloLista="Dias do evento" abas={dias.map((d) => ({ id: d.id, rotulo: d.rotulo }))}>
+    {
+      dias.map((dia) => (
+        <div data-painel={dia.id}>
+          <h2 class="sr-only">{dia.data}</h2>
+          <ol class="overflow-hidden rounded-cartao border border-borda">
+            {atividades
+              .filter((a) => a.dia === dia.id)
+              .map((atividade) => (
+                <li class="flex flex-wrap items-center gap-x-4 gap-y-1 px-5 py-1 odd:bg-white even:bg-palha hover:bg-creme">
+                  <span class="flex w-20 shrink-0 items-center gap-1.5 text-tabela font-semibold text-verde-medio">
+                    <Clock class="size-3.5" aria-hidden="true" />
+                    {atividade.hora}
+                  </span>
+                  <span class="min-w-[16rem] flex-1">
+                    <a
+                      href={url(`/atividades/${atividade.slug}`)}
+                      class="text-tabela font-semibold text-verde-escuro hover:underline"
+                    >
+                      {atividade.titulo}
+                    </a>
+                    <span class="flex items-center gap-1 text-tabela text-chumbo/60">
+                      <MapPin class="size-3" aria-hidden="true" />
+                      {atividade.local}
+                    </span>
+                  </span>
+                  <span class="rounded-full bg-creme px-2 py-0.5 text-xs font-bold text-verde-escuro uppercase">
+                    {rotulosTipo[atividade.tipo]}
+                  </span>
+                  <a
+                    href={url(`/atividades/${atividade.slug}`)}
+                    class="flex items-center gap-1 text-tabela font-semibold text-azul hover:underline"
+                  >
+                    Ver detalhes
+                    <ArrowRight class="size-3.5" aria-hidden="true" />
+                  </a>
+                </li>
+              ))}
+          </ol>
+        </div>
+      ))
+    }
+  </Abas>
+
+  <p class="mt-4 rounded-cartao border border-azul/40 bg-white p-3 text-tabela text-chumbo/70">
+    Cada atividade possui uma página própria com descrição detalhada, responsável, local e número de vagas.
+  </p>
+</Base>

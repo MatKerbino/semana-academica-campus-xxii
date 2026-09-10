@@ -1,0 +1,21 @@
+{
+  "name": "semana-academica-campus-xxii",
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "deploy:aws": "npm run build && aws s3 sync dist/ s3://semana-academica-uepa-2026/ --delete --exclude '_astro/*' --cache-control 'public,max-age=0,must-revalidate' && aws s3 sync dist/_astro/ s3://semana-academica-uepa-2026/_astro/ --delete --cache-control 'public,max-age=31536000,immutable' && aws cloudfront create-invalidation --distribution-id EE73VTEXD9WT0 --paths '/*'",
+    "deploy": "npm run build && npx gh-pages --dist dist --branch gh-pages --dotfiles --message 'Publicação do site estático'"
+  },
+  "dependencies": {
+    "@lucide/astro": "^1.42.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^7.3.2",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "gh-pages": "^6.3.0"
+  }
+}

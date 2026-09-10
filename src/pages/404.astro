@@ -1,0 +1,52 @@
+---
+import { url } from "../lib/url";
+import { ArrowRight, CalendarDays, Home } from "@lucide/astro";
+import Base from "../layouts/Base.astro";
+---
+
+<Base titulo="Página não encontrada" descricao="A página solicitada não existe neste site.">
+  <section class="rounded-cartao bg-creme p-6 lg:p-10">
+    <p class="text-tabela font-bold text-verde-medio">Erro 404</p>
+    <h1 class="mt-2 text-[28px] font-bold text-verde-escuro lg:text-hero">Página não encontrada</h1>
+    <p class="mt-2 max-w-[900px] text-[17px] text-chumbo">
+      O endereço acessado não existe no site da 1ª Semana Acadêmica do Campus XXII. Use os atalhos abaixo ou o menu do
+      cabeçalho para continuar a navegação.
+    </p>
+
+    <div class="mt-4 flex flex-wrap gap-3.5">
+      <a
+        href={url("/")}
+        class="flex items-center gap-2 rounded-full bg-verde-cta px-7 py-2.5 text-[15px] font-semibold text-verde-noite shadow"
+      >
+        <Home class="size-4" aria-hidden="true" />
+        Ir para a Página Inicial
+      </a>
+      <a
+        href={url("/cronograma")}
+        class="flex items-center gap-2 rounded-full border-2 border-verde-escuro px-7 py-2.5 text-[15px] font-semibold text-verde-escuro hover:bg-white"
+      >
+        <CalendarDays class="size-4" aria-hidden="true" />
+        Ver Cronograma
+      </a>
+    </div>
+  </section>
+
+  <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    {
+      [
+        { href: "/minicursos", rotulo: "Minicursos" },
+        { href: "/palestras", rotulo: "Palestras" },
+        { href: "/palestrantes", rotulo: "Palestrantes e Ministrantes" },
+        { href: "/local", rotulo: "Local do evento" },
+      ].map((item) => (
+        <a
+          href={url(item.href)}
+          class="flex items-center justify-between gap-2 rounded-cartao border border-borda bg-white p-4 text-sm font-semibold text-verde-escuro hover:shadow-md"
+        >
+          {item.rotulo}
+          <ArrowRight class="size-4 shrink-0 text-azul" aria-hidden="true" />
+        </a>
+      ))
+    }
+  </div>
+</Base>

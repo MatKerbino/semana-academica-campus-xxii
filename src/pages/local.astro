@@ -1,0 +1,93 @@
+---
+import { Building2, ExternalLink, Mail, MapPin } from "@lucide/astro";
+import Abas from "../components/Abas.astro";
+import PaginaCabecalho from "../components/PaginaCabecalho.astro";
+import Base from "../layouts/Base.astro";
+import { evento } from "../data/evento";
+
+const endereco = [
+  { icone: MapPin, rotulo: "Local", valor: evento.local.nome },
+  { icone: MapPin, rotulo: "Endereço", valor: evento.local.endereco },
+  { icone: MapPin, rotulo: "Cidade", valor: evento.local.cidade },
+  { icone: Building2, rotulo: "Blocos utilizados", valor: evento.local.blocos },
+  { icone: Mail, rotulo: "Contato", valor: evento.email },
+];
+
+const comoChegar = [
+  "De ônibus: linhas que atendem a BR-316 no sentido Belém–Marituba, com desembarque no ponto em frente ao campus.",
+  "De carro: acesso pela BR-316, km 8; estacionamento gratuito disponível no campus durante o evento.",
+  "Referências próximas: Shopping Metrópole Ananindeua e terminal de integração da BR-316.",
+  "Acessibilidade: rampas de acesso, elevador no Bloco A e vagas reservadas próximas à entrada principal.",
+];
+---
+
+<Base titulo="Local do evento" ativo="/local">
+  <PaginaCabecalho
+    titulo="Local do evento"
+    descricao="Todas as atividades acontecem no Campus XXII da UEPA, em Ananindeua, região metropolitana de Belém."
+    trilha={[{ href: "/", rotulo: "Início" }]}
+  />
+
+  <Abas
+    rotuloLista="Informações de localização"
+    abas={[
+      { id: "mapa", rotulo: "Mapa e endereço" },
+      { id: "chegar", rotulo: "Como chegar" },
+    ]}
+  >
+    <div data-painel="mapa" class="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+      <!-- Mapa incorporado (OpenStreetMap, sem chave de API); o botão ao lado abre o Google Maps (RF-04). -->
+      <figure>
+        <iframe
+          src={evento.local.mapaEmbed}
+          title={`Mapa da região do ${evento.local.nome}`}
+          loading="lazy"
+          class="h-[250px] w-full rounded-cartao border border-borda"></iframe>
+        <figcaption class="mt-1.5 text-tabela text-chumbo/70">
+          Mapa de referência do trecho da BR-316 no Coqueiro · a localização exata do campus abre no Google Maps.
+        </figcaption>
+      </figure>
+
+      <aside class="h-fit rounded-cartao border border-verde-medio bg-palha p-4">
+        <h2 class="text-base font-bold text-verde-escuro">Endereço</h2>
+        <ul class="mt-2 space-y-2">
+          {
+            endereco.map((item) => (
+              <li class="flex gap-2">
+                <item.icone class="mt-0.5 size-4 shrink-0 text-verde-medio" aria-hidden="true" />
+                <span>
+                  <span class="block text-xs font-bold text-verde-medio">{item.rotulo}</span>
+                  <span class="block text-tabela text-chumbo">{item.valor}</span>
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+
+        <a
+          href={evento.local.mapsUrl}
+          target="_blank"
+          rel="noopener"
+          class="mt-3 flex items-center justify-center gap-2 rounded-full bg-azul px-5 py-2.5 text-[15px] font-semibold text-white hover:opacity-90"
+        >
+          <ExternalLink class="size-4" aria-hidden="true" />
+          Abrir no Google Maps
+        </a>
+      </aside>
+    </div>
+
+    <div data-painel="chegar" class="rounded-cartao bg-creme p-6">
+      <h2 class="text-xl font-semibold text-verde-escuro">Como chegar</h2>
+      <ul class="mt-3 space-y-2">
+        {
+          comoChegar.map((item) => (
+            <li class="flex gap-2 text-sm text-chumbo">
+              <span class="mt-2 size-1.5 shrink-0 rounded-full bg-verde-medio" aria-hidden="true" />
+              {item}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </Abas>
+</Base>

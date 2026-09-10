@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+/* Tokens extraídos do protótipo Figma (tela 00 · Capa e Índice) e do Relatório de UI/UX. */
+@theme {
+  --color-verde-escuro: #2c471e;
+  --color-verde-medio: #218b21;
+  --color-verde-cta: #33d40c;
+  --color-azul: #288be4;
+  --color-creme: #f8e8ce;
+  --color-palha: #fdf6e9;
+  --color-borda: #e4d9c3;
+  --color-chumbo: #333333;
+  --color-verde-claro: #cfe3c2;
+  --color-azul-claro: #8fc7f5;
+  --color-divisor: #4a6b39;
+  --color-verde-noite: #0f2a08;
+
+  /* Cartões e tabelas do protótipo: raio de 14px. */
+  --radius-cartao: 14px;
+
+  /* Escala tipográfica do protótipo, toda com line-height de 150%. */
+  --text-tabela: 13px;
+  --text-tabela--line-height: 1.5;
+  --text-secao: 26px;
+  --text-secao--line-height: 1.5;
+  --text-hero: 40px;
+  --text-hero--line-height: 1.5;
+  --text-capa: 44px;
+  --text-capa--line-height: 1.5;
+  --text-titulo: 32px;
+  --text-titulo--line-height: 1.5;
+  --text-xs--line-height: 1.5;
+  --text-sm--line-height: 1.5;
+  --text-base--line-height: 1.5;
+  --text-lg--line-height: 1.5;
+  --text-xl--line-height: 1.5;
+}
+
+html {
+  color-scheme: light;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+body { color: var(--color-chumbo); }
+
+/* Rolagem apenas dentro do conteúdo: cabeçalho e rodapé ficam fixos. */
+.rolagem-interna { scrollbar-width: thin; scrollbar-color: var(--color-verde-medio) transparent; }
+
+:focus-visible { outline: 2px solid var(--color-azul); outline-offset: 2px; }

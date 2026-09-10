@@ -1,0 +1,21 @@
+---
+import PaginaListagem from "../components/PaginaListagem.astro";
+import { porTipo } from "../data/evento";
+---
+
+<PaginaListagem
+  titulo="Palestras"
+  descricao="Palestras e mesa-redonda das quatro áreas temáticas, no Auditório Central do Campus XXII."
+  ativo="/palestras"
+  grupos={[
+    { id: "palestras", rotulo: "Palestras", atividades: porTipo("palestra") },
+    { id: "mesa", rotulo: "Mesa-redonda", atividades: porTipo("mesa-redonda") },
+  ]}
+  notasRotulo="Informações"
+  notas={[
+    "Todas as palestras são realizadas no Auditório Central, com capacidade para 200 participantes.",
+    "As palestras são abertas à comunidade interna e externa, sem necessidade de vínculo com a UEPA.",
+    "O acesso ao auditório ocorre por ordem de chegada, mediante apresentação do crachá de participante.",
+    "O certificado de participação é enviado por e-mail após o encerramento do evento.",
+  ]}
+/>

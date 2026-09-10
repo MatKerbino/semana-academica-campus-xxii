@@ -1,0 +1,213 @@
+---
+import { url } from "../lib/url";
+import "../styles/global.css";
+import { Leaf, Mail, Menu } from "@lucide/astro";
+import { evento } from "../data/evento";
+
+interface Props {
+  titulo: string;
+  descricao?: string;
+  /** Página ativa no menu, pelo href. */
+  ativo?: string;
+}
+
+const { titulo, descricao = evento.descricao, ativo } = Astro.props;
+
+const menu = [
+  { href: "/", rotulo: "Início" },
+  { href: "/cronograma", rotulo: "Cronograma" },
+  { href: "/minicursos", rotulo: "Minicursos" },
+  { href: "/palestras", rotulo: "Palestras" },
+  { href: "/cursos", rotulo: "Cursos" },
+  { href: "/banners", rotulo: "Banners" },
+  { href: "/artigos", rotulo: "Artigos" },
+  { href: "/palestrantes", rotulo: "Palestrantes" },
+  { href: "/patrocinadores", rotulo: "Patrocinadores" },
+  { href: "/local", rotulo: "Local" },
+];
+
+/* Rodapé do protótipo: navegação secundária agrupada em linhas, como na tela 01. */
+const navRodape = [
+  [
+    { href: "/", rotulo: "Início" },
+    { href: "/cronograma", rotulo: "Cronograma" },
+    { href: "/local", rotulo: "Local" },
+  ],
+  [
+    { href: "/minicursos", rotulo: "Minicursos" },
+    { href: "/palestras", rotulo: "Palestras" },
+    { href: "/cursos", rotulo: "Cursos" },
+    { href: "/banners", rotulo: "Banners" },
+  ],
+  [
+    { href: "/artigos", rotulo: "Artigos" },
+    { href: "/palestrantes", rotulo: "Palestrantes" },
+    { href: "/patrocinadores", rotulo: "Patrocinadores" },
+  ],
+];
+
+const inscricao = `mailto:${evento.email}?subject=${encodeURIComponent("Inscrição — 1ª Semana Acadêmica do Campus XXII")}`;
+---
+
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href={url("/favicon.svg")} type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    />
+    <title>{titulo} · {evento.nome}</title>
+    <meta name="description" content={descricao} />
+  </head>
+  <body class="h-dvh overflow-hidden bg-palha">
+    <div class="grid h-dvh grid-rows-[auto_1fr_auto]">
+      <!-- Cabeçalho fixo: 18px/48px e botão de inscrição sempre visível (tela 01 do protótipo). -->
+      <header class="z-20 bg-verde-escuro text-white shadow-md">
+        <div class="mx-auto flex max-w-[1440px] items-center gap-6 px-6 py-[18px] lg:px-12">
+          <a href={url("/")} class="flex shrink-0 items-center gap-2.5">
+            <Leaf class="size-[26px] text-verde-cta" aria-hidden="true" />
+            <span>
+              <span class="block text-base leading-[130%] font-bold tracking-[0.6px] text-white uppercase">
+                Semana Acadêmica
+              </span>
+              <span class="block text-[11px] leading-[130%] font-medium tracking-[0.4px] text-verde-claro">
+                Campus XXII · UEPA · 2025
+              </span>
+            </span>
+          </a>
+
+          <nav aria-label="Navegação principal" class="mx-auto hidden xl:block">
+            <ul class="flex flex-wrap items-center gap-x-4 gap-y-1 text-tabela leading-[130%]">
+              {
+                menu.map((item) => (
+                  <li>
+                    <a
+                      href={url(item.href)}
+                      aria-current={ativo === item.href ? "page" : undefined}
+                      class:list={[
+                        "rounded transition-colors hover:text-verde-cta",
+                        ativo === item.href ? "font-semibold text-verde-cta" : "font-medium text-white",
+                      ]}
+                    >
+                      {item.rotulo}
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+          </nav>
+
+          <a
+            href={inscricao}
+            class="ml-auto flex shrink-0 items-center gap-2 rounded-full bg-verde-cta px-[22px] py-3 text-sm leading-[130%] font-bold text-verde-noite shadow transition-transform hover:scale-[1.03] xl:ml-0"
+          >
+            <Mail class="size-4" aria-hidden="true" />
+            Realizar Inscrição
+          </a>
+
+          <details class="relative xl:hidden">
+            <summary
+              class="flex cursor-pointer items-center gap-1 rounded border border-white/30 px-2 py-2 text-tabela [&::-webkit-details-marker]:hidden"
+              aria-label="Abrir menu"
+            >
+              <Menu class="size-4" aria-hidden="true" />
+            </summary>
+            <nav
+              aria-label="Navegação principal"
+              class="absolute right-0 z-30 mt-2 w-56 rounded-cartao border border-borda bg-white p-2 text-chumbo shadow-xl"
+            >
+              <ul class="text-sm">
+                {
+                  menu.map((item) => (
+                    <li>
+                      <a
+                        href={url(item.href)}
+                        aria-current={ativo === item.href ? "page" : undefined}
+                        class:list={[
+                          "block rounded px-3 py-2 hover:bg-creme",
+                          ativo === item.href && "font-semibold text-verde-medio",
+                        ]}
+                      >
+                        {item.rotulo}
+                      </a>
+                    </li>
+                  ))
+                }
+              </ul>
+            </nav>
+          </details>
+        </div>
+      </header>
+
+      <main class="rolagem-interna overflow-y-auto">
+        <div class="mx-auto max-w-[1440px] px-6 py-3 lg:px-10 xl:px-16">
+          <slot />
+        </div>
+      </main>
+
+      <!-- Rodapé institucional do protótipo, em versão compacta para caber na tela fixa. -->
+      <footer class="z-20 bg-verde-escuro text-verde-claro shadow-[0_-2px_8px_rgba(0,0,0,0.15)]">
+        <div class="mx-auto max-w-[1440px] px-6 pt-3 pb-2 lg:px-12">
+          <div class="hidden gap-x-8 xl:grid xl:grid-cols-[1.35fr_1fr_1fr_1.1fr]">
+            <section>
+              <h2 class="text-[15px] font-bold text-white">1ª Semana Acadêmica</h2>
+              <p class="text-tabela">Campus XXII — Ananindeua/PA · {evento.periodo}</p>
+            </section>
+
+            <nav aria-label="Navegação do rodapé">
+              <h2 class="text-[15px] font-bold text-white">Navegação</h2>
+              {
+                navRodape.map((linha) => (
+                  <p class="text-tabela">
+                    {linha.map((item, i) => (
+                      <>
+                        {i > 0 && <span class="mx-1 text-verde-claro/50">·</span>}
+                        <a href={url(item.href)} class="hover:text-verde-cta hover:underline">
+                          {item.rotulo}
+                        </a>
+                      </>
+                    ))}
+                  </p>
+                ))
+              }
+            </nav>
+
+            <section class="text-azul-claro">
+              <h2 class="flex items-center gap-2 text-[15px] font-bold text-white">
+                <Mail class="size-4 text-azul-claro" aria-hidden="true" />
+                Inscrição
+              </h2>
+              <p class="text-tabela">
+                <a href={inscricao} class="hover:underline">{evento.email}</a>
+              </p>
+              <p class="text-tabela">Custo: 1 kg de alimento não perecível</p>
+              <p class="text-tabela">Aberto à comunidade interna e externa</p>
+            </section>
+
+            <section>
+              <h2 class="text-[15px] font-bold text-white">Realização</h2>
+              {evento.realizacao.map((orgao) => <p class="text-tabela">{orgao}</p>)}
+            </section>
+          </div>
+
+          <!-- Telas estreitas: resumo em uma linha, para não consumir a altura útil. -->
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-tabela xl:hidden">
+            <span class="font-bold text-white">1ª Semana Acadêmica · Campus XXII</span>
+            <span>{evento.periodo}</span>
+            <a href={inscricao} class="text-azul-claro hover:underline">{evento.email}</a>
+            <span>Inscrição: 1 kg de alimento não perecível</span>
+          </div>
+
+          <hr class="mt-2.5 h-px border-0 bg-divisor" />
+          <p class="mt-1.5 text-xs">
+            © 2025 · {evento.nome} — UEPA. Site de divulgação institucional. Todos os direitos reservados.
+          </p>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

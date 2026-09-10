@@ -1,0 +1,133 @@
+---
+import { url } from "../../lib/url";
+import { CalendarDays, Clock, ExternalLink, GraduationCap, Mail, MapPin, Users } from "@lucide/astro";
+import Abas from "../../components/Abas.astro";
+import PaginaCabecalho from "../../components/PaginaCabecalho.astro";
+import Base from "../../layouts/Base.astro";
+import { atividades, dias, evento, palestrantePor, rotulosTipo, type Atividade } from "../../data/evento";
+
+export function getStaticPaths() {
+  return atividades.map((atividade) => ({ params: { slug: atividade.slug }, props: { atividade } }));
+}
+
+const { atividade } = Astro.props as { atividade: Atividade };
+const dia = dias.find((d) => d.id === atividade.dia)!;
+const palestrante = palestrantePor(atividade.palestrante);
+const inscricao = `mailto:${evento.email}?subject=${encodeURIComponent(`Inscrição — ${atividade.titulo}`)}`;
+
+const informacoes = [
+  { icone: CalendarDays, rotulo: "Data", valor: dia.data },
+  { icone: Clock, rotulo: "Horário", valor: atividade.horario },
+  { icone: MapPin, rotulo: "Local", valor: atividade.local },
+  ...(atividade.vagas ? [{ icone: Users, rotulo: "Vagas", valor: atividade.vagas }] : []),
+  ...(atividade.cargaHoraria
+    ? [{ icone: GraduationCap, rotulo: "Certificado", valor: `${atividade.cargaHoraria} de carga horária` }]
+    : []),
+  { icone: Users, rotulo: "Público", valor: "Comunidade interna e externa" },
+];
+
+/* Abas para o conteúdo da atividade caber na tela sem rolagem. */
+const abas = [
+  { id: "descricao", rotulo: "Descrição" },
+  ...(atividade.topicos ? [{ id: "topicos", rotulo: "Tópicos e orientações" }] : []),
+  ...(palestrante ? [{ id: "responsavel", rotulo: "Responsável" }] : []),
+];
+---
+
+<Base titulo={atividade.titulo} descricao={atividade.descricao[0]} ativo="/cronograma">
+  <PaginaCabecalho
+    titulo={atividade.titulo}
+    trilha={[{ href: "/", rotulo: "Início" }, { href: "/cronograma", rotulo: "Cronograma" }]}
+    voltar={{ href: "/cronograma", rotulo: "Voltar para o Cronograma" }}
+  />
+
+  <div class="mb-3 flex flex-wrap gap-2 text-xs font-bold">
+    <span class="rounded-full bg-verde-escuro px-3 py-1 text-white">{rotulosTipo[atividade.tipo]}</span>
+    <span class="rounded-full bg-creme px-3 py-1 text-verde-escuro">{dia.rotulo} · {atividade.horario}</span>
+    <span class="rounded-full bg-creme px-3 py-1 text-verde-escuro">{atividade.local}</span>
+    {atividade.vagas && <span class="rounded-full bg-creme px-3 py-1 text-verde-escuro">{atividade.vagas}</span>}
+  </div>
+
+  <div class="grid gap-4 lg:grid-cols-[1.6fr_1fr]">
+    <div>
+      <Abas rotuloLista="Conteúdo da atividade" abas={abas}>
+        <div data-painel="descricao" class="rounded-cartao border border-borda bg-white p-4">
+          {atividade.descricao.map((paragrafo) => <p class="mt-2 text-sm text-chumbo first:mt-0">{paragrafo}</p>)}
+        </div>
+
+        {
+          atividade.topicos && (
+            <div data-painel="topicos" class="rounded-cartao border border-borda bg-white p-4">
+              <ul class="grid gap-1.5 md:grid-cols-2">
+                {atividade.topicos.map((topico) => (
+                  <li class="flex gap-2 text-sm text-chumbo">
+                    <span class="mt-2 size-1.5 shrink-0 rounded-full bg-verde-medio" aria-hidden="true" />
+                    {topico}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )
+        }
+
+        {
+          palestrante && (
+            <div data-painel="responsavel" class="rounded-cartao border border-verde-medio bg-palha p-4">
+              <h2 class="text-base font-semibold text-verde-escuro">{palestrante.nome}</h2>
+              <p class="mt-1 text-tabela text-chumbo">
+                {palestrante.titulacao} · {palestrante.instituicao}
+              </p>
+              <p class="mt-1.5 text-sm text-chumbo">{palestrante.bio}</p>
+              <div class="mt-2 flex flex-wrap gap-x-4 text-tabela font-semibold">
+                <a
+                  href={palestrante.lattes}
+                  target="_blank"
+                  rel="noopener"
+                  class="flex items-center gap-1 text-azul hover:underline"
+                >
+                  Currículo Lattes
+                  <ExternalLink class="size-3" aria-hidden="true" />
+                </a>
+                <a href={`mailto:${palestrante.email}`} class="flex items-center gap-1 text-azul hover:underline">
+                  <Mail class="size-3" aria-hidden="true" />
+                  {palestrante.email}
+                </a>
+                <a href={url("/palestrantes")} class="text-verde-medio hover:underline">
+                  Ver todos os palestrantes
+                </a>
+              </div>
+            </div>
+          )
+        }
+      </Abas>
+    </div>
+
+    <aside class="h-fit rounded-cartao bg-creme p-4">
+      <h2 class="text-base font-semibold text-verde-escuro">Informações</h2>
+      <ul class="mt-2 grid gap-2 sm:grid-cols-2">
+        {
+          informacoes.map((info) => (
+            <li class="flex gap-2">
+              <info.icone class="mt-0.5 size-4 shrink-0 text-verde-medio" aria-hidden="true" />
+              <span>
+                <span class="block text-xs font-bold tracking-wide text-chumbo/60 uppercase">{info.rotulo}</span>
+                <span class="block text-tabela text-chumbo">{info.valor}</span>
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+
+      <a
+        href={inscricao}
+        class="mt-3 flex items-center justify-center gap-2 rounded-full bg-verde-cta px-4 py-2.5 text-[15px] font-semibold text-verde-noite shadow"
+      >
+        <Mail class="size-4" aria-hidden="true" />
+        Realizar Inscrição
+      </a>
+      <p class="mt-1.5 text-xs text-chumbo/70">
+        Inscrição por e-mail: {evento.email} · Custo: 1 kg de alimento não perecível.
+      </p>
+    </aside>
+  </div>
+</Base>

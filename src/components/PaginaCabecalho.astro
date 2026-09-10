@@ -1,0 +1,48 @@
+---
+import { url } from "../lib/url";
+import { ChevronLeft } from "@lucide/astro";
+import Ornamento from "./Ornamento.astro";
+
+interface Props {
+  titulo: string;
+  descricao?: string;
+  trilha?: { href: string; rotulo: string }[];
+  voltar?: { href: string; rotulo: string };
+}
+const { titulo, descricao, trilha = [], voltar } = Astro.props;
+---
+
+<!-- Faixa creme com trilha e título, como nas telas 02, 03, 06 e 07 do protótipo. -->
+<div class="relative mb-3 overflow-hidden rounded-cartao bg-creme px-6 py-4 lg:px-8">
+  <Ornamento />
+  <div class="relative">
+  {
+    voltar && (
+      <a
+        href={url(voltar.href)}
+        class="mb-3 inline-flex items-center gap-1 rounded-full border border-verde-escuro bg-white px-3.5 py-1.5 text-tabela font-semibold text-verde-escuro hover:bg-palha"
+      >
+        <ChevronLeft class="size-4" aria-hidden="true" />
+        {voltar.rotulo}
+      </a>
+    )
+  }
+  {
+    trilha.length > 0 && (
+      <nav aria-label="Trilha de navegação" class="mb-1 text-tabela font-semibold text-verde-medio">
+        {trilha.map((item) => (
+          <>
+            <a href={url(item.href)} class="hover:underline">
+              {item.rotulo}
+            </a>
+            <span class="mx-1.5 text-verde-medio/60">/</span>
+          </>
+        ))}
+        <span class="text-verde-escuro/70">{titulo}</span>
+      </nav>
+    )
+  }
+  <h1 class="text-secao font-bold text-verde-escuro">{titulo}</h1>
+    {descricao && <p class="mt-1.5 max-w-[1000px] text-sm text-chumbo">{descricao}</p>}
+  </div>
+</div>

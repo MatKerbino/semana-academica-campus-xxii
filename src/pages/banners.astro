@@ -1,0 +1,22 @@
+---
+import PaginaListagem from "../components/PaginaListagem.astro";
+import { materiais, porTipo } from "../data/evento";
+
+const modeloPoster = materiais.find((m) => m.nome === "Template de pôster")!;
+---
+
+<PaginaListagem
+  titulo="Exposição de Banners"
+  descricao="Mostra de pôsteres científicos de estudantes e pesquisadores dos cursos do Campus XXII."
+  ativo="/banners"
+  grupos={[{ id: "lista", rotulo: "Sessões de exposição", atividades: porTipo("banner") }]}
+  notasRotulo="Orientações para os expositores"
+  notas={[
+    "Dimensões do pôster: 90 cm de largura por 120 cm de altura, em orientação retrato.",
+    "O modelo oficial de pôster está disponível na página de Artigos e Materiais.",
+    "A impressão do pôster é de responsabilidade dos autores.",
+    "A montagem ocorre até 30 minutos antes do início da sessão, no Hall do Bloco B.",
+    "Pelo menos um autor deve permanecer junto ao pôster durante toda a sessão.",
+  ]}
+  cta={{ rotulo: "Baixar modelo de pôster", href: modeloPoster.url }}
+/>

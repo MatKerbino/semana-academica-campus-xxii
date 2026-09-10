@@ -1,0 +1,80 @@
+---
+import { CalendarClock, Download, ExternalLink } from "@lucide/astro";
+import Abas from "../components/Abas.astro";
+import CartaoAtividade from "../components/CartaoAtividade.astro";
+import PaginaCabecalho from "../components/PaginaCabecalho.astro";
+import Base from "../layouts/Base.astro";
+import { materiais, porTipo, prazos, regrasSubmissao } from "../data/evento";
+
+const sessoes = porTipo("artigo");
+---
+
+<Base titulo="Artigos e Materiais" ativo="/artigos">
+  <PaginaCabecalho
+    titulo="Artigos e Materiais do evento"
+    descricao="Sessões de apresentação de artigos, templates de artigo e de pôster e prazos de submissão definidos pela organização."
+    trilha={[{ href: "/", rotulo: "Início" }]}
+  />
+
+  <Abas
+    rotuloLista="Artigos e materiais"
+    abas={[
+      { id: "sessoes", rotulo: "Sessões de artigos" },
+      { id: "templates", rotulo: "Templates e modelos" },
+      { id: "prazos", rotulo: "Submissão de trabalhos" },
+    ]}
+  >
+    <div data-painel="sessoes" class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+      {sessoes.map((atividade) => <CartaoAtividade atividade={atividade} />)}
+    </div>
+
+    <div data-painel="templates" class="grid gap-5 md:grid-cols-3">
+      {
+        materiais.map((material) => (
+          <article class="flex flex-col rounded-cartao border border-borda bg-white p-6">
+            <h2 class="text-lg font-semibold text-verde-escuro">{material.nome}</h2>
+            <p class="mt-1 text-tabela font-semibold text-verde-medio">{material.formato}</p>
+            <p class="mt-2 text-tabela text-chumbo/75">{material.descricao}</p>
+            <a
+              href={material.url}
+              target="_blank"
+              rel="noopener"
+              class="mt-auto flex items-center justify-center gap-2 rounded-full bg-verde-cta px-4 py-2 pt-2 text-tabela font-bold text-verde-escuro"
+            >
+              <Download class="size-4" aria-hidden="true" />
+              Baixar template
+              <ExternalLink class="size-3.5" aria-hidden="true" />
+            </a>
+          </article>
+        ))
+      }
+    </div>
+
+    <div data-painel="prazos">
+      <h2 class="text-xl font-semibold text-verde-escuro">Submissão de trabalhos</h2>
+
+      <div class="mt-3 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {
+          prazos.map((prazo) => (
+            <article class="rounded-cartao border border-borda bg-white p-4">
+              <CalendarClock class="size-5 text-verde-medio" aria-hidden="true" />
+              <p class="mt-1.5 text-base font-bold text-verde-medio">{prazo.data}</p>
+              <p class="mt-1 text-tabela text-chumbo">{prazo.etapa}</p>
+            </article>
+          ))
+        }
+      </div>
+
+      <ul class="mt-4 space-y-2">
+        {
+          regrasSubmissao.map((regra) => (
+            <li class="flex gap-2 text-sm text-chumbo">
+              <span class="mt-2 size-1.5 shrink-0 rounded-full bg-verde-medio" aria-hidden="true" />
+              {regra}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </Abas>
+</Base>
