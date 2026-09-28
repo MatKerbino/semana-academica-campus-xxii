@@ -1,167 +1,189 @@
 ---
 import { url } from "../lib/url";
 import {
-  Apple,
-  ArrowRight,
-  Building2,
-  CalendarDays,
-  ClipboardList,
-  MapPin,
-  Users,
-  UserPlus,
-  ListChecks,
-  CircleCheck,
+  Apple, ArrowRight, Calendar, FileText, GraduationCap, Image as IconeImagem, KeyRound, ListChecks,
+  LogIn, MapPin, MicVocal, Presentation, UserPlus, Users,
 } from "@lucide/astro";
 import { Image as Imagem } from "astro:assets";
 import Abas from "../components/Abas.astro";
 import banner from "../assets/banner-semana-academica.png";
 import Base from "../layouts/Base.astro";
-import { evento } from "../data/evento";
+import { atividadesListadas, evento } from "../data/evento";
 
-const destaques = [
-  { icone: Users, titulo: "Aberto a todos", texto: "Comunidade interna e externa da universidade, sem exigir vínculo com a UEPA." },
-  { icone: Apple, titulo: "Participação", texto: evento.custo, custo: true },
+const cartao = "flex flex-col gap-3.5 rounded-cartao border border-borda bg-white p-[22px] shadow-[0_1px_3px_rgba(15,41,8,0.08)]";
+const titulo = "text-lg leading-[1.4] font-semibold text-verde-escuro";
+const texto = "text-[15px] leading-normal text-chumbo";
+const botaoPrimario =
+  "flex items-center justify-center gap-2 rounded-full bg-verde-cta px-[22px] py-3 text-[15px] leading-[1.3] font-bold text-verde-noite hover:brightness-95";
+const botaoSecundario =
+  "flex items-center justify-center gap-2 rounded-full border-2 border-verde-escuro bg-white px-[22px] py-3 text-[15px] leading-[1.3] font-bold text-verde-escuro hover:bg-palha";
+
+const info = [
+  { icone: Calendar, texto: evento.periodo },
+  { icone: MapPin, texto: "Campus XXII — Ananindeua/PA" },
+  { icone: Apple, texto: "Forma de participação: 1 kg de alimento não perecível" },
+  { icone: Users, texto: "Aberto à comunidade interna e externa" },
 ];
 
 const passos = [
-  { icone: UserPlus, titulo: "Crie sua conta", texto: "Cadastre apenas um login e uma senha." },
-  { icone: ListChecks, titulo: "Preencha a inscrição", texto: "Informe seus dados e escolha as atividades." },
-  { icone: CircleCheck, titulo: "Confirme", texto: "Revise tudo, aceite a política de privacidade e confirme." },
+  { titulo: "Crie sua conta", texto: "Informe apenas um login e uma senha. Criar a conta não faz a sua inscrição." },
+  { titulo: "Faça sua inscrição", texto: "Entre com seu login, informe nome, CPF, e-mail, telefone, perfil e data de nascimento, aceite a Política de Privacidade e escolha as atividades." },
+  { titulo: "Confirme e cumpra a forma de participação", texto: "Revise e confirme a inscrição. A forma de participação é definida pela organização; nesta edição, 1 kg de alimento não perecível. A situação aparece em \"Minha inscrição\"." },
+];
+
+const conta = (...tipos: string[]) => atividadesListadas.filter((a) => tipos.includes(a.tipo)).length;
+const grupos = [
+  { icone: Presentation, titulo: "Minicursos", quantidade: `${conta("minicurso")} atividades` },
+  { icone: MicVocal, titulo: "Palestras", quantidade: `${conta("palestra", "mesa-redonda")} atividades` },
+  { icone: GraduationCap, titulo: "Cursos", quantidade: `${conta("curso")} atividades` },
+  { icone: IconeImagem, titulo: "Exposição de Banners", quantidade: `${conta("banner")} sessões` },
+  { icone: FileText, titulo: "Apresentação de artigos", quantidade: `${conta("artigo")} sessões` },
 ];
 ---
 
-<Base titulo="Página Inicial" ativo="/">
-  <!-- Hero: título em destaque, informações do evento em texto simples (não parecem botões) e uma ação primária. -->
-  <section class="rounded-cartao bg-creme p-5">
-    <div class="grid items-center gap-6 lg:grid-cols-[1.3fr_1fr]">
-      <div>
-        <ul class="flex flex-wrap gap-x-5 gap-y-1 text-tabela font-semibold text-verde-escuro">
-          <li class="flex items-center gap-1.5">
-            <CalendarDays class="size-4 text-verde-medio" aria-hidden="true" />
-            {evento.periodo}
-          </li>
-          <li class="flex items-center gap-1.5">
-            <Building2 class="size-4 text-verde-medio" aria-hidden="true" />
-            Campus XXII — Ananindeua/PA
-          </li>
+<Base titulo="Página Inicial" ativo="/" espaco="amplo">
+  <div class="flex flex-col gap-5">
+    <section class="flex flex-col items-center gap-8 rounded-cartao bg-creme p-5 md:p-7 lg:flex-row">
+      <div class="flex min-w-0 flex-1 flex-col gap-3.5">
+        <ul class="flex flex-wrap gap-x-6 gap-y-2">
+          {
+            info.map((i) => (
+              <li class="flex items-center gap-2 text-sm leading-[1.4] font-semibold text-verde-escuro">
+                <i.icone class="size-[18px] shrink-0 text-verde-medio" aria-hidden="true" />
+                {i.texto}
+              </li>
+            ))
+          }
         </ul>
-
-        <h1 class="mt-3 text-[34px] leading-[1.15] font-extrabold text-verde-escuro lg:text-[46px]">{evento.nome}</h1>
-        <p class="mt-3 max-w-[760px] text-base text-chumbo">
-          Quatro dias de palestras, minicursos, cursos, banners e artigos. Aberto à comunidade interna e externa.
+        <h1 class="text-[32px] leading-[1.3] font-bold text-verde-escuro">{evento.nome}</h1>
+        <p class={texto}>
+          Quatro dias de palestras, minicursos, cursos, exposição de banners e apresentação de artigos promovidos pela UEPA,
+          com o tema "{evento.lema}".
         </p>
-
-        <div class="mt-5 flex flex-wrap gap-3.5">
-          <a
-            href={url("/inscricao")}
-            class="flex items-center gap-2 rounded-full bg-verde-cta px-7 py-3 text-base font-bold text-verde-noite shadow transition-transform hover:scale-[1.03]"
-          >
-            <ClipboardList class="size-4" aria-hidden="true" />
-            Realizar Inscrição
+        <div class="flex flex-col gap-3 sm:flex-row">
+          <a href={url("/inscricao")} class={botaoPrimario}>
+            <UserPlus class="size-[18px]" aria-hidden="true" />
+            Inscreva-se
           </a>
-          <a
-            href={url("/cronograma")}
-            class="flex items-center gap-2 rounded-full border-2 border-verde-escuro px-7 py-3 text-base font-semibold text-verde-escuro hover:bg-white"
-          >
-            Ver Cronograma
-            <ArrowRight class="size-4" aria-hidden="true" />
+          <a href={url("/cronograma")} class={botaoSecundario}>
+            <Calendar class="size-[18px]" aria-hidden="true" />
+            Ver cronograma
           </a>
         </div>
       </div>
 
       <Imagem
         src={banner}
-        widths={[460, 920]}
-        sizes="(min-width: 1024px) 460px, 100vw"
+        widths={[520, 1040]}
+        sizes="(min-width: 1024px) 520px, 100vw"
         format="webp"
-        alt="Banner oficial da 1ª Semana Acadêmica do Campus XXII — Educação, Saúde, Tecnologia e Meio Ambiente: soluções inteligentes para um mundo sustentável"
-        class="w-full rounded-cartao border border-borda"
+        alt="Banner oficial da 1ª Semana Acadêmica do Campus XXII"
+        class="h-auto w-full shrink-0 rounded-cartao border border-borda object-cover lg:h-[208px] lg:w-[520px]"
       />
-    </div>
-  </section>
+    </section>
 
-  <section class="mt-3">
     <Abas
+      tamanho="grande"
       rotuloLista="Informações do evento"
       abas={[
         { id: "sobre", rotulo: "Sobre o evento" },
         { id: "inscricao", rotulo: "Como se inscrever" },
+        { id: "atividades", rotulo: "Atividades do evento" },
         { id: "local", rotulo: "Local" },
       ]}
     >
-      <div data-painel="sobre" class="grid gap-4 md:grid-cols-3">
-        <article class="rounded-cartao border border-borda bg-white p-4 md:col-span-3">
-          <h2 class="text-lg font-semibold text-verde-escuro">O evento</h2>
-          <p class="mt-1.5 text-sm text-chumbo">{evento.descricao}</p>
-        </article>
-        {
-          destaques.map((d) => (
-            <article class="rounded-cartao border border-borda bg-white p-4">
-              <d.icone class="size-[26px] text-verde-escuro" aria-hidden="true" />
-              <h3 class="mt-2 text-lg font-semibold text-verde-escuro">{d.titulo}</h3>
-              <p class="mt-1.5 text-sm text-chumbo" data-custo={d.custo ? "" : undefined}>{d.texto}</p>
-            </article>
-          ))
-        }
-        <article class="rounded-cartao bg-verde-escuro p-4 text-white">
-          <h3 class="text-lg font-semibold">Tema</h3>
-          <p class="mt-1.5 text-sm text-white/85">“{evento.lema}”</p>
-        </article>
+      <div data-painel="sobre" class="flex flex-col gap-4">
+        <p class={texto}>
+          A 1ª Semana Acadêmica do Campus XXII reúne estudantes, docentes, pesquisadores e profissionais em torno de soluções
+          inteligentes para um mundo sustentável, com atividades das áreas de Educação, Saúde, Tecnologia e Meio Ambiente
+          realizadas no campus de Ananindeua.
+        </p>
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <article class={cartao}>
+            <Users class="size-[26px] text-verde-escuro" aria-hidden="true" />
+            <h2 class={titulo}>Aberto a todos</h2>
+            <p class={texto}>Participação aberta à comunidade interna e externa da universidade, sem necessidade de vínculo com a UEPA.</p>
+          </article>
+          <article class={cartao}>
+            <Apple class="size-[26px] text-verde-escuro" aria-hidden="true" />
+            <h2 class={titulo}>Forma de participação</h2>
+            <p class={texto}>Definida pela organização para todos os participantes. Nesta edição: doação de 1 kg de alimento não perecível, entregue no credenciamento.</p>
+          </article>
+          <article class={cartao}>
+            <KeyRound class="size-[26px] text-verde-escuro" aria-hidden="true" />
+            <h2 class={titulo}>Conta e inscrição</h2>
+            <p class={texto}>Crie uma conta de acesso (login e senha) e depois faça sua inscrição, escolhendo as atividades de que deseja participar.</p>
+          </article>
+          <article class="flex flex-col gap-3.5 rounded-cartao border border-verde-escuro bg-verde-escuro p-[22px] text-white shadow-[0_1px_3px_rgba(15,41,8,0.08)]">
+            <h2 class={titulo + " !text-white"}>Tema da Semana Acadêmica</h2>
+            <p class="text-[15px] leading-normal">"{evento.lema}"</p>
+            <p class="text-[13px] leading-normal text-verde-claro">Realização: {evento.realizacao.join(" · ")}</p>
+          </article>
+        </div>
       </div>
 
-      <div data-painel="inscricao">
-        <h2 class="sr-only">Como realizar a inscrição</h2>
+      <div data-painel="inscricao" class="flex flex-col gap-4">
+        <p class={texto}>Cadastro e inscrição são etapas diferentes: a conta dá acesso ao sistema; a inscrição registra sua participação no evento.</p>
         <div class="grid gap-4 md:grid-cols-3">
           {
             passos.map((passo, i) => (
-              <article class="rounded-cartao border border-borda bg-white p-4">
-                <div class="flex items-center gap-2">
-                  <span class="inline-flex size-7 items-center justify-center rounded-full bg-verde-medio text-sm font-bold text-white">
-                    {i + 1}
-                  </span>
-                  <passo.icone class="size-5 text-verde-escuro" aria-hidden="true" />
-                </div>
-                <h3 class="mt-2 text-lg font-semibold text-verde-escuro">{passo.titulo}</h3>
-                <p class="mt-1 text-sm text-chumbo">{passo.texto}</p>
+              <article class={cartao}>
+                <span class="flex size-8 items-center justify-center rounded-full bg-verde-escuro text-sm font-bold text-white">{i + 1}</span>
+                <h2 class={titulo}>{passo.titulo}</h2>
+                <p class={texto}>{passo.texto}</p>
               </article>
             ))
           }
         </div>
-        <div class="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-cartao bg-creme p-4">
-          <p class="text-sm text-chumbo">Já tem conta? Entre para continuar ou consultar sua inscrição.</p>
-          <a href={url("/inscricao")} class="flex items-center gap-1 text-sm font-semibold text-azul hover:underline">
-            Ir para a inscrição
-            <ArrowRight class="size-4" aria-hidden="true" />
+        <div class="flex flex-col gap-3 pt-2 sm:flex-row">
+          <a href={url("/cadastro")} class={botaoPrimario}>
+            <UserPlus class="size-[18px]" aria-hidden="true" />
+            Criar conta
+          </a>
+          <a href={url("/entrar")} class={botaoSecundario}>
+            <LogIn class="size-[18px]" aria-hidden="true" />
+            Já tenho conta — Entrar
           </a>
         </div>
       </div>
 
-      <div data-painel="local">
-        <div class="flex flex-wrap items-center justify-between gap-6 rounded-cartao bg-creme px-6 py-6 lg:px-10">
-          <div>
-            <MapPin class="size-7 text-verde-escuro" aria-hidden="true" />
-            <h2 class="mt-1 text-secao font-bold text-verde-escuro">Local do evento</h2>
-            <p class="mt-1 text-sm text-chumbo">
-              {evento.local.nome}, {evento.local.endereco} · {evento.local.cidade}
-            </p>
-          </div>
-          <div class="flex flex-col items-start gap-2">
-            <a
-              href={evento.local.mapsUrl}
-              target="_blank"
-              rel="noopener"
-              class="flex items-center gap-2 rounded-full bg-azul px-7 py-3 text-[15px] font-semibold text-white hover:opacity-90"
-            >
-              <MapPin class="size-4" aria-hidden="true" />
-              Abrir no Google Maps
-            </a>
-            <a href={url("/local")} class="flex items-center gap-1 text-tabela font-semibold text-verde-medio hover:underline">
-              Página de localização
-              <ArrowRight class="size-3.5" aria-hidden="true" />
-            </a>
-          </div>
+      <div data-painel="atividades" class="flex flex-col gap-4">
+        <p class={texto}>Todas as atividades estão reunidas em uma única página. A consulta é livre e não exige cadastro.</p>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          {
+            grupos.map((g) => (
+              <article class="flex flex-col gap-2 rounded-cartao border border-borda bg-creme p-5">
+                <g.icone class="size-[22px] text-verde-escuro" aria-hidden="true" />
+                <h2 class={titulo}>{g.titulo}</h2>
+                <p class="text-[13px] leading-normal text-texto-suave">{g.quantidade}</p>
+                <a href={url("/atividades")} class="flex items-center gap-1 text-sm font-semibold text-azul hover:underline">
+                  Ver na página de atividades
+                  <ArrowRight class="size-3.5" aria-hidden="true" />
+                </a>
+              </article>
+            ))
+          }
+        </div>
+        <div>
+          <a href={url("/atividades")} class={botaoSecundario + " inline-flex"}>
+            <ListChecks class="size-[18px]" aria-hidden="true" />
+            Ver todas as atividades
+          </a>
         </div>
       </div>
+
+      <div data-painel="local" class="flex flex-col items-start gap-4">
+        <p class={texto}>{evento.local.nome}, {evento.local.endereco} · {evento.local.cidade}</p>
+        <a
+          href={evento.local.mapsUrl}
+          target="_blank"
+          rel="noopener"
+          class="flex items-center gap-2 rounded-full bg-azul px-[22px] py-3 text-[15px] leading-[1.3] font-bold text-white hover:opacity-90"
+        >
+          <MapPin class="size-[18px]" aria-hidden="true" />
+          Abrir no Google Maps
+        </a>
+      </div>
     </Abas>
-  </section>
+  </div>
 </Base>

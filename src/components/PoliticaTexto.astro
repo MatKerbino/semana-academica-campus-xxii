@@ -1,0 +1,23 @@
+---
+import { evento } from "../data/evento";
+const secoes = [
+  ["1. Quais dados coletamos", "Na criação da conta: somente login e senha (a senha é armazenada de forma protegida e nunca é exibida em texto aberto). Na inscrição: nome, CPF, e-mail, telefone, data de nascimento, perfil e atividades escolhidas."],
+  ["2. Para que usamos", "Identificar a sua inscrição, organizar o credenciamento e as vagas das atividades, acompanhar a forma de participação, emitir certificados e enviar comunicações sobre o evento."],
+  ["3. Com quem compartilhamos", "Os dados são acessados somente pela comissão organizadora da 1ª Semana Acadêmica do Campus XXII — UEPA. Não vendemos nem repassamos seus dados a terceiros."],
+  ["4. Armazenamento e segurança", "Os dados ficam armazenados com acesso restrito aos administradores do evento e são mantidos pelo período necessário à emissão de certificados e à prestação de contas."],
+  ["5. Seus direitos (LGPD)", "Conforme a Lei nº 13.709/2018, você pode solicitar acesso, correção ou exclusão dos seus dados e revogar o consentimento a qualquer momento."],
+  ["6. Contato", evento.email],
+];
+---
+
+<div class="space-y-4">
+  {
+    secoes.map(([titulo, texto]) => (
+      <section>
+        <h3 class="text-sm leading-[1.4] font-bold text-verde-escuro">{titulo}</h3>
+        <p class="mt-1 text-[15px] leading-normal text-chumbo">{texto}</p>
+      </section>
+    ))
+  }
+  <p class="text-[13px] leading-normal text-texto-suave">Versão 1.0 · publicada em 01/09/2025</p>
+</div>

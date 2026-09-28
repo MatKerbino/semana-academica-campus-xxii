@@ -1,0 +1,97 @@
+---
+import { ArrowLeft, Check, Undo2 } from "@lucide/astro";
+import Alerta from "../components/Alerta.astro";
+import CamposDados from "../components/CamposDados.astro";
+import Base from "../layouts/Base.astro";
+import { url } from "../lib/url";
+
+const btnPrimario = "inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-verde-cta px-[22px] py-3 text-[15px] leading-[1.3] font-bold text-verde-noite hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60";
+const btnContorno = "inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border-2 border-verde-escuro bg-white px-[22px] py-2.5 text-[15px] leading-[1.3] font-bold text-verde-escuro hover:bg-palha";
+---
+
+<Base titulo="Editar dados da inscrição" espaco="acesso">
+  <form id="form" novalidate hidden class="mx-auto flex w-full max-w-[1120px] flex-col gap-5">
+    <div class="flex flex-col gap-2">
+      <nav aria-label="Trilha de navegação" class="flex flex-wrap gap-2 text-[13px] leading-normal">
+        <a href={url("/minha-area")} class="text-verde-medio hover:underline">Minha área</a><span class="text-texto-suave">/</span>
+        <a href={url("/minha-inscricao")} class="text-verde-medio hover:underline">Minha inscrição</a><span class="text-texto-suave">/</span>
+        <span class="text-texto-suave">Editar dados</span>
+      </nav>
+      <h1 class="text-[32px] leading-[1.3] font-bold text-verde-escuro">Editar dados da inscrição</h1>
+      <p class="text-[15px] leading-normal text-chumbo">As alterações atualizam a inscrição nº <span data-numero></span> existente. Nenhuma nova inscrição é criada.</p>
+    </div>
+
+    <Alerta tipo="erro" titulo="Não foi possível salvar" geral />
+
+    <section class="flex flex-col gap-4 rounded-cartao border border-borda bg-white p-6 shadow-[0_1px_3px_rgba(15,41,8,0.08)]">
+      <h2 class="text-[18px] leading-[1.4] font-semibold text-verde-escuro">Dados pessoais</h2>
+      <CamposDados ajudaPerfil="Se você alterar o e-mail, enviaremos um novo link de verificação para o novo endereço." />
+    </section>
+
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <button type="button" id="descartar" class="order-2 inline-flex w-full cursor-pointer items-center justify-center gap-2 py-2 text-[15px] font-bold text-verde-medio hover:underline sm:order-1 sm:w-auto">
+        <Undo2 class="size-[18px]" aria-hidden="true" />
+        Descartar alterações
+      </button>
+      <div class="order-1 flex w-full flex-col gap-3 sm:order-2 sm:w-auto sm:flex-row">
+        <a href={url("/minha-inscricao")} class={btnContorno}>
+          <ArrowLeft class="size-[18px]" aria-hidden="true" />
+          Voltar
+        </a>
+        <button type="submit" class={btnPrimario}>
+          <Check class="size-[18px]" aria-hidden="true" />
+          Salvar alterações
+        </button>
+      </div>
+    </div>
+  </form>
+  <p id="erro-carga" role="alert" hidden class="mx-auto w-full max-w-[1120px] rounded-campo border border-erro-borda bg-erro-fundo p-4 text-erro"></p>
+</Base>
+
+<script>
+  import { api, erroCampos, exigirLogin, limparErro, mostrarErro, type Inscricao } from "../lib/api";
+  import { ativarMascaras, lerDados, preencherDados, validarDados } from "../lib/dados-form";
+  import { url } from "../lib/url";
+
+  const form = document.querySelector<HTMLFormElement>("#form")!;
+  let insc: Inscricao;
+  if (exigirLogin()) {
+    ativarMascaras(form);
+    api<{ inscricao: Inscricao }>("/inscricao")
+      .then((r) => {
+        insc = r.inscricao;
+        if (insc.status !== "confirmada" || !insc.podeEditar) return void (location.href = url("/minha-inscricao"));
+        form.querySelector("[data-numero]")!.textContent = insc.numero ?? "—";
+        preencherDados(form, insc.dados);
+        form.hidden = false;
+      })
+      .catch((e) => {
+        const erro = document.getElementById("erro-carga")!;
+        erro.textContent = e.message;
+        erro.hidden = false;
+      });
+  }
+
+  document.getElementById("descartar")!.addEventListener("click", () => {
+    limparErro(form);
+    preencherDados(form, insc.dados);
+  });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    limparErro(form);
+    const dados = lerDados(form);
+    const campos = validarDados(dados);
+    if (Object.keys(campos).length) return mostrarErro(form, erroCampos(campos, "Corrija os campos destacados. Seus dados anteriores continuam salvos."));
+    const botao = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
+    botao.disabled = true;
+    try {
+      await api("/inscricao", { metodo: "PUT", corpo: { dados } });
+      sessionStorage.setItem("semana:aviso", "Dados da inscrição atualizados.");
+      location.href = url("/minha-inscricao");
+    } catch (err) {
+      mostrarErro(form, err);
+      botao.disabled = false;
+    }
+  });
+</script>

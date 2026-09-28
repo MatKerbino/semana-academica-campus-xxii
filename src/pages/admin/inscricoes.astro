@@ -1,0 +1,124 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+---
+
+<AdminLayout titulo="Inscrições" ativo="inscricoes">
+  <div id="conteudo" class="flex flex-col gap-6" aria-live="polite"></div>
+</AdminLayout>
+
+<script>
+  import {
+    buscaHtml, botaoOlho, cabecalhoColuna, cabecalhoPagina, contar, erroCarregar, esc, filtroHtml, formatarCPF, icone, iniciarPainel, inscricoes,
+    normalizar, paginar, rodapeTabela, rotuloPerfil, seloDevolucao, seloInscricao, seloPagamento, situacaoDevolucao, situacaoPagamento,
+    type InscricaoAdmin,
+  } from "../../lib/admin-api";
+  import { url } from "../../lib/url";
+
+  const TAMANHO = 7;
+  const F = {
+    inscricao: [["todas", "Todas"], ["confirmada", "Confirmada"], ["cancelada", "Cancelada"]],
+    pagamento: [["todos", "Todos"], ["pendente", "Pendente"], ["regularizada", "Regularizada"], ["nao_aplica", "Não se aplica"]],
+    devolucao: [["todas", "Todas"], ["pendente", "Pendente"], ["devolvido", "Devolvido"], ["nao_aplica", "Não se aplica"]],
+    perfil: [["todos", "Todos"], ["estudante", "Estudante"], ["professor", "Professor(a)"], ["profissional", "Profissional"], ["outro", "Outro"]],
+  } as Record<string, [string, string][]>;
+
+  if (iniciarPainel()) {
+    const raiz = document.getElementById("conteudo")!;
+    const q = new URLSearchParams(location.search);
+    const valido = (k: string, v: string | null, padrao: string) => (v && F[k].some(([x]) => x === v) ? v : padrao);
+    const estado = {
+      busca: "",
+      pagina: 1,
+      inscricao: valido("inscricao", q.get("inscricao"), "todas"),
+      pagamento: valido("pagamento", q.get("pagamento"), "todos"),
+      devolucao: valido("devolucao", q.get("devolucao"), "todas"),
+      perfil: valido("perfil", q.get("perfil"), "todos"),
+    };
+
+    inscricoes()
+      .then((todas) => {
+        const lista = todas.filter((i) => i.status !== "rascunho");
+        const rotulo = (i: InscricaoAdmin) => i.dados.nome ?? i.login;
+        const href = (i: InscricaoAdmin) => `${url("/admin/inscricao")}?login=${encodeURIComponent(i.login)}`;
+
+        const desenhar = (foco = false) => {
+          const termo = normalizar(estado.busca);
+          const filtradas = lista.filter((i) => {
+            if (estado.inscricao !== "todas" && i.status !== estado.inscricao) return false;
+            if (estado.pagamento !== "todos" && situacaoPagamento(i) !== estado.pagamento) return false;
+            if (estado.devolucao !== "todas" && situacaoDevolucao(i) !== estado.devolucao) return false;
+            if (estado.perfil !== "todos" && i.dados.perfil !== estado.perfil) return false;
+            if (!termo) return true;
+            return [i.login, i.dados.nome ?? "", i.dados.cpf ?? "", formatarCPF(i.dados.cpf), i.dados.email ?? ""].some((t) => normalizar(t).includes(termo));
+          });
+          const pg = paginar(filtradas, estado.pagina, TAMANHO);
+          estado.pagina = pg.atual;
+
+          const linhas = pg.itens
+            .map(
+              (i) => `<tr class="border-b border-borda last:border-0 hover:bg-palha">
+                <td class="px-3 py-3"><a href="${href(i)}" class="block"><span class="block text-sm leading-[1.4] font-semibold text-chumbo">${esc(rotulo(i))}</span><span class="block text-[13px] text-texto-suave">CPF ${formatarCPF(i.dados.cpf)}</span></a></td>
+                <td class="px-3 py-3 text-[13px] text-chumbo">${i.dados.perfil ? rotuloPerfil[i.dados.perfil] : "—"}</td>
+                <td class="px-3 py-3 text-[13px] whitespace-nowrap text-chumbo">${contar(i.atividades.length, "atividade", "atividades")}</td>
+                <td class="px-3 py-3">${seloInscricao(i.status)}</td><td class="px-3 py-3">${seloPagamento(i)}</td><td class="px-3 py-3">${seloDevolucao(i)}</td>
+                <td class="px-3 py-3">${botaoOlho(href(i), `Ver inscrição de ${rotulo(i)}`)}</td></tr>`,
+            )
+            .join("");
+          const cartoes = pg.itens
+            .map(
+              (i) => `<li class="flex flex-col gap-2 rounded-cartao border border-borda bg-white p-4 shadow-[0_1px_3px_rgba(15,41,8,0.08)]">
+                <div class="flex items-start justify-between gap-3"><div class="min-w-0"><p class="text-sm leading-[1.4] font-semibold text-chumbo">${esc(rotulo(i))}</p>
+                  <p class="text-[13px] leading-normal text-chumbo">CPF ${formatarCPF(i.dados.cpf)} · ${i.dados.perfil ? rotuloPerfil[i.dados.perfil] : "—"}</p>
+                  <p class="text-[13px] leading-normal text-chumbo">${contar(i.atividades.length, "atividade selecionada", "atividades selecionadas")}</p></div>
+                  <a href="${href(i)}" aria-label="Abrir inscrição de ${esc(rotulo(i))}" class="flex size-9 shrink-0 items-center justify-center rounded-campo border-[1.5px] border-borda text-verde-escuro">${icone("ellipsis-vertical")}</a></div>
+                <div class="flex flex-col items-start gap-2">${seloInscricao(i.status, true)}${seloPagamento(i, true, "Pagamento ")}</div></li>`,
+            )
+            .join("");
+          const so = estado.pagamento === "pendente" && estado.inscricao === "todas" && estado.devolucao === "todas" && estado.perfil === "todos";
+          const rodape = so ? `Mostrando ${pg.itens.length} de ${filtradas.length} inscrições com compensação pendente` : `Mostrando ${pg.itens.length} de ${filtradas.length} inscrições`;
+
+          raiz.innerHTML = `
+            ${cabecalhoPagina("Inscrições", "Inscrições realizadas na 1ª Semana Acadêmica. Use a busca e os filtros para localizar uma inscrição.")}
+            <div class="flex flex-wrap items-center gap-3">${buscaHtml("busca", estado.busca)}
+              ${filtroHtml("f-inscricao", "Inscrição", F.inscricao, estado.inscricao, "todas", "max-md:order-2")}${filtroHtml("f-pagamento", "Pagamento/compensação", F.pagamento, estado.pagamento, "todos", "max-md:order-1")}
+              ${filtroHtml("f-devolucao", "Devolução", F.devolucao, estado.devolucao, "todas", "max-md:hidden")}${filtroHtml("f-perfil", "Perfil", F.perfil, estado.perfil, "todos", "max-md:hidden")}</div>
+            <div class="hidden overflow-x-auto rounded-cartao border border-borda bg-white md:block"><table class="w-full min-w-[900px] border-collapse">
+              <caption class="sr-only">Inscrições realizadas</caption>
+              <thead class="border-b border-borda bg-creme/60"><tr>${["Participante", "Perfil", "Atividades", "Inscrição", "Pagamento/ compensação", "Devolução", "Ações"].map((t) => `<th scope="col" class="${cabecalhoColuna}">${t}</th>`).join("")}</tr></thead>
+              <tbody>${linhas || `<tr><td colspan="7" class="px-3 py-8 text-center text-sm text-texto-suave">Nenhuma inscrição encontrada.</td></tr>`}</tbody></table></div>
+            <ul class="flex flex-col gap-3 md:hidden">${cartoes || `<li class="rounded-cartao border border-borda bg-white p-6 text-center text-sm text-texto-suave">Nenhuma inscrição encontrada.</li>`}</ul>
+            ${rodapeTabela(rodape, pg.atual, pg.paginas)}`;
+          if (foco) {
+            const b = document.getElementById("busca") as HTMLInputElement;
+            b.focus();
+            b.setSelectionRange(b.value.length, b.value.length);
+          }
+        };
+
+        raiz.addEventListener("input", (e) => {
+          if ((e.target as HTMLElement).id === "busca") {
+            estado.busca = (e.target as HTMLInputElement).value;
+            estado.pagina = 1;
+            desenhar(true);
+          }
+        });
+        raiz.addEventListener("change", (e) => {
+          const el = e.target as HTMLSelectElement;
+          if (el.id?.startsWith("f-")) {
+            (estado as Record<string, unknown>)[el.id.slice(2)] = el.value;
+            estado.pagina = 1;
+            desenhar();
+          }
+        });
+        raiz.addEventListener("click", (e) => {
+          const b = (e.target as HTMLElement).closest<HTMLElement>("[data-pag]");
+          if (b) {
+            estado.pagina += Number(b.dataset.pag);
+            desenhar();
+          }
+        });
+        desenhar();
+      })
+      .catch((e) => (raiz.innerHTML = erroCarregar(e)));
+  }
+</script>

@@ -3,8 +3,10 @@ interface Props {
   /** Rótulos das abas, na mesma ordem dos painéis (elementos com data-painel). */
   abas: { id: string; rotulo: string }[];
   rotuloLista: string;
+  /** "grande": Início e Cronograma (14px). "pequeno": páginas com faixa de título (13px). */
+  tamanho?: "grande" | "pequeno";
 }
-const { abas, rotuloLista } = Astro.props;
+const { abas, rotuloLista, tamanho = "pequeno" } = Astro.props;
 ---
 
 <div data-abas>
@@ -16,14 +18,19 @@ const { abas, rotuloLista } = Astro.props;
           role="tab"
           data-aba={aba.id}
           aria-selected={i === 0 ? "true" : "false"}
-          class="cursor-pointer rounded-full border border-verde-medio/40 bg-white px-4 py-1 text-tabela font-semibold text-verde-escuro transition-colors hover:border-verde-medio aria-selected:border-verde-escuro aria-selected:bg-verde-escuro aria-selected:text-white"
+          class:list={[
+            "cursor-pointer rounded-full border font-semibold text-verde-escuro aria-selected:border-verde-escuro aria-selected:bg-verde-escuro aria-selected:text-white",
+            tamanho === "grande"
+              ? "border-verde-claro bg-white px-4 py-1.5 text-sm leading-[1.4]"
+              : "border-verde-medio/40 bg-white px-4 py-1 text-[13px] leading-[1.5]",
+          ]}
         >
           {aba.rotulo}
         </button>
       ))
     }
   </div>
-  <div class="mt-2.5">
+  <div class:list={[tamanho === "grande" ? "mt-5" : "mt-2.5"]}>
     <slot />
   </div>
 </div>

@@ -1,291 +1,406 @@
 ---
-import { url } from "../lib/url";
-import { ClipboardList, Info } from "@lucide/astro";
-import Campo from "../components/Campo.astro";
-import PaginaCabecalho from "../components/PaginaCabecalho.astro";
+import { ArrowLeft, Clock, FileText, UserRound, X } from "@lucide/astro";
+import Alerta from "../components/Alerta.astro";
+import CamposDados from "../components/CamposDados.astro";
+import IconesCliente from "../components/IconesCliente.astro";
+import PoliticaTexto from "../components/PoliticaTexto.astro";
 import Base from "../layouts/Base.astro";
 import { catalogoSelecionavel } from "../data/evento";
+import { url } from "../lib/url";
 
-const perfis = [
-  { valor: "estudante", rotulo: "Estudante" },
-  { valor: "professor", rotulo: "Professor(a)" },
-  { valor: "profissional", rotulo: "Profissional" },
-  { valor: "outro", rotulo: "Outro" },
-];
-const botao = "cursor-pointer rounded-full px-6 py-2.5 text-[15px] font-bold shadow disabled:opacity-60";
-const primario = `${botao} bg-verde-cta text-verde-noite`;
-const secundario = `${botao} border-2 border-verde-escuro bg-white text-verde-escuro shadow-none`;
+const cartao = "rounded-cartao border border-borda bg-white p-6 shadow-[0_1px_3px_rgba(15,41,8,0.08)]";
+const btnPrimario = "inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-verde-cta px-[22px] py-3 text-[15px] leading-[1.3] font-bold text-verde-noite hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60";
+const btnContorno = "inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border-2 border-verde-escuro bg-white px-[22px] py-2.5 text-[15px] leading-[1.3] font-bold text-verde-escuro hover:bg-palha";
+const btnTexto = "inline-flex cursor-pointer items-center gap-2 py-2 text-[15px] leading-[1.3] font-bold text-verde-medio hover:underline";
 ---
 
-<Base titulo="Inscrição" ativo="/inscricao">
-  <PaginaCabecalho
-    titulo="Inscrição na Semana Acadêmica"
-    descricao="A inscrição é feita aqui no site, em três etapas. Criar a conta e se inscrever são coisas diferentes: a conta só vale como inscrição depois da sua confirmação."
-    trilha={[{ href: "/", rotulo: "Início" }]}
-  />
-
+<Base titulo="Inscrição" espaco="acesso">
   <script type="application/json" id="catalogo" set:html={JSON.stringify(catalogoSelecionavel)} />
 
-  <div class="mb-3 flex items-start gap-3 rounded-cartao border border-azul/40 bg-white p-4">
-    <Info class="mt-0.5 size-5 shrink-0 text-azul" aria-hidden="true" />
-    <div class="text-sm text-chumbo">
-      <p class="font-semibold text-verde-escuro">Como funciona</p>
-      <ol class="mt-1 list-decimal space-y-0.5 pl-5">
-        <li>Crie uma conta (login e senha) ou entre.</li>
-        <li>Informe seus dados pessoais e escolha as atividades.</li>
-        <li>Revise, aceite a Política de Privacidade e confirme.</li>
-      </ol>
-      <p class="mt-2">Participação: <strong data-custo>1 kg de alimento não perecível</strong>.</p>
+  <div id="conteudo" hidden class="mx-auto flex w-full max-w-[1120px] flex-col gap-5">
+    <div id="cabecalho" class="flex flex-col gap-3">
+      <nav aria-label="Trilha de navegação" class="flex gap-2 text-[13px] leading-normal">
+        <a href={url("/minha-area")} class="text-verde-medio hover:underline">Minha área</a>
+        <span class="text-texto-suave">/</span>
+        <span class="text-texto-suave">Inscrição</span>
+      </nav>
+      <h1 class="text-[32px] leading-[1.3] font-bold text-verde-escuro">Inscrição na 1ª Semana Acadêmica</h1>
+      <p class="flex items-center gap-2 text-[13px] leading-normal text-texto-suave">
+        <UserRound class="size-4 text-verde-medio" aria-hidden="true" />
+        <span>Inscrição vinculada à conta <span data-login></span></span>
+      </p>
+      <div id="passos"></div>
     </div>
-  </div>
 
-  <!-- Visitante sem sessão -->
-  <div id="anonimo" hidden class="rounded-cartao bg-creme p-5">
-    <h2 class="text-lg font-semibold text-verde-escuro">Para começar, acesse sua conta</h2>
-    <div class="mt-3 flex flex-wrap gap-3">
-      <a href={url("/cadastro")} class={primario}>Criar conta</a>
-      <a href={url("/entrar?voltar=" + encodeURIComponent(url("/inscricao")))} id="link-entrar" class={secundario}>Já tenho conta</a>
-    </div>
-  </div>
+    <!-- Etapa 1 · Dados e política -->
+    <form id="etapa-1" novalidate hidden class="flex flex-col gap-5">
+      <section class={`${cartao} flex flex-col gap-4 md:flex-row md:items-center md:gap-8`}>
+        <div data-forma class="w-full md:w-auto"></div>
+        <p class="text-[13px] leading-normal text-texto-suave md:max-w-[520px]">A forma de participação é definida pela organização e vale para todos os inscritos. Ela será confirmada na revisão.</p>
+      </section>
 
-  <div id="carregando" role="status" class="rounded-cartao bg-white p-5 text-sm text-chumbo" hidden>Carregando sua inscrição…</div>
-  <p id="erro-carga" role="alert" hidden class="rounded-lg bg-red-50 p-3 text-sm font-semibold text-red-700"></p>
+      <Alerta tipo="erro" titulo="Corrija os campos destacados" geral />
 
-  <div id="mensagem" hidden class="rounded-cartao bg-creme p-5"></div>
+      <section class={`${cartao} flex flex-col gap-4`}>
+        <div>
+          <h2 class="text-[18px] leading-[1.4] font-semibold text-verde-escuro">Dados pessoais</h2>
+          <p class="mt-2 text-[13px] leading-normal text-texto-suave">Campos com * são obrigatórios. Estes dados ficam associados à sua conta de acesso e não criam uma nova conta.</p>
+        </div>
+        <CamposDados />
+      </section>
 
-  <div id="inicio" hidden class="rounded-cartao bg-creme p-5">
-    <h2 class="text-lg font-semibold text-verde-escuro">Você ainda não iniciou sua inscrição</h2>
-    <p class="mt-1 text-sm text-chumbo">Ter uma conta não é estar inscrito. Inicie a inscrição para preencher seus dados.</p>
-    <button type="button" id="iniciar" class={`mt-3 ${primario}`}>
-      <ClipboardList class="mr-1 inline size-4" aria-hidden="true" />
-      Iniciar inscrição
-    </button>
-  </div>
+      <section class={`${cartao} flex flex-col gap-3`}>
+        <h2 class="text-[18px] leading-[1.4] font-semibold text-verde-escuro">Política de Privacidade</h2>
+        <p class="text-[15px] leading-normal text-chumbo">Antes de concluir a inscrição, leia como seus dados serão tratados pela comissão organizadora.</p>
+        <button type="button" id="abrir-politica" class={`${btnTexto} self-start`}>
+          <FileText class="size-[18px]" aria-hidden="true" />
+          Ler a Política de Privacidade
+        </button>
+        <div>
+          <label class="inline-flex cursor-pointer items-center gap-2.5 text-[15px] text-chumbo">
+            <input type="checkbox" name="aceitePrivacidade" class="size-[18px] cursor-pointer rounded border-[1.5px] border-chumbo/60 accent-verde-medio aria-[invalid=true]:border-erro aria-[invalid=true]:border-2" />
+            Li e aceito a Política de Privacidade *
+          </label>
+          <p data-erro="aceitePrivacidade" class="mt-1 text-[13px] leading-normal text-erro empty:hidden"></p>
+        </div>
+      </section>
 
-  <div id="assistente" hidden>
-    <ol id="passos" class="mb-3 flex flex-wrap gap-2 text-tabela font-semibold" aria-label="Etapas da inscrição"></ol>
-    <p data-erro-geral role="alert" hidden class="mb-3 rounded-lg bg-red-50 p-2 text-sm font-semibold text-red-700"></p>
-
-    <form id="etapa-1" hidden novalidate class="grid gap-3 rounded-cartao border border-borda bg-white p-5 md:grid-cols-2">
-      <h2 class="text-lg font-semibold text-verde-escuro md:col-span-2">1. Dados pessoais</h2>
-      <p data-erro-geral role="alert" hidden class="rounded-lg bg-red-50 p-2 text-sm font-semibold text-red-700 md:col-span-2"></p>
-      <Campo nome="nome" rotulo="Nome completo" autocomplete="name" />
-      <Campo nome="cpf" rotulo="CPF" inputmode="numeric" maxlength={14} ajuda="Somente números ou no formato 000.000.000-00." />
-      <Campo nome="email" rotulo="E-mail" tipo="email" autocomplete="email" />
-      <Campo nome="telefone" rotulo="Telefone" tipo="tel" autocomplete="tel" inputmode="tel" ajuda="Com DDD." />
-      <Campo nome="dataNascimento" rotulo="Data de nascimento" tipo="date" autocomplete="bday" />
-      <Campo nome="perfil" rotulo="Perfil" opcoes={perfis} />
-      <div class="flex justify-end md:col-span-2">
-        <button type="submit" class={primario}>Salvar e continuar</button>
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <button type="button" data-salvar-depois class={`${btnTexto} order-2 w-full justify-center sm:order-1 sm:w-auto`}>
+          <Clock class="size-[18px]" aria-hidden="true" />
+          Salvar e continuar depois
+        </button>
+        <button type="submit" class={`${btnPrimario} order-1 w-full sm:order-2 sm:w-auto`}>Continuar para atividades</button>
       </div>
     </form>
 
-    <section id="etapa-2" hidden class="rounded-cartao border border-borda bg-white p-5">
-      <h2 class="text-lg font-semibold text-verde-escuro">2. Atividades</h2>
-      <p class="mt-1 text-sm text-chumbo">Escolha as atividades das quais deseja participar. Atividades sem vagas ficam indisponíveis.</p>
-      <div id="seletor" class="mt-3 grid gap-3"></div>
-      <div class="mt-4 flex flex-wrap justify-between gap-3">
-        <button type="button" data-voltar class={secundario}>Voltar</button>
-        <button type="button" id="salvar-atividades" class={primario}>Salvar e continuar</button>
+    <!-- Etapa 2 · Atividades -->
+    <div id="etapa-2" hidden class="flex flex-col gap-5">
+      <Alerta tipo="info" titulo="Escolha suas atividades">
+        Selecione as atividades de que deseja participar. Atividades sem vagas não podem ser selecionadas. Credenciamento, abertura e premiação fazem parte da programação geral e não precisam de seleção.
+      </Alerta>
+      <Alerta tipo="erro" titulo="Não foi possível continuar" geral id="erro-etapa-2" />
+      <div id="seletor" class="flex flex-col gap-5"></div>
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <button type="button" data-salvar-depois class={`${btnTexto} order-3 w-full justify-center sm:order-1 sm:w-auto`}>
+          <Clock class="size-[18px]" aria-hidden="true" />
+          Salvar e continuar depois
+        </button>
+        <div class="order-1 flex w-full flex-col gap-3 sm:order-2 sm:w-auto sm:flex-row">
+          <button type="button" data-ir="1" class={btnContorno}>
+            <ArrowLeft class="size-[18px]" aria-hidden="true" />
+            Voltar para dados
+          </button>
+          <button type="button" data-ir="3" class={btnPrimario}>Continuar para revisão</button>
+        </div>
       </div>
-    </section>
+    </div>
 
-    <section id="etapa-3" hidden class="rounded-cartao border border-borda bg-white p-5">
-      <h2 class="text-lg font-semibold text-verde-escuro">3. Revisar e confirmar</h2>
-      <div id="resumo" class="mt-3 grid gap-3 md:grid-cols-2"></div>
-      <div class="mt-4 rounded-cartao bg-creme p-3 text-sm text-chumbo">
-        <p class="font-semibold text-verde-escuro">Forma de pagamento / compensação</p>
-        <p id="pagamento-vigente" class="mt-1"></p>
+    <!-- Etapa 3 · Revisão e confirmação -->
+    <div id="etapa-3" hidden class="flex flex-col gap-5">
+      <div id="alerta-revisao"></div>
+      <section class={cartao}>
+        <div class="flex items-center justify-between gap-3">
+          <h2 class="text-[18px] leading-[1.4] font-semibold text-verde-escuro">Dados da inscrição</h2>
+          <button type="button" data-ir="1" class={btnTexto}><span data-ico="lapis"></span>Editar</button>
+        </div>
+        <div id="revisao-dados" class="mt-4"></div>
+      </section>
+      <section class={cartao}>
+        <div class="flex items-center justify-between gap-3">
+          <h2 class="text-[18px] leading-[1.4] font-semibold text-verde-escuro">Atividades selecionadas (<span data-total></span>)</h2>
+          <button type="button" data-ir="2" class={btnTexto}><span data-ico="lapis"></span>Alterar atividades</button>
+        </div>
+        <ul id="revisao-atividades" class="mt-4 space-y-2.5"></ul>
+      </section>
+      <section class={cartao}>
+        <h2 class="text-[18px] leading-[1.4] font-semibold text-verde-escuro">Forma de participação</h2>
+        <div data-forma class="mt-4"></div>
+        <p class="mt-4 text-[13px] leading-normal text-texto-suave">Definida pela organização e igual para todos os participantes. Não é possível escolher outra modalidade.</p>
+      </section>
+      <section class={cartao}>
+        <h2 class="text-[18px] leading-[1.4] font-semibold text-verde-escuro">Política de Privacidade</h2>
+        <p id="revisao-aceite" class="mt-3 flex items-center gap-2 text-[15px] text-chumbo"></p>
+      </section>
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <button type="button" data-salvar-depois class={`${btnTexto} order-3 w-full justify-center sm:order-1 sm:w-auto`}>
+          <Clock class="size-[18px]" aria-hidden="true" />
+          Salvar e continuar depois
+        </button>
+        <div class="order-1 flex w-full flex-col gap-3 sm:order-2 sm:w-auto sm:flex-row">
+          <button type="button" data-ir="2" class={btnContorno}>
+            <ArrowLeft class="size-[18px]" aria-hidden="true" />
+            Voltar para atividades
+          </button>
+          <button type="button" id="confirmar" class={btnPrimario}></button>
+        </div>
       </div>
-      <label class="mt-4 flex cursor-pointer items-start gap-2 text-sm text-chumbo">
-        <input type="checkbox" id="aceite" class="mt-1 size-4 accent-verde-medio" />
-        <span>
-          Li e aceito a
-          <a href={url("/politica-de-privacidade")} target="_blank" rel="noopener" class="font-semibold text-azul hover:underline">Política de Privacidade</a>
-          (abre em nova aba).
-        </span>
-      </label>
-      <p id="erro-aceite" class="mt-1 text-xs font-semibold text-red-700"></p>
-      <div class="mt-4 flex flex-wrap justify-between gap-3">
-        <button type="button" data-voltar class={secundario}>Voltar</button>
-        <button type="button" id="confirmar" class={primario}>Confirmar inscrição</button>
-      </div>
-    </section>
+    </div>
+
+    <!-- Inscrição confirmada -->
+    <div id="confirmada" hidden class="mx-auto flex w-full max-w-[488px] flex-col items-center gap-4 rounded-cartao border border-borda bg-white p-6 text-center shadow-[0_1px_3px_rgba(15,41,8,0.08)] sm:p-9">
+      <div class="flex size-[72px] items-center justify-center rounded-full bg-verde-claro text-verde-escuro"><span data-ico="circulo-ok" data-grande></span></div>
+      <h2 class="text-[32px] leading-[1.3] font-bold text-verde-escuro">Inscrição confirmada!</h2>
+      <p id="confirmada-texto" class="text-[15px] leading-normal text-chumbo"></p>
+      <Alerta tipo="aviso" titulo="Confirme seu e-mail" class="w-full text-left"><span id="confirmada-email"></span></Alerta>
+      <Alerta tipo="info" titulo="Próximo passo" class="w-full text-left"><span id="confirmada-proximo"></span></Alerta>
+      <p id="reenvio-status" role="status" hidden class="text-[13px] text-verde-medio"></p>
+      <a href={url("/minha-inscricao")} class={`${btnPrimario} w-full`}><span data-ico="lista"></span>Ver minha inscrição</a>
+      <button type="button" id="reenviar" class={btnTexto}><span data-ico="email"></span>Reenviar e-mail de verificação</button>
+    </div>
   </div>
+
+  <p id="erro-carga" role="alert" hidden class="mx-auto w-full max-w-[1120px] rounded-campo border border-erro-borda bg-erro-fundo p-4 text-erro"></p>
+
+  <!-- Política de Privacidade (painel lateral) -->
+  <div id="politica" hidden class="fixed inset-0 z-50">
+    <div data-fechar-politica class="absolute inset-0 bg-verde-noite/60"></div>
+    <aside role="dialog" aria-modal="true" aria-labelledby="politica-titulo" class="absolute top-0 right-0 flex h-full w-full max-w-[560px] flex-col gap-4 overflow-y-auto bg-white p-6 shadow-2xl">
+      <div class="flex items-start justify-between gap-4">
+        <h2 id="politica-titulo" class="text-[24px] leading-[1.3] font-bold text-verde-escuro">Política de Privacidade</h2>
+        <button type="button" data-fechar-politica aria-label="Fechar" class="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-palha text-chumbo">
+          <X class="size-[18px]" aria-hidden="true" />
+        </button>
+      </div>
+      <PoliticaTexto />
+      <button type="button" data-fechar-politica class={`${btnPrimario} w-full`}>
+        <ArrowLeft class="size-[18px]" aria-hidden="true" />
+        Fechar e voltar à inscrição
+      </button>
+    </aside>
+  </div>
+  <IconesCliente />
 </Base>
 
 <script>
-  import {
-    ApiError, api, caminho, descreverPagamento, esc, formatarCPF, formatarData, limparErro, mostrarErro, erroCampos,
-    rotuloPerfil, sessao, soDigitos, type Dados, type Inscricao, type Pagamento, type Vagas,
-  } from "../lib/api";
-  import { renderSeletor, type ItemCatalogo } from "../lib/seletor";
+  import { api, ApiError, erroCampos, exigirLogin, formatarDataHora, limparErro, mostrarErro, type Inscricao, type Pagamento, type Vagas } from "../lib/api";
+  import { ativarMascaras, lerDados, preencherDados, validarDados } from "../lib/dados-form";
+  import { montarSeletor } from "../lib/seletor";
+  import { formaParticipacao, gradeDados, ico, linhaAtividade, passos, separarDescricao, type ItemCatalogo } from "../lib/visao";
+  import { url } from "../lib/url";
 
+  const sessao = exigirLogin();
   const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
-  const mostrar = (id: string, ligado: boolean) => ($(id).hidden = !ligado);
-  const catalogo: ItemCatalogo[] = JSON.parse($("#catalogo").textContent!);
-  const rotulosEtapas = ["Dados pessoais", "Atividades", "Revisar e confirmar"];
+  const catalogo = JSON.parse($("#catalogo").textContent!) as ItemCatalogo[];
+  const porSlug = new Map(catalogo.map((a) => [a.slug, a]));
+  const form = $<HTMLFormElement>("#etapa-1");
+  const telas = { 1: $("#etapa-1"), 2: $("#etapa-2"), 3: $("#etapa-3") } as const;
 
-  let inscricao: Inscricao | null = null;
+  let insc: Inscricao;
   let pagamento: Pagamento;
   let vagas: Vagas = {};
-  let etapa = 1;
-  let lerSelecao: () => string[] = () => [];
+  let seletor: ReturnType<typeof montarSeletor> | null = null;
+  let etapa: 1 | 2 | 3 = 1;
+  let indisponiveis: string[] = [];
 
-  const s = sessao();
-  if (!s) {
-    mostrar("#anonimo", true);
-  } else {
-    iniciar();
-  }
+  document.querySelectorAll("[data-ico]").forEach((el) => {
+    el.innerHTML = ico((el as HTMLElement).dataset.ico!, el.hasAttribute("data-grande") ? "size-9" : "size-[18px]");
+  });
 
+  ativarMascaras(form);
+
+  // ---- carga ----
   async function iniciar() {
-    mostrar("#carregando", true);
+    if (!sessao) return;
+    document.querySelectorAll("[data-login]").forEach((el) => (el.textContent = sessao.usuario.login));
     try {
-      const [insc, pag, v] = await Promise.all([
-        api<{ inscricao: Inscricao }>("/inscricao").catch((e) => (e instanceof ApiError && e.status === 404 ? null : Promise.reject(e))),
+      [pagamento, vagas] = await Promise.all([
         api<Pagamento>("/pagamento", { auth: false }),
-        api<{ atividades: Vagas }>("/atividades/vagas", { auth: false }).catch(() => ({ atividades: {} as Vagas })),
+        api<{ atividades: Vagas }>("/atividades/vagas", { auth: false }).then((r) => r.atividades),
       ]);
-      inscricao = insc?.inscricao ?? null;
-      pagamento = pag;
-      vagas = v.atividades;
-      mostrar("#carregando", false);
-      renderizar();
+      insc = await api<{ inscricao: Inscricao }>("/inscricao")
+        .then((r) => r.inscricao)
+        .catch(async (e) => {
+          if (e instanceof ApiError && e.status === 404) return (await api<{ inscricao: Inscricao }>("/inscricao", { metodo: "POST" })).inscricao;
+          throw e;
+        });
+      if (insc.status !== "rascunho") return void (location.href = url("/minha-inscricao"));
+      preencher();
+      const d = insc.dados;
+      const completos = d.nome && d.cpf && d.email && d.telefone && d.dataNascimento && d.perfil && insc.aceitePrivacidade;
+      irPara(!completos ? 1 : insc.atividades.length ? 3 : 2);
+      $("#conteudo").hidden = false;
     } catch (e) {
-      mostrar("#carregando", false);
-      const el = $("#erro-carga");
-      el.textContent = e instanceof ApiError ? e.message : "Erro inesperado.";
-      el.hidden = false;
+      const erro = $("#erro-carga");
+      erro.textContent = e instanceof Error ? e.message : "Não foi possível carregar a inscrição.";
+      erro.hidden = false;
     }
   }
 
-  function renderizar() {
-    ["#inicio", "#assistente", "#mensagem"].forEach((i) => mostrar(i, false));
-    if (!inscricao) return mostrar("#inicio", true);
-    if (inscricao.status !== "rascunho") {
-      const cancelada = inscricao.status === "cancelada";
-      $("#mensagem").innerHTML = `<h2 class="text-lg font-semibold text-verde-escuro">${cancelada ? "Sua inscrição foi cancelada" : "Sua inscrição já está confirmada"}</h2>
-        <p class="mt-1 text-sm text-chumbo">${cancelada ? "O histórico da inscrição foi mantido." : "Você pode consultar, editar ou cancelar sua inscrição na sua área."}</p>
-        <a href="${caminho("/minha-inscricao")}" class="mt-3 inline-block rounded-full bg-verde-cta px-6 py-2.5 text-[15px] font-bold text-verde-noite shadow">Ver minha inscrição</a>`;
-      return mostrar("#mensagem", true);
-    }
-    mostrar("#assistente", true);
-    irPara(etapa);
+  function preencher() {
+    preencherDados(form, insc.dados);
+    (form.elements.namedItem("aceitePrivacidade") as HTMLInputElement).checked = insc.aceitePrivacidade;
+    document.querySelectorAll("[data-forma]").forEach((el) => (el.innerHTML = formaParticipacao(pagamento)));
   }
 
-  function irPara(n: number) {
+  function irPara(n: 1 | 2 | 3) {
     etapa = n;
-    limparErro($("#assistente"));
-    $("#passos").innerHTML = rotulosEtapas
-      .map(
-        (r, i) =>
-          `<li aria-current="${i + 1 === n ? "step" : "false"}" class="rounded-full px-4 py-1 ${i + 1 === n ? "bg-verde-escuro text-white" : i + 1 < n ? "bg-verde-claro text-verde-escuro" : "border border-verde-medio/40 bg-white text-verde-escuro"}">${i + 1}. ${r}</li>`,
-      )
+    ([1, 2, 3] as const).forEach((i) => (telas[i].hidden = i !== n));
+    $("#confirmada").hidden = true;
+    $("#cabecalho").hidden = false;
+    $("#passos").innerHTML = passos(n);
+    if (n === 2) desenharSeletor();
+    if (n === 3) desenharRevisao();
+    scrollTo({ top: 0 });
+  }
+  document.addEventListener("click", (e) => {
+    const alvo = (e.target as HTMLElement).closest<HTMLElement>("[data-ir]");
+    if (!alvo) return;
+    const destino = Number(alvo.dataset.ir) as 1 | 2 | 3;
+    void avancar(destino);
+  });
+
+  const dadosDoForm = () => ({ dados: lerDados(form), aceitePrivacidade: (form.elements.namedItem("aceitePrivacidade") as HTMLInputElement).checked });
+
+  function validarEtapa1() {
+    const { dados, aceitePrivacidade } = dadosDoForm();
+    const c = validarDados(dados);
+    if (!aceitePrivacidade) c.aceitePrivacidade = "O aceite da Política de Privacidade é obrigatório para concluir a inscrição.";
+    return c;
+  }
+
+  async function salvar(corpo: object) {
+    insc = (await api<{ inscricao: Inscricao }>("/inscricao", { metodo: "PUT", corpo })).inscricao;
+  }
+
+  async function avancar(destino: 1 | 2 | 3) {
+    limparErro(form);
+    try {
+      if (etapa === 1 && destino > 1) {
+        const campos = validarEtapa1();
+        if (Object.keys(campos).length) {
+          mostrarErro(form, erroCampos(campos, "Preencha os campos obrigatórios, selecione um perfil e aceite a Política de Privacidade para continuar."));
+          $("#etapa-1 [data-erro-geral]").scrollIntoView({ block: "center" });
+          return;
+        }
+        await salvar(dadosDoForm());
+      }
+      if (etapa === 2 && destino === 3) await salvar({ atividades: seletor!.obter() });
+      else if (etapa === 2) await salvar({ atividades: seletor!.obter() });
+      irPara(destino);
+    } catch (e) {
+      const alvo = etapa === 1 ? form : $("#etapa-2");
+      mostrarErro(alvo, e);
+    }
+  }
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    void avancar(2);
+  });
+
+  // ---- etapa 2 ----
+  function desenharSeletor() {
+    limparErro($("#etapa-2"));
+    seletor = montarSeletor({ raiz: $("#seletor"), catalogo, vagas, selecionadas: insc.atividades, salvas: [] });
+  }
+
+  // ---- etapa 3 ----
+  function desenharRevisao() {
+    const slugs = insc.atividades.filter((s) => porSlug.has(s));
+    $("#revisao-dados").innerHTML = gradeDados(insc.dados);
+    $("[data-total]").textContent = String(slugs.length);
+    $("#revisao-atividades").innerHTML = slugs
+      .map((s) => {
+        const marca = indisponiveis.includes(s)
+          ? `<span class="inline-flex items-center gap-1.5 rounded-full border border-borda bg-[#eeeeee] px-2.5 py-1 text-[11px] font-bold tracking-[0.4px] text-chumbo uppercase">${ico("proibido", "size-3.5")}Ficou sem vagas — remova para confirmar</span>`
+          : "";
+        return linhaAtividade(porSlug.get(s)!, marca);
+      })
       .join("");
-    [1, 2, 3].forEach((i) => mostrar(`#etapa-${i}`, i === n));
-    if (n === 1) preencherDados();
-    if (n === 2) lerSelecao = renderSeletor($("#seletor"), catalogo, vagas, inscricao!.atividades, inscricao!.atividades);
-    if (n === 3) renderizarResumo();
-    ($(`#etapa-${n}`).querySelector("h2") as HTMLElement).tabIndex = -1;
-    ($(`#etapa-${n}`).querySelector("h2") as HTMLElement).focus();
-  }
-
-  function preencherDados() {
-    const f = $<HTMLFormElement>("#etapa-1");
-    const d = inscricao!.dados ?? {};
-    (["nome", "cpf", "email", "telefone", "dataNascimento", "perfil"] as const).forEach((k) => {
-      const el = f.elements.namedItem(k) as HTMLInputElement | null;
-      if (el && d[k] !== undefined) el.value = k === "cpf" ? formatarCPF(d.cpf) : d[k]!;
-    });
-  }
-
-  $("#iniciar").addEventListener("click", async () => {
-    try {
-      inscricao = (await api<{ inscricao: Inscricao }>("/inscricao", { metodo: "POST" })).inscricao;
-      renderizar();
-    } catch (e) {
-      const el = $("#erro-carga");
-      el.textContent = e instanceof ApiError ? e.message : "Erro inesperado.";
-      el.hidden = false;
+    $("#revisao-aceite").innerHTML = `<span class="text-verde-medio">${ico("circulo-ok", "size-[18px]")}</span>Aceite registrado nesta inscrição${insc.aceiteEm ? ` em ${formatarDataHora(insc.aceiteEm).replace(", ", " às ").replace(":", "h")}` : ""} · Política versão ${insc.versaoPolitica ?? "1.0"}`;
+    const alerta = $("#alerta-revisao");
+    if (indisponiveis.length) {
+      const t = porSlug.get(indisponiveis[0])!.titulo;
+      alerta.innerHTML = `<div role="alert" class="flex items-start gap-3 rounded-campo border border-erro-borda bg-erro-fundo p-4"><span class="mt-0.5 text-erro">${ico("circulo-x", "size-5")}</span><div><p class="text-sm leading-[1.4] font-semibold text-erro">Não foi possível confirmar a inscrição</p><p class="text-[15px] leading-normal text-chumbo">A atividade “${t}” ficou sem vagas enquanto você revisava. Remova-a ou escolha outra atividade para continuar.</p></div></div>`;
+    } else {
+      alerta.innerHTML = `<div class="flex items-start gap-3 rounded-campo border border-info-borda bg-info-fundo p-4"><span class="mt-0.5 text-info-texto">${ico("info", "size-5")}</span><div><p class="text-sm leading-[1.4] font-semibold text-info-texto">Revise antes de confirmar</p><p class="text-[15px] leading-normal text-chumbo">Sua inscrição só será registrada depois que você clicar em “Confirmar inscrição”. Use “Editar” ou “Voltar” para corrigir qualquer informação.</p></div></div>`;
     }
-  });
-
-  $<HTMLFormElement>("#etapa-1").addEventListener("submit", async (ev) => {
-    ev.preventDefault();
-    const f = ev.currentTarget as HTMLFormElement;
-    limparErro(f);
-    const v = Object.fromEntries(new FormData(f)) as Record<string, string>;
-    const dados: Dados = {
-      nome: v.nome.trim(),
-      cpf: soDigitos(v.cpf),
-      email: v.email.trim(),
-      telefone: soDigitos(v.telefone),
-      dataNascimento: v.dataNascimento,
-      perfil: v.perfil as Dados["perfil"],
-    };
-    const campos: Record<string, string> = {};
-    if (!dados.nome) campos.nome = "Informe o nome.";
-    if (dados.cpf!.length !== 11) campos.cpf = "O CPF deve ter 11 dígitos.";
-    if (!/^\S+@\S+\.\S+$/.test(dados.email!)) campos.email = "Informe um e-mail válido.";
-    if (!/^\d{10,11}$/.test(dados.telefone!)) campos.telefone = "Informe o telefone com DDD (10 ou 11 dígitos).";
-    if (!dados.dataNascimento) campos.dataNascimento = "Informe a data de nascimento.";
-    if (!dados.perfil) campos.perfil = "Selecione o perfil.";
-    if (Object.keys(campos).length) return mostrarErro(f, erroCampos(campos));
-    try {
-      inscricao = (await api<{ inscricao: Inscricao }>("/inscricao", { metodo: "PUT", corpo: { dados } })).inscricao;
-      irPara(2);
-    } catch (e) {
-      mostrarErro(f, e);
-    }
-  });
-
-  $("#salvar-atividades").addEventListener("click", async () => {
-    try {
-      inscricao = (await api<{ inscricao: Inscricao }>("/inscricao", { metodo: "PUT", corpo: { atividades: lerSelecao() } })).inscricao;
-      irPara(3);
-    } catch (e) {
-      mostrarErro($("#assistente"), e);
-    }
-  });
-
-  document.querySelectorAll("[data-voltar]").forEach((b) => b.addEventListener("click", () => irPara(etapa - 1)));
-
-  function renderizarResumo() {
-    const d = inscricao!.dados;
-    const linhas: [string, string][] = [
-      ["Nome", d.nome ?? "—"], ["CPF", formatarCPF(d.cpf)], ["E-mail", d.email ?? "—"], ["Telefone", d.telefone ?? "—"],
-      ["Nascimento", formatarData(d.dataNascimento)], ["Perfil", d.perfil ? rotuloPerfil[d.perfil] : "—"],
-    ];
-    const escolhidas = catalogo.filter((a) => inscricao!.atividades.includes(a.slug));
-    $("#resumo").innerHTML = `
-      <div class="rounded-cartao bg-palha p-3"><h3 class="font-semibold text-verde-escuro">Seus dados</h3>
-        <dl class="mt-1 text-sm">${linhas.map(([k, val]) => `<div class="flex gap-2"><dt class="w-24 shrink-0 font-semibold">${k}</dt><dd>${esc(val)}</dd></div>`).join("")}</dl>
-        <button type="button" data-editar="1" class="mt-2 cursor-pointer text-tabela font-semibold text-azul hover:underline">Corrigir dados</button></div>
-      <div class="rounded-cartao bg-palha p-3"><h3 class="font-semibold text-verde-escuro">Atividades selecionadas</h3>
-        ${escolhidas.length ? `<ul class="mt-1 list-disc pl-5 text-sm">${escolhidas.map((a) => `<li>${esc(a.titulo)} <span class="text-chumbo/70">(${esc(a.dia)}, ${esc(a.horario)})</span></li>`).join("")}</ul>` : `<p class="mt-1 text-sm text-chumbo">Nenhuma atividade selecionada.</p>`}
-        <button type="button" data-editar="2" class="mt-2 cursor-pointer text-tabela font-semibold text-azul hover:underline">Alterar atividades</button></div>`;
-    document.querySelectorAll<HTMLElement>("[data-editar]").forEach((b) => b.addEventListener("click", () => irPara(Number(b.dataset.editar))));
-    $("#pagamento-vigente").textContent = descreverPagamento(pagamento);
-    $<HTMLInputElement>("#aceite").checked = inscricao!.aceitePrivacidade;
+    const botao = $<HTMLButtonElement>("#confirmar");
+    botao.innerHTML = indisponiveis.length ? `${ico("lapis", "size-[18px]")}Revisar atividades` : `${ico("ok", "size-[18px]")}Confirmar inscrição`;
   }
 
   $("#confirmar").addEventListener("click", async () => {
-    $("#erro-aceite").textContent = "";
-    limparErro($("#assistente"));
-    if (!$<HTMLInputElement>("#aceite").checked) {
-      $("#erro-aceite").textContent = "É obrigatório aceitar a Política de Privacidade para confirmar.";
-      return $<HTMLInputElement>("#aceite").focus();
-    }
+    if (indisponiveis.length) return irPara(2);
     const botao = $<HTMLButtonElement>("#confirmar");
     botao.disabled = true;
     try {
-      await api("/inscricao", { metodo: "PUT", corpo: { aceitePrivacidade: true } });
-      await api("/inscricao/confirmar", { metodo: "POST" });
-      location.href = caminho("/minha-inscricao?confirmada=1");
+      insc = (await api<{ inscricao: Inscricao }>("/inscricao/confirmar", { metodo: "POST" })).inscricao;
+      mostrarConfirmada();
     } catch (e) {
-      mostrarErro($("#assistente"), e);
+      vagas = await api<{ atividades: Vagas }>("/atividades/vagas", { auth: false }).then((r) => r.atividades).catch(() => vagas);
+      indisponiveis = insc.atividades.filter((s) => vagas[s] && !vagas[s].disponivel);
+      if (e instanceof ApiError && e.status === 400 && Object.keys(e.campos).some((c) => c !== "atividades")) {
+        // dados incompletos: volta para a etapa 1 com os erros da API
+        irPara(1);
+        mostrarErro(form, e);
+      } else if (indisponiveis.length) desenharRevisao();
+      else {
+        const alerta = $("#alerta-revisao");
+        alerta.innerHTML = `<div role="alert" class="flex items-start gap-3 rounded-campo border border-erro-borda bg-erro-fundo p-4"><span class="mt-0.5 text-erro">${ico("circulo-x", "size-5")}</span><div><p class="text-sm leading-[1.4] font-semibold text-erro">Não foi possível confirmar a inscrição</p><p class="text-[15px] leading-normal text-chumbo">${e instanceof Error ? e.message : "Tente novamente."}</p></div></div>`;
+      }
+    } finally {
       botao.disabled = false;
     }
   });
+
+  function mostrarConfirmada() {
+    Object.values(telas).forEach((t) => (t.hidden = true));
+    $("#cabecalho").hidden = true;
+    $("#confirmada").hidden = false;
+    const quando = formatarDataHora(insc.confirmadaEm).replace(", ", " às ").replace(":", "h");
+    $("#confirmada-texto").textContent = `Inscrição nº ${insc.numero ?? "—"} registrada em ${quando} e vinculada à conta ${sessao!.usuario.login}.`;
+    $("#confirmada-email").textContent = `Enviamos um link de verificação para ${insc.dados.email}. Abra a mensagem e clique no link para confirmar o endereço.`;
+    const p = insc.pagamento;
+    const { destaque, detalhe } = separarDescricao(p?.descricao ?? null);
+    $("#confirmada-proximo").textContent =
+      p?.modalidade === "monetaria"
+        ? `Sua forma de participação é o pagamento de ${p.valor?.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} por participante. ${p.descricao ?? ""} A organização atualizará a situação na sua área.`
+        : `${destaque.replace(/\.$/, "")}. ${detalhe} A organização atualizará a situação na sua área.`.replace(/\s+/g, " ");
+    scrollTo({ top: 0 });
+  }
+
+  $("#reenviar").addEventListener("click", async () => {
+    const status = $("#reenvio-status");
+    try {
+      await api("/inscricao/reenviar-verificacao", { metodo: "POST" });
+      status.textContent = "E-mail de verificação reenviado.";
+    } catch (e) {
+      status.textContent = e instanceof Error ? e.message : "Não foi possível reenviar.";
+    }
+    status.hidden = false;
+  });
+
+  // ---- salvar e continuar depois ----
+  document.querySelectorAll("[data-salvar-depois]").forEach((b) =>
+    b.addEventListener("click", async () => {
+      try {
+        if (etapa === 1) {
+          const { dados, aceitePrivacidade } = dadosDoForm();
+          const parcial = Object.fromEntries(Object.entries(dados).filter(([, v]) => v));
+          await salvar({ dados: parcial, aceitePrivacidade });
+        } else if (etapa === 2) await salvar({ atividades: seletor!.obter() });
+        location.href = url("/minha-area");
+      } catch (e) {
+        mostrarErro(etapa === 1 ? form : $("#etapa-2"), e);
+      }
+    }),
+  );
+
+  // ---- painel da Política de Privacidade ----
+  const painel = $("#politica");
+  const abrir = $("#abrir-politica");
+  const fechar = () => {
+    painel.hidden = true;
+    document.body.style.overflow = "";
+    abrir.focus();
+  };
+  abrir.addEventListener("click", () => {
+    painel.hidden = false;
+    document.body.style.overflow = "hidden";
+    painel.querySelector<HTMLElement>("button")!.focus();
+  });
+  painel.querySelectorAll("[data-fechar-politica]").forEach((el) => el.addEventListener("click", fechar));
+  document.addEventListener("keydown", (e) => e.key === "Escape" && !painel.hidden && fechar());
+
+  void iniciar();
 </script>

@@ -1,25 +1,47 @@
 ---
+import { KeyRound, LogIn, UserPlus } from "@lucide/astro";
 import { url } from "../lib/url";
+import Alerta from "../components/Alerta.astro";
 import Campo from "../components/Campo.astro";
-import CartaoForm from "../components/CartaoForm.astro";
+import CartaoAcesso from "../components/CartaoAcesso.astro";
+
+const botao = "flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-verde-cta px-[22px] py-3 text-[15px] leading-[1.3] font-bold text-verde-noite hover:brightness-95 disabled:opacity-60";
+const link = "flex items-center gap-2 rounded-full px-2 py-3 text-[15px] font-bold text-verde-medio hover:underline";
 ---
 
-<CartaoForm titulo="Entrar" descricao="Acesse sua conta para realizar ou consultar sua inscrição." ativo="/entrar">
-  <form id="form" novalidate class="grid gap-3">
-    <p data-erro-geral role="alert" hidden class="rounded-lg bg-red-50 p-2 text-sm font-semibold text-red-700"></p>
-    <Campo nome="login" rotulo="Login" autocomplete="username" />
-    <Campo nome="senha" rotulo="Senha" tipo="password" autocomplete="current-password" />
-    <button type="submit" class="w-full cursor-pointer rounded-full bg-verde-cta px-6 py-2.5 text-[15px] font-bold text-verde-noite shadow disabled:opacity-60">Entrar</button>
-    <p class="flex flex-wrap justify-between gap-2 text-sm">
-      <a href={url("/cadastro")} class="font-semibold text-azul hover:underline">Criar conta</a>
-      <a href={url("/recuperar-senha")} class="font-semibold text-azul hover:underline">Esqueci minha senha</a>
+<CartaoAcesso titulo="Entrar" ativo="/entrar">
+  <LogIn slot="icone" class="size-8" aria-hidden="true" />
+  <form id="form" novalidate class="flex w-full flex-col gap-4">
+    <Alerta tipo="erro" titulo="Não foi possível entrar" geral />
+    <Alerta tipo="aviso" titulo="Entre para continuar" class="hidden" id="aviso-restrito">Esta área é exclusiva para participantes autenticados.</Alerta>
+    <p class="text-center text-[15px] leading-normal text-chumbo">Use o login e a senha da sua conta.</p>
+    <Campo nome="login" rotulo="Login" icone="usuario" placeholder="Digite seu login" autocomplete="username" />
+    <Campo nome="senha" rotulo="Senha" tipo="password" icone="cadeado" placeholder="Digite sua senha" autocomplete="current-password" />
+    <button type="submit" class={botao}>
+      <LogIn class="size-[18px]" aria-hidden="true" />
+      Entrar
+    </button>
+    <a href={url("/recuperar-senha")} class:list={[link, "justify-center"]}>
+      <KeyRound class="size-[18px]" aria-hidden="true" />
+      Esqueci minha senha
+    </a>
+    <p class="flex items-center justify-center gap-1 text-[15px] text-chumbo">
+      Ainda não tem conta?
+      <a href={url("/cadastro")} class={link}>
+        <UserPlus class="size-[18px]" aria-hidden="true" />
+        Criar conta
+      </a>
     </p>
   </form>
-</CartaoForm>
+</CartaoAcesso>
 
 <script>
-  import { api, destinoSeguro, limparErro, mostrarErro, salvarSessao, type Sessao } from "../lib/api";
+  import { api, ApiError, destinoSeguro, erroCampos, limparErro, mostrarErro, salvarSessao, type Sessao } from "../lib/api";
   const form = document.querySelector<HTMLFormElement>("#form")!;
+  const params = new URLSearchParams(location.search);
+  // Redirecionado de uma área restrita: mostra o aviso do protótipo.
+  if (params.get("voltar")) document.getElementById("aviso-restrito")!.classList.remove("hidden");
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     limparErro(form);
@@ -29,10 +51,10 @@ import CartaoForm from "../components/CartaoForm.astro";
     try {
       const r = await api<Sessao>("/login", { metodo: "POST", corpo: { login: d.login.trim().toLowerCase(), senha: d.senha }, auth: false });
       salvarSessao({ token: r.token, expiraEm: r.expiraEm, usuario: r.usuario });
-      const padrao = r.usuario.papel === "admin" ? "/admin" : "/minha-inscricao";
-      location.href = destinoSeguro(new URLSearchParams(location.search).get("voltar"), padrao);
+      const padrao = r.usuario.papel === "admin" ? "/admin" : "/minha-area";
+      location.href = destinoSeguro(params.get("voltar"), padrao);
     } catch (err) {
-      mostrarErro(form, err);
+      mostrarErro(form, err instanceof ApiError && err.status === 401 ? erroCampos({}, "Login ou senha inválidos. Verifique os dados e tente novamente.") : err);
       botao.disabled = false;
     }
   });

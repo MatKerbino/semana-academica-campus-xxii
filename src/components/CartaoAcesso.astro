@@ -1,0 +1,25 @@
+---
+import Base from "../layouts/Base.astro";
+
+interface Props {
+  titulo: string;
+  descricao?: string;
+  /** Ícone lucide (componente) exibido no círculo verde. */
+  ativo?: string;
+  id?: string;
+}
+const { titulo, descricao, ativo, id } = Astro.props;
+---
+
+<Base titulo={titulo} ativo={ativo} espaco="acesso">
+  <div class="mx-auto flex w-full max-w-[480px] flex-col items-center gap-4 rounded-cartao border border-borda bg-white p-6 shadow-[0_1px_3px_rgba(15,41,8,0.08)] sm:p-9" id={id}>
+    <div data-cabecalho class="flex w-full flex-col items-center gap-4">
+      <div class="flex size-16 items-center justify-center rounded-full bg-verde-claro text-verde-escuro">
+        <slot name="icone" />
+      </div>
+      <h1 class="text-center text-[32px] leading-[1.3] font-bold text-verde-escuro">{titulo}</h1>
+      {descricao && <p class="text-center text-[15px] leading-normal text-chumbo">{descricao}</p>}
+    </div>
+    <slot />
+  </div>
+</Base>

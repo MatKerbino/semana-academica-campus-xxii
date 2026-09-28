@@ -1,268 +1,223 @@
 ---
-import { url } from "../lib/url";
-import Campo from "../components/Campo.astro";
-import PaginaCabecalho from "../components/PaginaCabecalho.astro";
+import { TriangleAlert } from "@lucide/astro";
+import IconesCliente from "../components/IconesCliente.astro";
 import Base from "../layouts/Base.astro";
 import { catalogoSelecionavel } from "../data/evento";
-
-const perfis = [
-  { valor: "estudante", rotulo: "Estudante" },
-  { valor: "professor", rotulo: "Professor(a)" },
-  { valor: "profissional", rotulo: "Profissional" },
-  { valor: "outro", rotulo: "Outro" },
-];
-const botao = "cursor-pointer rounded-full px-5 py-2 text-sm font-bold disabled:opacity-60";
-const primario = `${botao} bg-verde-cta text-verde-noite shadow`;
-const secundario = `${botao} border-2 border-verde-escuro bg-white text-verde-escuro`;
-const perigo = `${botao} border-2 border-red-700 bg-white text-red-700`;
+import { url } from "../lib/url";
 ---
 
-<Base titulo="Minha inscrição" ativo="/minha-inscricao">
-  <PaginaCabecalho
-    titulo="Minha inscrição"
-    descricao="Acompanhe seus dados, atividades, pagamento e a situação da inscrição."
-    trilha={[{ href: "/", rotulo: "Início" }]}
-  />
+<Base titulo="Minha inscrição" espaco="acesso">
   <script type="application/json" id="catalogo" set:html={JSON.stringify(catalogoSelecionavel)} />
 
-  <div id="carregando" role="status" class="rounded-cartao bg-white p-5 text-sm">Carregando…</div>
-  <p id="aviso" role="status" hidden class="mb-3 rounded-lg bg-green-50 p-3 text-sm font-semibold text-verde-escuro"></p>
-  <p data-erro-geral role="alert" hidden class="mb-3 rounded-lg bg-red-50 p-3 text-sm font-semibold text-red-700"></p>
-
-  <div id="sem-inscricao" hidden class="rounded-cartao bg-creme p-5">
-    <p class="text-sm text-chumbo">Você ainda não possui inscrição no evento.</p>
-    <a href={url("/inscricao")} class={`mt-3 inline-block ${primario}`}>Realizar inscrição</a>
-  </div>
-
-  <div id="conteudo" hidden class="grid gap-3 lg:grid-cols-2">
-    <section class="rounded-cartao border border-borda bg-white p-4 lg:col-span-2" aria-labelledby="t-situacao">
-      <h2 id="t-situacao" class="text-lg font-semibold text-verde-escuro">Situação</h2>
-      <dl id="situacao" class="mt-2 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2"></dl>
-      <div id="devolucao" hidden class="mt-3 rounded-lg bg-creme p-3 text-sm"></div>
-      <div id="rascunho" hidden class="mt-3 rounded-lg bg-creme p-3 text-sm">
-        Sua inscrição ainda não foi confirmada.
-        <a href={url("/inscricao")} class="font-semibold text-azul hover:underline">Continuar inscrição</a>
-      </div>
-    </section>
-
-    <section class="rounded-cartao border border-borda bg-white p-4" aria-labelledby="t-dados">
-      <h2 id="t-dados" class="text-lg font-semibold text-verde-escuro">Dados</h2>
-      <dl id="dados" class="mt-2 text-sm"></dl>
-      <button type="button" id="editar-dados" class={`mt-3 ${secundario}`} hidden>Editar dados</button>
-      <form id="form-dados" hidden novalidate class="mt-3 grid gap-3">
-        <p data-erro-geral role="alert" hidden class="rounded-lg bg-red-50 p-2 text-sm font-semibold text-red-700"></p>
-        <Campo nome="nome" rotulo="Nome completo" autocomplete="name" />
-        <Campo nome="cpf" rotulo="CPF" inputmode="numeric" maxlength={14} />
-        <Campo nome="email" rotulo="E-mail" tipo="email" autocomplete="email" />
-        <Campo nome="telefone" rotulo="Telefone" tipo="tel" inputmode="tel" />
-        <Campo nome="dataNascimento" rotulo="Data de nascimento" tipo="date" />
-        <Campo nome="perfil" rotulo="Perfil" opcoes={perfis} />
-        <div class="flex gap-3">
-          <button type="submit" class={primario}>Salvar</button>
-          <button type="button" data-cancelar-edicao class={secundario}>Cancelar</button>
-        </div>
-      </form>
-    </section>
-
-    <section class="rounded-cartao border border-borda bg-white p-4" aria-labelledby="t-atividades">
-      <h2 id="t-atividades" class="text-lg font-semibold text-verde-escuro">Atividades</h2>
-      <ul id="atividades" class="mt-2 list-disc space-y-1 pl-5 text-sm"></ul>
-      <button type="button" id="editar-atividades" class={`mt-3 ${secundario}`} hidden>Editar atividades</button>
-      <div id="area-atividades" hidden class="mt-3">
-        <p id="prazo-atividades" class="mb-2 text-tabela text-chumbo/70"></p>
-        <div id="seletor" class="grid gap-3"></div>
-        <div class="mt-3 flex gap-3">
-          <button type="button" id="salvar-atividades" class={primario}>Salvar atividades</button>
-          <button type="button" data-cancelar-edicao class={secundario}>Cancelar</button>
-        </div>
-      </div>
-    </section>
-
-    <section class="rounded-cartao border border-borda bg-white p-4 lg:col-span-2" aria-labelledby="t-pag">
-      <h2 id="t-pag" class="text-lg font-semibold text-verde-escuro">Forma de pagamento ou compensação</h2>
-      <p id="pagamento" class="mt-2 text-sm"></p>
-      <div id="cancelamento" hidden class="mt-4 border-t border-borda pt-3">
-        <p id="prazo-cancelamento" class="mb-2 text-tabela text-chumbo/70"></p>
-        <button type="button" id="cancelar" class={perigo}>Cancelar inscrição</button>
-      </div>
-    </section>
-  </div>
-
-  <dialog id="dialogo" aria-labelledby="dialogo-titulo" class="m-auto max-w-md rounded-cartao p-5 backdrop:bg-black/50">
-    <h2 id="dialogo-titulo" class="text-lg font-semibold text-verde-escuro">Cancelar inscrição?</h2>
-    <p class="mt-2 text-sm text-chumbo">
-      Sua inscrição será marcada como cancelada. O histórico é mantido e sua conta não é excluída.
-      <span id="dialogo-devolucao"></span>
-    </p>
-    <div class="mt-4 flex justify-end gap-3">
-      <button type="button" id="dialogo-nao" class={secundario}>Manter inscrição</button>
-      <button type="button" id="dialogo-sim" class={perigo}>Sim, cancelar</button>
+  <div id="conteudo" hidden class="mx-auto flex w-full max-w-[1120px] flex-col gap-5">
+    <div class="flex flex-col gap-3">
+      <nav aria-label="Trilha de navegação" class="flex gap-2 text-[13px] leading-normal">
+        <a href={url("/minha-area")} class="text-verde-medio hover:underline">Minha área</a>
+        <span class="text-texto-suave">/</span>
+        <span class="text-texto-suave">Minha inscrição</span>
+      </nav>
+      <h1 class="text-[32px] leading-[1.3] font-bold text-verde-escuro">Minha inscrição</h1>
+      <p id="resumo" class="flex flex-wrap items-center gap-x-3 gap-y-2 text-[13px] leading-normal text-texto-suave"></p>
     </div>
-  </dialog>
+
+    <div id="aviso-topo"></div>
+
+    <div class="grid items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      <div class="flex flex-col gap-5">
+        <section class="rounded-cartao border border-borda bg-white p-6 shadow-[0_1px_3px_rgba(15,41,8,0.08)]">
+          <div class="flex items-center justify-between gap-3">
+            <h2 class="text-[18px] leading-[1.4] font-semibold text-verde-escuro">Dados da inscrição</h2>
+            <a id="editar-dados" hidden href={url("/editar-dados")} class="inline-flex items-center gap-2 text-[15px] font-bold text-verde-medio hover:underline"><span data-ico="lapis"></span>Editar dados</a>
+          </div>
+          <div id="dados" class="mt-4"></div>
+          <div class="mt-4 flex flex-wrap items-center gap-2 text-[13px] text-texto-suave">
+            E-mail: <span id="selo-email"></span>
+            <button type="button" id="reenviar" hidden class="cursor-pointer font-bold text-verde-medio hover:underline">Reenviar e-mail de verificação</button>
+            <span id="reenvio-status" role="status" class="text-verde-medio"></span>
+          </div>
+        </section>
+
+        <section class="rounded-cartao border border-borda bg-white p-6 shadow-[0_1px_3px_rgba(15,41,8,0.08)]">
+          <div class="flex items-center justify-between gap-3">
+            <h2 class="text-[18px] leading-[1.4] font-semibold text-verde-escuro" id="titulo-atividades"></h2>
+            <a id="editar-atividades" hidden href={url("/editar-atividades")} class="inline-flex items-center gap-2 text-[15px] font-bold text-verde-medio hover:underline"><span data-ico="lapis"></span>Editar atividades</a>
+          </div>
+          <ul id="atividades" class="mt-4 space-y-2.5"></ul>
+        </section>
+
+        <section class="rounded-cartao border border-borda bg-white p-6 shadow-[0_1px_3px_rgba(15,41,8,0.08)]">
+          <h2 class="text-[18px] leading-[1.4] font-semibold text-verde-escuro">Histórico da inscrição</h2>
+          <ul id="historico" class="mt-4 space-y-3"></ul>
+        </section>
+      </div>
+
+      <aside class="flex flex-col gap-5" id="lateral"></aside>
+    </div>
+  </div>
+  <p id="erro-carga" role="alert" hidden class="mx-auto w-full max-w-[1120px] rounded-campo border border-erro-borda bg-erro-fundo p-4 text-erro"></p>
+
+  <!-- Cancelar inscrição · confirmação -->
+  <div id="cancelar" hidden class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div data-fechar-cancelar class="absolute inset-0 bg-verde-noite/60"></div>
+    <div role="alertdialog" aria-modal="true" aria-labelledby="cancelar-titulo" class="relative w-full max-w-[440px] rounded-cartao bg-white p-6 shadow-2xl">
+      <div class="flex items-center gap-3">
+        <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-erro-fundo text-erro"><TriangleAlert class="size-5" aria-hidden="true" /></span>
+        <h2 id="cancelar-titulo" class="text-[18px] leading-[1.4] font-semibold text-verde-escuro">Cancelar inscrição?</h2>
+      </div>
+      <p id="cancelar-texto" class="mt-4 text-[15px] leading-normal text-chumbo"></p>
+      <p id="cancelar-erro" role="alert" hidden class="mt-3 text-[13px] text-erro"></p>
+      <div class="mt-5 flex justify-end gap-3">
+        <button type="button" data-fechar-cancelar class="cursor-pointer rounded-full border-2 border-verde-escuro bg-white px-4 py-2.5 text-sm font-bold text-verde-escuro hover:bg-palha">Manter inscrição</button>
+        <button type="button" id="confirmar-cancelamento" class="cursor-pointer rounded-full bg-erro px-4 py-2.5 text-sm font-bold text-white hover:brightness-110 disabled:opacity-60">Sim, cancelar inscrição</button>
+      </div>
+    </div>
+  </div>
+  <IconesCliente />
 </Base>
 
 <script>
-  import {
-    ApiError, api, descreverPagamento, erroCampos, esc, exigirLogin, formatarCPF, formatarData, formatarDataHora,
-    formatarMoeda, limparErro, mostrarErro, rotuloDevolucao, rotuloPerfil, rotuloSituacaoInscricao,
-    rotuloSituacaoPagamento, soDigitos, type Dados, type Inscricao, type Pagamento, type Vagas,
-  } from "../lib/api";
-  import { renderSeletor, type ItemCatalogo } from "../lib/seletor";
+  import { api, exigirLogin, formatarData, formatarDataHora, formatarMoeda, type Inscricao, type Pagamento } from "../lib/api";
+  import { url } from "../lib/url";
+  import { aviso, formaParticipacao, gradeDados, historico, ico, linhaAtividade, selo, seloEmail, seloInscricao, type ItemCatalogo } from "../lib/visao";
 
+  const sessao = exigirLogin();
   const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
-  const catalogo: ItemCatalogo[] = JSON.parse($("#catalogo").textContent!);
-  let inscricao: Inscricao;
-  let pagamento: Pagamento;
-  let lerSelecao: () => string[] = () => [];
-  
+  const catalogo = new Map((JSON.parse($("#catalogo").textContent!) as ItemCatalogo[]).map((a) => [a.slug, a]));
+  let insc: Inscricao;
+  let cfg: Pagamento;
 
-  if (exigirLogin()) carregar();
+  document.querySelectorAll("[data-ico]").forEach((el) => (el.innerHTML = ico((el as HTMLElement).dataset.ico!, "size-[18px]")));
 
-  async function carregar() {
+  const quando = (iso: string | null) => formatarDataHora(iso).replace(", ", " às ").replace(":", "h");
+  const dia = (iso: string | null) => (iso ? formatarData(iso) : null);
+  const alerta = (cor: "info" | "aviso" | "sucesso", titulo: string, texto: string) => {
+    const c = { info: ["border-info-borda bg-info-fundo", "text-info-texto", "info"], aviso: ["border-pendente-borda bg-pendente-fundo", "text-pendente-texto", "alerta"], sucesso: ["border-entregue-borda bg-entregue-fundo", "text-entregue-texto", "circulo-ok"] }[cor];
+    return `<div class="flex items-start gap-3 rounded-campo border p-4 ${c[0]}"><span class="mt-0.5 ${c[1]}">${ico(c[2], "size-5")}</span><div><p class="text-sm leading-[1.4] font-semibold ${c[1]}">${titulo}</p><p class="text-[15px] leading-normal text-chumbo">${texto}</p></div></div>`;
+  };
+
+  function cartaoSituacao(): string {
+    const base = "rounded-cartao border p-5";
+    const linha = (fundo: string, icone: string, cor: string, titulo: string, seloHtml: string, texto: string) =>
+      `<section class="${base} ${fundo}"><div class="flex items-center gap-3"><span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-white ${cor}">${ico(icone, "size-5")}</span><div><h2 class="text-[18px] leading-[1.4] font-semibold text-verde-escuro">${titulo}</h2>${seloHtml}</div></div><p class="mt-3 text-[15px] leading-normal text-chumbo">${texto}</p></section>`;
+    if (insc.status === "cancelada" && insc.devolucao) {
+      const feita = insc.devolucao.situacao === "devolvido";
+      return (
+        linha(feita ? "border-entregue-borda bg-entregue-fundo" : "border-pendente-borda bg-pendente-fundo", "desfazer", feita ? "text-entregue-texto" : "text-pendente-texto", "Devolução do pagamento",
+          feita ? selo("verde", "circulo-ok", "Devolvido") : selo("ambar", "desfazer", "Devolução pendente"),
+          feita ? "A organização registrou a devolução do valor pago." : "Sua inscrição foi cancelada. A devolução do valor pago está pendente e será realizada pelo responsável pelo evento.") +
+        `<p class="text-[13px] leading-normal text-texto-suave">Valor a devolver: ${formatarMoeda(insc.devolucao.valor ?? 0)}. A devolução é realizada pelo responsável pelo evento; o sistema registra e acompanha a situação.</p>`
+      );
+    }
+    if (insc.status === "cancelada")
+      return `<section class="${base} border-borda bg-white"><h2 class="text-[18px] leading-[1.4] font-semibold text-verde-escuro">Pagamento ou compensação</h2><div class="mt-2">${selo("cinza", "proibido", "Não se aplica")}</div><p class="mt-3 text-[13px] leading-normal text-texto-suave">A inscrição foi cancelada. Não há compensação a entregar nem valor a devolver.</p></section>`;
+    return insc.situacaoPagamento === "regularizada"
+      ? linha("border-entregue-borda bg-entregue-fundo", "circulo-ok", "text-verde-escuro", "Pagamento ou compensação", selo("verde", "circulo-ok", "Regularizada"), "A organização registrou o cumprimento da forma de participação.")
+      : linha("border-pendente-borda bg-pendente-fundo", "carteira", "text-pendente-texto", "Pagamento ou compensação", selo("ambar", "relogio", "Pendente"), "A organização ainda não registrou o cumprimento da forma de participação.");
+  }
+
+  function cartaoPrazos(): string {
+    const alterar = dia(cfg.prazoAlteracao);
+    const cancelar = dia(cfg.prazoCancelamento);
+    const encerrado = insc.status === "confirmada" && !insc.podeAlterarAtividades && !insc.podeCancelar;
+    let rodape = "";
+    if (insc.status === "cancelada") rodape = `<p class="mt-3 text-[13px] leading-normal text-texto-suave">Inscrição cancelada. Sua conta continua ativa e o histórico foi mantido.</p>`;
+    else if (insc.podeCancelar)
+      rodape = `<button type="button" id="abrir-cancelar" class="mt-4 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-erro px-5 py-3 text-[15px] leading-[1.3] font-bold text-white hover:brightness-110">${ico("proibido", "size-[18px]")}Cancelar inscrição</button>`;
+    else if (encerrado) rodape = `<div class="mt-3">${selo("cinza", "relogio", "Prazo encerrado")}</div>`;
+    return `<section class="rounded-cartao border border-borda bg-white p-5"><h2 class="text-[18px] leading-[1.4] font-semibold text-verde-escuro">Prazos</h2>
+      <p class="mt-3 flex items-center gap-2 text-[13px] leading-normal text-chumbo"><span class="text-verde-medio">${ico("lapis", "size-4")}</span>Alterar dados e atividades ${alterar ? `até ${alterar}` : "— sem prazo definido"}</p>
+      <p class="mt-2 flex items-center gap-2 text-[13px] leading-normal text-chumbo"><span class="text-verde-medio">${ico("proibido", "size-4")}</span>Cancelar inscrição ${cancelar ? `até ${cancelar}` : "— sem prazo definido"}</p>${rodape}</section>`;
+  }
+
+  function desenhar() {
+    const cancelada = insc.status === "cancelada";
+    $("#resumo").innerHTML = `${seloInscricao(insc.status)}<span>Inscrição nº ${insc.numero ?? "—"} · confirmada em ${dia(insc.confirmadaEm)} · conta ${sessao!.usuario.login}</span>`;
+
+    const devolucao = insc.devolucao;
+    const encerrado = insc.status === "confirmada" && !insc.podeAlterarAtividades && !insc.podeCancelar;
+    $("#aviso-topo").innerHTML = cancelada
+      ? devolucao
+        ? alerta(devolucao.situacao === "devolvido" ? "sucesso" : "aviso", devolucao.situacao === "devolvido" ? "Inscrição cancelada · devolução concluída" : "Inscrição cancelada · devolução pendente",
+            `Sua inscrição foi cancelada em ${dia(insc.canceladaEm)}. Sua conta e o histórico foram mantidos. ${devolucao.situacao === "devolvido" ? `A devolução de ${formatarMoeda(devolucao.valor ?? 0)} foi registrada como concluída.` : `A devolução de ${formatarMoeda(devolucao.valor ?? 0)} está pendente.`}`)
+        : alerta("info", `Inscrição cancelada em ${dia(insc.canceladaEm)}`, "Sua conta continua ativa e o histórico da inscrição foi mantido. As vagas das atividades foram liberadas.")
+      : encerrado
+        ? alerta("aviso", "Prazo de alterações encerrado", `O prazo para editar dados, alterar atividades e cancelar a inscrição terminou em ${dia(cfg.prazoAlteracao ?? cfg.prazoCancelamento)}. Em caso de dúvida, fale com a organização.`)
+        : "";
+
+    $("#dados").innerHTML = gradeDados(insc.dados);
+    $("#selo-email").innerHTML = seloEmail(insc.emailVerificado);
+    $("#reenviar").hidden = insc.emailVerificado || cancelada;
+    $("#editar-dados").hidden = !insc.podeEditar || encerrado;
+    $("#editar-atividades").hidden = !insc.podeAlterarAtividades;
+
+    const slugs = insc.atividades.filter((s) => catalogo.has(s));
+    $("#titulo-atividades").textContent = `${cancelada ? "Atividades da inscrição cancelada" : "Atividades selecionadas"} (${slugs.length})`;
+    $("#atividades").innerHTML = slugs.map((s) => linhaAtividade(catalogo.get(s)!)).join("");
+    $("#historico").innerHTML = historico(insc);
+    $("#lateral").innerHTML = cartaoSituacao() + formaParticipacao(insc.pagamento ?? cfg) + cartaoPrazos();
+    $("#conteudo").hidden = false;
+  }
+
+  // ---- cancelamento ----
+  const dialogo = $("#cancelar");
+  const abrirDialogo = () => {
+    const monetariaPaga = insc.pagamento?.modalidade === "monetaria" && insc.situacaoPagamento === "regularizada";
+    $("#cancelar-texto").textContent = `A inscrição nº ${insc.numero ?? "—"} será cancelada e suas vagas nas atividades serão liberadas. Sua conta e o histórico da inscrição serão mantidos.${monetariaPaga ? ` Como o pagamento de ${formatarMoeda(insc.pagamento!.valor ?? 0)} já foi regularizado, será registrada uma pendência de devolução.` : ""}`;
+    $("#cancelar-erro").hidden = true;
+    dialogo.hidden = false;
+    dialogo.querySelector<HTMLElement>("button")!.focus();
+  };
+  const fecharDialogo = () => (dialogo.hidden = true);
+  document.addEventListener("click", (e) => {
+    const alvo = e.target as HTMLElement;
+    if (alvo.closest("#abrir-cancelar")) abrirDialogo();
+    if (alvo.closest("[data-fechar-cancelar]")) fecharDialogo();
+  });
+  document.addEventListener("keydown", (e) => e.key === "Escape" && fecharDialogo());
+  $("#confirmar-cancelamento").addEventListener("click", async () => {
+    const botao = $<HTMLButtonElement>("#confirmar-cancelamento");
+    botao.disabled = true;
     try {
-      const [r, pag] = await Promise.all([
-        api<{ inscricao: Inscricao }>("/inscricao").catch((e) => (e instanceof ApiError && e.status === 404 ? null : Promise.reject(e))),
-        api<Pagamento>("/pagamento", { auth: false }),
-      ]);
-      pagamento = pag;
-      $("#carregando").hidden = true;
-      if (!r) return ($("#sem-inscricao").hidden = false);
-      inscricao = r.inscricao;
-      render();
-      if (new URLSearchParams(location.search).get("confirmada")) {
-        const a = $("#aviso");
-        a.textContent = "Inscrição confirmada com sucesso!";
-        a.hidden = false;
+      insc = (await api<{ inscricao: Inscricao }>("/inscricao/cancelar", { metodo: "POST" })).inscricao;
+      fecharDialogo();
+      desenhar();
+      aviso(insc.devolucao ? "Inscrição cancelada. Devolução registrada como pendente." : "Inscrição cancelada.");
+      scrollTo({ top: 0 });
+    } catch (e) {
+      const erro = $("#cancelar-erro");
+      erro.textContent = e instanceof Error ? e.message : "Não foi possível cancelar.";
+      erro.hidden = false;
+    } finally {
+      botao.disabled = false;
+    }
+  });
+
+  $("#reenviar").addEventListener("click", async () => {
+    const status = $("#reenvio-status");
+    try {
+      await api("/inscricao/reenviar-verificacao", { metodo: "POST" });
+      status.textContent = "E-mail de verificação reenviado.";
+    } catch (e) {
+      status.textContent = e instanceof Error ? e.message : "Não foi possível reenviar.";
+    }
+  });
+
+  async function iniciar() {
+    if (!sessao) return;
+    try {
+      [cfg, insc] = await Promise.all([api<Pagamento>("/pagamento", { auth: false }), api<{ inscricao: Inscricao }>("/inscricao").then((r) => r.inscricao)]);
+      if (insc.status === "rascunho") return void (location.href = url("/inscricao"));
+      desenhar();
+      const flash = sessionStorage.getItem("semana:aviso");
+      if (flash) {
+        sessionStorage.removeItem("semana:aviso");
+        aviso(flash);
       }
     } catch (e) {
-      $("#carregando").hidden = true;
-      mostrarErro(document.body, e);
+      const erro = $("#erro-carga");
+      erro.textContent = e instanceof Error ? e.message : "Não foi possível carregar a inscrição.";
+      erro.hidden = false;
     }
   }
-
-  const dl = (linhas: [string, string][]) =>
-    linhas.map(([k, v]) => `<div class="flex gap-2"><dt class="w-36 shrink-0 font-semibold text-verde-escuro">${k}</dt><dd>${esc(v)}</dd></div>`).join("");
-
-  function render() {
-    $("#conteudo").hidden = false;
-    const i = inscricao;
-    const p = i.pagamento ?? pagamento;
-    $("#situacao").innerHTML = dl([
-      ["Inscrição", rotuloSituacaoInscricao[i.status]],
-      ["Pagamento/compensação", i.situacaoPagamento ? rotuloSituacaoPagamento[i.situacaoPagamento] : "—"],
-      ["Criada em", formatarDataHora(i.criadaEm)],
-      ["Confirmada em", formatarDataHora(i.confirmadaEm)],
-      ...(i.canceladaEm ? ([["Cancelada em", formatarDataHora(i.canceladaEm)]] as [string, string][]) : []),
-    ]);
-    $("#rascunho").hidden = i.status !== "rascunho";
-    const dev = $("#devolucao");
-    dev.hidden = !i.devolucao;
-    if (i.devolucao)
-      dev.innerHTML = `<strong>Devolução do pagamento:</strong> ${rotuloDevolucao[i.devolucao.situacao]}${i.devolucao.valor != null ? ` (${formatarMoeda(i.devolucao.valor)})` : ""}
-        — atualizada em ${formatarDataHora(i.devolucao.atualizadaEm)}. ${i.devolucao.situacao === "pendente" ? "A devolução será feita pela organização do evento." : ""}`;
-
-    const d = i.dados ?? {};
-    $("#dados").innerHTML = dl([
-      ["Nome", d.nome ?? "—"], ["CPF", formatarCPF(d.cpf) || "—"], ["E-mail", d.email ?? "—"], ["Telefone", d.telefone ?? "—"],
-      ["Nascimento", formatarData(d.dataNascimento)], ["Perfil", d.perfil ? rotuloPerfil[d.perfil] : "—"],
-    ]);
-    const escolhidas = catalogo.filter((a) => i.atividades.includes(a.slug));
-    $("#atividades").innerHTML = escolhidas.length
-      ? escolhidas.map((a) => `<li>${esc(a.titulo)} <span class="text-chumbo/70">(${esc(a.dia)}, ${esc(a.horario)})</span></li>`).join("")
-      : `<li class="list-none text-chumbo">Nenhuma atividade selecionada.</li>`;
-    $("#pagamento").textContent = descreverPagamento(p);
-
-    $("#editar-dados").hidden = !i.podeEditar;
-    $("#editar-atividades").hidden = !i.podeAlterarAtividades;
-    $("#cancelamento").hidden = !i.podeCancelar;
-    $("#prazo-cancelamento").textContent = pagamento.prazoCancelamento ? `Prazo para cancelamento: até ${formatarDataHora(pagamento.prazoCancelamento)}.` : "";
-    $("#prazo-atividades").textContent = pagamento.prazoAlteracao ? `Alterações permitidas até ${formatarDataHora(pagamento.prazoAlteracao)}.` : "";
-    fecharEdicoes();
-  }
-
-  function fecharEdicoes() {
-    $("#form-dados").hidden = true;
-    $("#area-atividades").hidden = true;
-  }
-  document.querySelectorAll("[data-cancelar-edicao]").forEach((b) => b.addEventListener("click", () => { limparErro(document.body); fecharEdicoes(); }));
-
-  // Editar dados
-  $("#editar-dados").addEventListener("click", () => {
-    fecharEdicoes();
-    const f = $<HTMLFormElement>("#form-dados");
-    const d = inscricao.dados ?? {};
-    (["nome", "cpf", "email", "telefone", "dataNascimento", "perfil"] as const).forEach((k) => {
-      (f.elements.namedItem(k) as HTMLInputElement).value = k === "cpf" ? formatarCPF(d.cpf) : (d[k] ?? "");
-    });
-    f.hidden = false;
-    (f.elements.namedItem("nome") as HTMLInputElement).focus();
-  });
-  $<HTMLFormElement>("#form-dados").addEventListener("submit", async (ev) => {
-    ev.preventDefault();
-    const f = ev.currentTarget as HTMLFormElement;
-    limparErro(f);
-    const v = Object.fromEntries(new FormData(f)) as Record<string, string>;
-    const dados: Dados = { nome: v.nome.trim(), cpf: soDigitos(v.cpf), email: v.email.trim(), telefone: soDigitos(v.telefone), dataNascimento: v.dataNascimento, perfil: v.perfil as Dados["perfil"] };
-    const campos: Record<string, string> = {};
-    if (!dados.nome) campos.nome = "Informe o nome.";
-    if (dados.cpf!.length !== 11) campos.cpf = "O CPF deve ter 11 dígitos.";
-    if (!/^\S+@\S+\.\S+$/.test(dados.email!)) campos.email = "Informe um e-mail válido.";
-    if (!/^\d{10,11}$/.test(dados.telefone!)) campos.telefone = "Informe o telefone com DDD.";
-    if (!dados.dataNascimento) campos.dataNascimento = "Informe a data de nascimento.";
-    if (!dados.perfil) campos.perfil = "Selecione o perfil.";
-    if (Object.keys(campos).length) return mostrarErro(f, erroCampos(campos));
-    try {
-      inscricao = (await api<{ inscricao: Inscricao }>("/inscricao", { metodo: "PUT", corpo: { dados } })).inscricao;
-      render();
-      avisar("Dados atualizados.");
-    } catch (e) {
-      mostrarErro(f, e);
-    }
-  });
-
-  // Editar atividades
-  $("#editar-atividades").addEventListener("click", async () => {
-    fecharEdicoes();
-    const v = await api<{ atividades: Vagas }>("/atividades/vagas", { auth: false }).catch(() => ({ atividades: {} as Vagas }));
-    lerSelecao = renderSeletor($("#seletor"), catalogo, v.atividades, inscricao.atividades, inscricao.atividades);
-    $("#area-atividades").hidden = false;
-  });
-  $("#salvar-atividades").addEventListener("click", async () => {
-    limparErro(document.body);
-    try {
-      inscricao = (await api<{ inscricao: Inscricao }>("/inscricao", { metodo: "PUT", corpo: { atividades: lerSelecao() } })).inscricao;
-      render();
-      avisar("Atividades atualizadas.");
-    } catch (e) {
-      mostrarErro(document.body, e);
-    }
-  });
-
-  // Cancelar inscrição
-  const dialogo = $<HTMLDialogElement>("#dialogo");
-  $("#cancelar").addEventListener("click", () => {
-    $("#dialogo-devolucao").textContent =
-      inscricao.pagamento?.modalidade === "monetaria" && inscricao.situacaoPagamento === "regularizada"
-        ? "Como houve pagamento, será registrada uma pendência de devolução."
-        : "";
-    dialogo.showModal();
-  });
-  $("#dialogo-nao").addEventListener("click", () => dialogo.close());
-  $("#dialogo-sim").addEventListener("click", async () => {
-    dialogo.close();
-    try {
-      inscricao = (await api<{ inscricao: Inscricao }>("/inscricao/cancelar", { metodo: "POST" })).inscricao;
-      render();
-      avisar("Inscrição cancelada.");
-    } catch (e) {
-      mostrarErro(document.body, e);
-    }
-  });
-
-  function avisar(msg: string) {
-    const a = $("#aviso");
-    a.textContent = msg;
-    a.hidden = false;
-    a.scrollIntoView({ block: "nearest" });
-  }
+  void iniciar();
 </script>

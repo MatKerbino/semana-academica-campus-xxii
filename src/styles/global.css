@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Tokens extraídos do protótipo Figma (tela 00 · Capa e Índice) e do Relatório de UI/UX. */
+/* Tokens do protótipo Figma (Site público v2) e do Relatório de UI/UX. */
 @theme {
   --color-verde-escuro: #2c471e;
   --color-verde-medio: #218b21;
@@ -14,9 +14,24 @@
   --color-azul-claro: #8fc7f5;
   --color-divisor: #4a6b39;
   --color-verde-noite: #0f2a08;
+  --color-texto-suave: #6b6b6b;
+  --color-info-texto: #0b5cad;
+  --color-entregue-fundo: #cfe3c2;
+  --color-curso: #8a5a00;
+  --color-erro: #b3261e;
+  --color-erro-fundo: #fdecea;
+  --color-erro-borda: #e59a94;
+  --color-info-fundo: #e3f1fc;
+  --color-info-borda: #8fc7f5;
+  --color-pendente-fundo: #fff1cc;
+  --color-pendente-borda: #e8b64c;
+  --color-pendente-texto: #7a4b00;
+  --color-entregue-borda: #8dbf78;
+  --color-entregue-texto: #2c471e;
 
   /* Cartões e tabelas do protótipo: raio de 14px. */
   --radius-cartao: 14px;
+  --radius-campo: 10px;
 
   /* Escala tipográfica do protótipo, toda com line-height de 150%. */
   --text-tabela: 13px;
@@ -41,9 +56,8 @@ html {
   font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
-body { color: var(--color-chumbo); }
+body { color: var(--color-chumbo); background: var(--color-palha); }
 
-/* Rolagem apenas dentro do conteúdo: cabeçalho e rodapé ficam fixos. */
-.rolagem-interna { scrollbar-width: thin; scrollbar-color: var(--color-verde-medio) transparent; }
-
-:focus-visible { outline: 2px solid var(--color-azul); outline-offset: 2px; }
+@layer base {
+  :focus-visible { outline: 2px solid var(--color-azul); outline-offset: 2px; }
+}

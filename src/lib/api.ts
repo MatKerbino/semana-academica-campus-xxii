@@ -3,7 +3,7 @@ const BASE = ((import.meta.env.PUBLIC_API_URL as string | undefined) ?? "").repl
 const CHAVE = "semana:sessao";
 
 export type Papel = "participante" | "admin";
-export type Sessao = { token: string; expiraEm: string; usuario: { login: string; papel: Papel } };
+export type Sessao = { token: string; expiraEm: string; usuario: { login: string; papel: Papel; nome?: string | null } };
 
 export type Pagamento = {
   modalidade: "monetaria" | "nao_monetaria";
@@ -11,6 +11,8 @@ export type Pagamento = {
   descricao: string | null;
   prazoCancelamento: string | null;
   prazoAlteracao: string | null;
+  atualizadoEm: string | null;
+  atualizadoPor: string | null;
 };
 
 export type Dados = {
@@ -23,8 +25,12 @@ export type Dados = {
 };
 
 export type Inscricao = {
+  numero: string | null;
   status: "rascunho" | "confirmada" | "cancelada";
   dados: Dados;
+  emailVerificado: boolean;
+  versaoPolitica: string | null;
+  historico: { evento: string; em: string }[];
   atividades: string[];
   aceitePrivacidade: boolean;
   aceiteEm: string | null;
@@ -156,7 +162,7 @@ export function mostrarErro(form: HTMLElement, erro: unknown) {
     }
   }
   if (geral) {
-    geral.textContent = [e.message, ...semAlvo].join(" ");
+    (geral.querySelector("[data-erro-texto]") ?? geral).textContent = [e.message, ...semAlvo].join(" ");
     geral.hidden = false;
   }
   (form.querySelector("[aria-invalid]") as HTMLElement | null)?.focus();
@@ -166,7 +172,7 @@ export function limparErro(form: HTMLElement) {
   form.querySelectorAll<HTMLElement>("[data-erro]").forEach((el) => (el.textContent = ""));
   const geral = form.querySelector<HTMLElement>("[data-erro-geral]");
   if (geral) {
-    geral.textContent = "";
+    (geral.querySelector("[data-erro-texto]") ?? geral).textContent = "";
     geral.hidden = true;
   }
 }

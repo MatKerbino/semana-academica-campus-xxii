@@ -1,6 +1,6 @@
 ---
 import { url } from "../lib/url";
-import { CalendarClock, Download, ExternalLink } from "@lucide/astro";
+import { ArrowRight, CalendarClock, Download, ExternalLink, FileText } from "@lucide/astro";
 import Abas from "../components/Abas.astro";
 import PaginaCabecalho from "../components/PaginaCabecalho.astro";
 import Base from "../layouts/Base.astro";
@@ -24,21 +24,27 @@ const sessoes = porTipo("artigo");
       { id: "prazos", rotulo: "Submissão de trabalhos" },
     ]}
   >
-    <div data-painel="sessoes" class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+    <div data-painel="sessoes" class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
       {
         sessoes.map((a) => (
-          <article class="flex flex-col rounded-cartao border border-verde-medio bg-palha p-4">
-            <h3 class="text-[17px] leading-tight font-semibold text-verde-escuro">{a.titulo}</h3>
-            <p class="mt-1 text-tabela text-chumbo/80">{a.horario} · {a.local}</p>
-            <p class="mt-2 line-clamp-2 text-sm text-chumbo">{a.descricao[0]}</p>
-            <a href={url(linkAtividade(a.slug))} class="mt-auto pt-2 text-tabela font-semibold text-azul hover:underline">
-              Ver na página de Atividades
-            </a>
+          <article class="flex flex-col gap-1.5 rounded-cartao border border-verde-medio bg-palha p-4">
+            <FileText class="size-6 text-verde-escuro" aria-hidden="true" />
+            <span class="w-fit rounded-full bg-creme px-2.5 py-0.5 text-xs font-bold text-verde-escuro">
+              {a.dia.replace("-", "/")} · {a.horario.replace(" às ", "–")}
+            </span>
+            <h2 class="text-lg leading-[1.3] font-semibold text-verde-escuro">{a.titulo}</h2>
+            <p class="line-clamp-1 text-[15px] text-chumbo">{a.descricao[0]}</p>
+            <div class="mt-auto flex items-center justify-between gap-2 pt-1 text-[13px]">
+              <span class="text-chumbo/80">{a.local}</span>
+              <a href={url(linkAtividade(a.slug))} class="flex items-center gap-1 font-semibold text-azul hover:underline">
+                Ver página da atividade
+                <ArrowRight class="size-3.5" aria-hidden="true" />
+              </a>
+            </div>
           </article>
         ))
       }
     </div>
-
     <div data-painel="templates" class="grid gap-5 md:grid-cols-3">
       {
         materiais.map((material) => (

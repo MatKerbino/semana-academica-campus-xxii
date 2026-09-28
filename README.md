@@ -127,6 +127,3 @@ O site continua estático, mas as telas de conta, inscrição e admin consomem a
 A URL vem de `PUBLIC_API_URL` (ver `.env.example`; `.env.development` aponta para `http://localhost:3000`, e `.env.production`
 deve conter a Function URL da Lambda). A sessão (token) fica em `localStorage` (`src/lib/api.ts`); a proteção de rotas no cliente é
 só conveniência — a autorização real é feita pela API.
-
-As páginas antigas `/minicursos`, `/palestras`, `/cursos`, `/banners` e `/atividades/<slug>` foram unificadas em `/atividades` (RN-04).
-Se o CloudFront tiver regras específicas para essas rotas (ver seção acima), elas podem ser removidas.

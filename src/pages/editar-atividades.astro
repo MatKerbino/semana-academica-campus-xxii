@@ -1,0 +1,118 @@
+---
+import { ArrowLeft, Check, Undo2 } from "@lucide/astro";
+import Alerta from "../components/Alerta.astro";
+import IconesCliente from "../components/IconesCliente.astro";
+import Base from "../layouts/Base.astro";
+import { catalogoSelecionavel } from "../data/evento";
+import { url } from "../lib/url";
+
+const btnPrimario = "inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-verde-cta px-[22px] py-3 text-[15px] leading-[1.3] font-bold text-verde-noite hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60";
+const btnContorno = "inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border-2 border-verde-escuro bg-white px-[22px] py-2.5 text-[15px] leading-[1.3] font-bold text-verde-escuro hover:bg-palha";
+---
+
+<Base titulo="Editar atividades" espaco="acesso">
+  <script type="application/json" id="catalogo" set:html={JSON.stringify(catalogoSelecionavel)} />
+  <div id="conteudo" hidden class="mx-auto flex w-full max-w-[1120px] flex-col gap-5">
+    <div class="flex flex-col gap-2">
+      <nav aria-label="Trilha de navegação" class="flex flex-wrap gap-2 text-[13px] leading-normal">
+        <a href={url("/minha-area")} class="text-verde-medio hover:underline">Minha área</a><span class="text-texto-suave">/</span>
+        <a href={url("/minha-inscricao")} class="text-verde-medio hover:underline">Minha inscrição</a><span class="text-texto-suave">/</span>
+        <span class="text-texto-suave">Editar atividades</span>
+      </nav>
+      <h1 class="text-[32px] leading-[1.3] font-bold text-verde-escuro">Editar atividades</h1>
+      <p id="subtitulo" class="text-[15px] leading-normal text-chumbo"></p>
+    </div>
+
+    <Alerta tipo="erro" titulo="Não foi possível salvar as alterações" geral id="erro-geral" />
+    <div id="seletor" class="flex flex-col gap-5"></div>
+
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <button type="button" id="descartar" class="order-2 inline-flex w-full cursor-pointer items-center justify-center gap-2 py-2 text-[15px] font-bold text-verde-medio hover:underline sm:order-1 sm:w-auto">
+        <Undo2 class="size-[18px]" aria-hidden="true" />
+        Descartar alterações
+      </button>
+      <div class="order-1 flex w-full flex-col gap-3 sm:order-2 sm:w-auto sm:flex-row">
+        <a href={url("/minha-inscricao")} class={btnContorno}>
+          <ArrowLeft class="size-[18px]" aria-hidden="true" />
+          Voltar
+        </a>
+        <button type="button" id="salvar" class={btnPrimario}>
+          <Check class="size-[18px]" aria-hidden="true" />
+          Salvar alterações
+        </button>
+      </div>
+    </div>
+  </div>
+  <p id="erro-carga" role="alert" hidden class="mx-auto w-full max-w-[1120px] rounded-campo border border-erro-borda bg-erro-fundo p-4 text-erro"></p>
+  <IconesCliente />
+</Base>
+
+<script>
+  import { api, ApiError, exigirLogin, formatarData, limparErro, mostrarErro, type Inscricao, type Pagamento, type Vagas } from "../lib/api";
+  import { montarSeletor } from "../lib/seletor";
+  import type { ItemCatalogo } from "../lib/visao";
+  import { url } from "../lib/url";
+
+  const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
+  const catalogo = JSON.parse($("#catalogo").textContent!) as ItemCatalogo[];
+  const raiz = $("#seletor");
+  let insc: Inscricao;
+  let vagas: Vagas;
+  let seletor: ReturnType<typeof montarSeletor>;
+
+  const montar = () => {
+    seletor = montarSeletor({ raiz, catalogo, vagas, selecionadas: insc.atividades, salvas: insc.atividades });
+  };
+
+  async function iniciar() {
+    if (!exigirLogin()) return;
+    try {
+      const [cfg, r, v] = await Promise.all([
+        api<Pagamento>("/pagamento", { auth: false }),
+        api<{ inscricao: Inscricao }>("/inscricao"),
+        api<{ atividades: Vagas }>("/atividades/vagas", { auth: false }),
+      ]);
+      insc = r.inscricao;
+      vagas = v.atividades;
+      if (insc.status !== "confirmada" || !insc.podeAlterarAtividades) return void (location.href = url("/minha-inscricao"));
+      $("#subtitulo").textContent = `Adicione ou remova atividades${cfg.prazoAlteracao ? ` até ${formatarData(cfg.prazoAlteracao)}` : ""}. A inscrição nº ${insc.numero ?? "—"} será atualizada, sem criar uma nova.`;
+      montar();
+      $("#conteudo").hidden = false;
+    } catch (e) {
+      const erro = $("#erro-carga");
+      erro.textContent = e instanceof Error ? e.message : "Não foi possível carregar a inscrição.";
+      erro.hidden = false;
+    }
+  }
+
+  $("#descartar").addEventListener("click", () => {
+    limparErro($("#conteudo"));
+    montar();
+  });
+
+  $("#salvar").addEventListener("click", async () => {
+    const area = $("#conteudo");
+    limparErro(area);
+    const botao = $<HTMLButtonElement>("#salvar");
+    botao.disabled = true;
+    try {
+      await api("/inscricao", { metodo: "PUT", corpo: { atividades: seletor.obter() } });
+      sessionStorage.setItem("semana:aviso", "Atividades da inscrição atualizadas.");
+      location.href = url("/minha-inscricao");
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 409) {
+        // Vagas mudaram: atualiza o seletor e explica o que aconteceu.
+        const novas = await api<{ atividades: Vagas }>("/atividades/vagas", { auth: false }).then((r) => r.atividades).catch(() => vagas);
+        const escolhidas = seletor.obter();
+        const sem = escolhidas.filter((s) => novas[s] && !novas[s].disponivel && !insc.atividades.includes(s));
+        seletor.atualizarVagas(novas);
+        const titulo = catalogo.find((a) => a.slug === sem[0])?.titulo;
+        mostrarErro(area, titulo ? new ApiError(`A atividade “${titulo}” ficou sem vagas antes de você salvar. Escolha outra atividade. Sua inscrição continua com a seleção anterior.`, 409) : e);
+        $("#erro-geral").scrollIntoView({ block: "center" });
+      } else mostrarErro(area, e);
+    } finally {
+      botao.disabled = false;
+    }
+  });
+  void iniciar();
+</script>

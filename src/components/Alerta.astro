@@ -1,0 +1,35 @@
+---
+import { CircleCheck, CircleX, Info, TriangleAlert } from "@lucide/astro";
+
+interface Props {
+  tipo?: "info" | "aviso" | "sucesso" | "erro";
+  titulo?: string;
+  /** Região de erro geral preenchida por mostrarErro() (oculta até haver erro). */
+  geral?: boolean;
+  class?: string;
+  id?: string;
+}
+const { tipo = "info", titulo, geral = false, class: classe, id } = Astro.props;
+
+const estilos = {
+  info: { caixa: "bg-info-fundo border-info-borda", titulo: "text-info-texto", Icone: Info, cor: "text-info-texto" },
+  aviso: { caixa: "bg-pendente-fundo border-pendente-borda", titulo: "text-pendente-texto", Icone: TriangleAlert, cor: "text-pendente-texto" },
+  sucesso: { caixa: "bg-entregue-fundo border-entregue-borda", titulo: "text-entregue-texto", Icone: CircleCheck, cor: "text-entregue-texto" },
+  erro: { caixa: "bg-erro-fundo border-erro-borda", titulo: "text-erro", Icone: CircleX, cor: "text-erro" },
+}[tipo];
+const { Icone } = estilos;
+---
+
+<div
+  id={id}
+  role={tipo === "erro" ? "alert" : "status"}
+  hidden={geral}
+  data-erro-geral={geral ? "" : undefined}
+  class:list={["flex items-start gap-3 rounded-campo border p-4", estilos.caixa, classe]}
+>
+  <Icone class:list={["mt-0.5 size-5 shrink-0", estilos.cor]} aria-hidden="true" />
+  <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+    {titulo && <p class:list={["text-sm leading-[1.4] font-semibold", estilos.titulo]}>{titulo}</p>}
+    <div data-erro-texto class="text-[15px] leading-normal text-chumbo"><slot /></div>
+  </div>
+</div>

@@ -1,0 +1,19 @@
+---
+/* Ícones lucide renderizados no servidor e clonados no navegador por lib/visao.ts (ico()). */
+import {
+  Apple, ArrowLeft, Ban, Banknote, Check, CircleCheck, CircleX, Clock, FileText, GraduationCap, History,
+  Image, Info, ListChecks, Mail, MailCheck, MapPin, MicVocal, Pencil, Presentation, TriangleAlert,
+  Undo2, User, UserPlus, Wallet, CalendarDays, X, Save, Send,
+} from "@lucide/astro";
+
+const icones = {
+  maca: Apple, voltar: ArrowLeft, proibido: Ban, dinheiro: Banknote, ok: Check, "circulo-ok": CircleCheck, "circulo-x": CircleX,
+  relogio: Clock, arquivo: FileText, capelo: GraduationCap, historico: History, imagem: Image, info: Info, lista: ListChecks,
+  email: Mail, "email-ok": MailCheck, pin: MapPin, mic: MicVocal, lapis: Pencil, apresentacao: Presentation, alerta: TriangleAlert,
+  desfazer: Undo2, usuario: User, "usuario-mais": UserPlus, carteira: Wallet, calendario: CalendarDays, fechar: X, salvar: Save, enviar: Send,
+};
+---
+
+<div id="icones-cliente" hidden aria-hidden="true">
+  {Object.entries(icones).map(([nome, Icone]) => <span data-icone={nome}><Icone /></span>)}
+</div>

@@ -1,0 +1,92 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+---
+
+<AdminLayout titulo="Conta" ativo="conta">
+  <div id="conteudo" class="flex flex-col gap-6" aria-live="polite"></div>
+</AdminLayout>
+
+<script>
+  import {
+    alterarSenha, ApiError, cabecalhoPagina, CLASSES, dataHora, erroCarregar, esc, eStatusErro, icone, iniciarPainel, minhaConta, toast,
+  } from "../../lib/admin-api";
+
+  if (iniciarPainel()) {
+    const raiz = document.getElementById("conteudo")!;
+    const dado = (r: string, v: string) => `<div><dt class="text-[13px] text-texto-suave">${r}</dt><dd class="text-[15px] leading-normal text-chumbo">${esc(v)}</dd></div>`;
+    const senha = (nome: string, rotulo: string, auto: string) => `<div class="flex flex-col gap-1.5"><label for="c-${nome}" class="text-sm leading-[1.4] font-semibold text-chumbo">${rotulo}</label>
+      <div class="${CLASSES.campo} has-[[aria-invalid=true]]:!border-2 has-[[aria-invalid=true]]:!border-erro">${icone("lock", "size-5 text-chumbo")}
+        <input id="c-${nome}" name="${nome}" type="password" autocomplete="${auto}" placeholder="Digite sua senha" aria-describedby="e-${nome}" class="${CLASSES.entrada}" />
+        <button type="button" data-olho aria-label="Mostrar senha" aria-pressed="false" class="cursor-pointer text-chumbo">${icone("eye", "size-[18px]")}</button></div>
+      <p id="e-${nome}" data-erro="${nome}" class="text-[13px] text-erro empty:hidden"></p></div>`;
+
+    minhaConta()
+      .then((c) => {
+        raiz.innerHTML = `
+          ${cabecalhoPagina("Conta", "Dados da sua conta de administrador.")}
+          <section class="${CLASSES.cartao}" aria-labelledby="t-dados"><h2 id="t-dados" class="${CLASSES.titulo} mb-4">Dados da conta</h2>
+            <dl class="grid gap-x-8 gap-y-4 sm:grid-cols-2">${dado("Nome", c.nome ?? "—")}${dado("Login", c.login)}${dado("Permissão", "Administrador")}${dado("Último acesso", dataHora(c.ultimoAcesso).replace(" ", " às "))}</dl></section>
+          <section class="${CLASSES.cartao}" aria-labelledby="t-senha"><h2 id="t-senha" class="${CLASSES.titulo} mb-4">Alterar senha</h2>
+            <form id="form" novalidate class="grid gap-4 sm:grid-cols-2">
+              ${senha("senhaAtual", "Senha atual", "current-password")}${senha("novaSenha", "Nova senha", "new-password")}${senha("confirmacaoNovaSenha", "Confirmar nova senha", "new-password")}
+              <p data-erro-geral role="alert" hidden class="rounded-campo border border-erro-borda bg-erro-fundo p-3 text-sm font-semibold text-erro sm:col-span-2"></p>
+              <div class="sm:col-span-2"><button type="submit" class="${CLASSES.botaoPrimario}">${icone("check")}Salvar nova senha</button></div></form></section>`;
+
+        const form = document.getElementById("form") as HTMLFormElement;
+        form.addEventListener("click", (e) => {
+          const b = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-olho]");
+          if (!b) return;
+          const input = b.parentElement!.querySelector("input")!;
+          const mostrar = input.type === "password";
+          input.type = mostrar ? "text" : "password";
+          b.setAttribute("aria-pressed", String(mostrar));
+          b.setAttribute("aria-label", mostrar ? "Ocultar senha" : "Mostrar senha");
+        });
+        const limpar = () => {
+          form.querySelectorAll<HTMLElement>("[data-erro]").forEach((p) => (p.textContent = ""));
+          form.querySelectorAll("[aria-invalid]").forEach((i) => i.removeAttribute("aria-invalid"));
+          const g = form.querySelector<HTMLElement>("[data-erro-geral]")!;
+          g.hidden = true;
+          g.textContent = "";
+        };
+        const mostrar = (campos: Record<string, string>, geral?: string) => {
+          for (const [k, msg] of Object.entries(campos)) {
+            const p = form.querySelector<HTMLElement>(`[data-erro="${k}"]`);
+            if (!p) continue;
+            p.textContent = msg;
+            form.querySelector(`[name="${k}"]`)?.setAttribute("aria-invalid", "true");
+          }
+          if (geral) {
+            const g = form.querySelector<HTMLElement>("[data-erro-geral]")!;
+            g.textContent = geral;
+            g.hidden = false;
+          }
+          form.querySelector<HTMLElement>("[aria-invalid=true]")?.focus();
+        };
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          limpar();
+          const d = Object.fromEntries(new FormData(form)) as Record<string, string>;
+          const locais: Record<string, string> = {};
+          if (!d.senhaAtual) locais.senhaAtual = "Informe a senha atual.";
+          if (d.novaSenha.length < 8) locais.novaSenha = "A senha deve ter no mínimo 8 caracteres.";
+          else if (d.novaSenha !== d.confirmacaoNovaSenha) locais.confirmacaoNovaSenha = "As senhas não coincidem.";
+          if (Object.keys(locais).length) return mostrar(locais);
+          const botao = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
+          botao.disabled = true;
+          try {
+            await alterarSenha({ senhaAtual: d.senhaAtual, novaSenha: d.novaSenha, confirmacaoNovaSenha: d.confirmacaoNovaSenha });
+            form.reset();
+            toast("Senha alterada com sucesso.");
+          } catch (err) {
+            const erro = eStatusErro(err) as ApiError;
+            if (erro.status === 401) mostrar({ senhaAtual: erro.message });
+            else mostrar(erro.campos ?? {}, Object.keys(erro.campos ?? {}).length ? undefined : erro.message);
+          } finally {
+            botao.disabled = false;
+          }
+        });
+      })
+      .catch((e) => (raiz.innerHTML = erroCarregar(e)));
+  }
+</script>

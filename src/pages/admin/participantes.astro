@@ -1,0 +1,91 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+---
+
+<AdminLayout titulo="Participantes" ativo="participantes">
+  <div id="conteudo" class="flex flex-col gap-6" aria-live="polite"></div>
+</AdminLayout>
+
+<script>
+  import {
+    botaoOlho, buscaHtml, cabecalhoColuna, cabecalhoPagina, dataCurta, erroCarregar, esc, filtroHtml, iniciarPainel, inscricoes,
+    normalizar, paginar, participantes, rodapeTabela, rotuloPerfil, seloInscricao, formatarCPF,
+  } from "../../lib/admin-api";
+  import { url } from "../../lib/url";
+
+  const TAMANHO = 8;
+  const OPCOES: [string, string][] = [["todas", "Todas"], ["confirmada", "Confirmada"], ["rascunho", "Em preenchimento"], ["cancelada", "Cancelada"], ["sem", "Sem inscrição"]];
+
+  if (iniciarPainel()) {
+    const raiz = document.getElementById("conteudo")!;
+    const inicial = new URLSearchParams(location.search).get("inscricao");
+    const estado = { busca: "", filtro: OPCOES.some(([v]) => v === inicial) ? inicial! : "todas", pagina: 1 };
+
+    Promise.all([participantes(), inscricoes()])
+      .then(([lista, insc]) => {
+        const porLogin = new Map(insc.map((i) => [i.login, i]));
+        const linhas = lista.map((p) => ({ ...p, insc: porLogin.get(p.login) }));
+
+        const desenhar = (manterFoco = false) => {
+          const q = normalizar(estado.busca);
+          const filtradas = linhas.filter((l) => {
+            const s = l.statusInscricao ?? "sem";
+            if (estado.filtro !== "todas" && s !== estado.filtro) return false;
+            if (!q) return true;
+            const d = l.insc?.dados;
+            return [l.login, l.nome ?? "", d?.cpf ?? "", formatarCPF(d?.cpf), d?.email ?? ""].some((t) => normalizar(t).includes(q));
+          });
+          const pg = paginar(filtradas, estado.pagina, TAMANHO);
+          estado.pagina = pg.atual;
+          const corpo = pg.itens
+            .map(
+              (l) => `<tr class="border-b border-borda last:border-0 hover:bg-palha">
+                <td class="px-3 py-3.5 text-sm leading-[1.4] font-semibold text-chumbo">${esc(l.login)}</td>
+                <td class="px-3 py-3.5 text-[13px] text-chumbo">${esc(l.nome ?? "Não informado")}</td>
+                <td class="px-3 py-3.5 text-[13px] text-chumbo whitespace-nowrap">${dataCurta(l.criadoEm)}</td>
+                <td class="px-3 py-3.5">${seloInscricao(l.statusInscricao)}</td>
+                <td class="px-3 py-3.5 text-[13px] text-chumbo">${l.insc?.dados.perfil ? rotuloPerfil[l.insc.dados.perfil] : "—"}</td>
+                <td class="px-3 py-3.5">${botaoOlho(`${url("/admin/participante")}?login=${encodeURIComponent(l.login)}`, `Ver participante ${l.login}`)}</td></tr>`,
+            )
+            .join("");
+          raiz.innerHTML = `
+            ${cabecalhoPagina("Participantes", "Pessoas com conta de acesso. Criar conta não gera inscrição: quem ainda não se inscreveu aparece como “Sem inscrição”.")}
+            <div class="flex flex-wrap items-center gap-3">${buscaHtml("busca", estado.busca)}${filtroHtml("filtro", "Inscrição", OPCOES, estado.filtro, "todas")}</div>
+            <div class="overflow-x-auto rounded-cartao border border-borda bg-white"><table class="w-full min-w-[760px] border-collapse">
+              <caption class="sr-only">Participantes com conta de acesso</caption>
+              <thead class="border-b border-borda bg-creme/60"><tr>${["Login", "Nome", "Conta criada em", "Inscrição", "Perfil", "Ações"].map((t) => `<th scope="col" class="${cabecalhoColuna}">${t}</th>`).join("")}</tr></thead>
+              <tbody>${corpo || `<tr><td colspan="6" class="px-3 py-8 text-center text-sm text-texto-suave">Nenhum participante encontrado.</td></tr>`}</tbody></table></div>
+            ${rodapeTabela(`Mostrando ${pg.itens.length} de ${filtradas.length} participantes`, pg.atual, pg.paginas)}`;
+          if (manterFoco) {
+            const b = document.getElementById("busca") as HTMLInputElement;
+            b.focus();
+            b.setSelectionRange(b.value.length, b.value.length);
+          }
+        };
+
+        raiz.addEventListener("input", (e) => {
+          if ((e.target as HTMLElement).id === "busca") {
+            estado.busca = (e.target as HTMLInputElement).value;
+            estado.pagina = 1;
+            desenhar(true);
+          }
+        });
+        raiz.addEventListener("change", (e) => {
+          if ((e.target as HTMLElement).id === "filtro") {
+            estado.filtro = (e.target as HTMLSelectElement).value;
+            estado.pagina = 1;
+            desenhar();
+          }
+        });
+        raiz.addEventListener("click", (e) => {
+          const b = (e.target as HTMLElement).closest<HTMLElement>("[data-pag]");
+          if (b) {
+            estado.pagina += Number(b.dataset.pag);
+            desenhar();
+          }
+        });
+        desenhar();
+      })
+      .catch((e) => (raiz.innerHTML = erroCarregar(e)));
+  }
+</script>

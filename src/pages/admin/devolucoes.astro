@@ -1,0 +1,156 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+---
+
+<AdminLayout titulo="Devoluções" ativo="devolucoes">
+  <div id="conteudo" class="flex flex-col gap-6" aria-live="polite"></div>
+</AdminLayout>
+
+<script>
+  import {
+    abrirModal, atualizarDevolucao, botaoOlho, buscaHtml, cabecalhoColuna, cabecalhoPagina, CLASSES, dataCurta, erroCarregar, esc, eStatusErro,
+    filtroHtml, formatarCPF, formatarMoeda, icone, iniciarPainel, inscricoes, normalizar, paginar, rodapeTabela, seloDevolucao, seloPagamento,
+    toast, type InscricaoAdmin,
+  } from "../../lib/admin-api";
+  import { url } from "../../lib/url";
+
+  const TAMANHO = 8;
+  const OPCOES: [string, string][] = [["pendente", "Pendente"], ["todas", "Todas"], ["devolvido", "Devolvido"]];
+
+  if (iniciarPainel()) {
+    const raiz = document.getElementById("conteudo")!;
+    const estado = { busca: "", filtro: "pendente", pagina: 1, destaque: "" };
+    let lista: InscricaoAdmin[] = [];
+    let aviso = "";
+
+    const desenhar = (foco = false) => {
+      const termo = normalizar(estado.busca);
+      const filtradas = lista.filter((i) => {
+        if (estado.filtro !== "todas" && i.devolucao?.situacao !== estado.filtro) return false;
+        if (!termo) return true;
+        return [i.login, i.dados.nome ?? "", i.dados.cpf ?? "", formatarCPF(i.dados.cpf), i.dados.email ?? ""].some((t) => normalizar(t).includes(termo));
+      });
+      const pg = paginar(filtradas, estado.pagina, TAMANHO);
+      estado.pagina = pg.atual;
+      const linhas = pg.itens
+        .map(
+          (i) => `<tr class="border-b border-borda last:border-0 ${i.login === estado.destaque ? "bg-info-fundo" : "hover:bg-palha"}">
+            <td class="px-3 py-3"><span class="block text-sm leading-[1.4] font-semibold text-chumbo">${esc(i.dados.nome ?? i.login)}</span><span class="block text-[13px] text-texto-suave">CPF ${formatarCPF(i.dados.cpf)}</span></td>
+            <td class="px-3 py-3 text-sm font-bold text-chumbo whitespace-nowrap">${formatarMoeda(i.devolucao?.valor ?? 0)}</td>
+            <td class="px-3 py-3 text-[13px] text-chumbo whitespace-nowrap">${dataCurta(i.canceladaEm)}</td>
+            <td class="px-3 py-3">${seloDevolucao(i)}</td><td class="px-3 py-3">${seloPagamento(i)}</td>
+            <td class="px-3 py-3"><button type="button" data-login="${esc(i.login)}" aria-label="Atualizar devolução de ${esc(i.dados.nome ?? i.login)}" class="flex size-9 cursor-pointer items-center justify-center rounded-campo border-[1.5px] border-borda bg-white text-verde-escuro hover:bg-palha">${icone("eye", "size-[18px]")}</button></td></tr>`,
+        )
+        .join("");
+      raiz.innerHTML = `
+        ${cabecalhoPagina("Devoluções", "Inscrições canceladas com pagamento monetário. A devolução do valor é feita pelo responsável pelo evento; aqui o administrador registra e acompanha a situação.")}
+        <div role="note" class="flex items-center gap-3 rounded-campo border border-info-borda bg-info-fundo px-4 py-3.5">${icone("info", "size-5 text-info-texto")}
+          <p class="text-[15px] leading-normal text-chumbo">Esta lista só recebe registros quando a forma vigente é monetária (ex.: R$ 20,00) e o participante cancela a inscrição.</p></div>
+        <div class="flex flex-wrap items-center gap-3">${buscaHtml("busca", estado.busca)}${filtroHtml("filtro", "Devolução", OPCOES, estado.filtro, "todas")}</div>
+        <div class="overflow-x-auto rounded-cartao border border-borda bg-white"><table class="w-full min-w-[760px] border-collapse">
+          <caption class="sr-only">Devoluções de pagamento</caption>
+          <thead class="border-b border-borda bg-creme/60"><tr>${["Participante", "Valor", "Cancelada em", "Devolução", "Pagamento", "Ações"].map((t) => `<th scope="col" class="${cabecalhoColuna}">${t}</th>`).join("")}</tr></thead>
+          <tbody>${linhas || `<tr><td colspan="6" class="px-3 py-8 text-center text-sm text-texto-suave">Nenhuma devolução encontrada.</td></tr>`}</tbody></table></div>
+        ${rodapeTabela(`Mostrando ${pg.itens.length} de ${filtradas.length} devoluções`, pg.atual, pg.paginas)}`;
+      if (foco) {
+        const b = document.getElementById("busca") as HTMLInputElement;
+        b.focus();
+        b.setSelectionRange(b.value.length, b.value.length);
+      }
+      if (aviso) {
+        toast(aviso);
+        aviso = "";
+      }
+    };
+
+    function abrirAtualizacao(i: InscricaoAdmin) {
+      const nome = i.dados.nome ?? i.login;
+      const hoje = new Date().toISOString().slice(0, 10);
+      const { dialogo, fechar } = abrirModal(`
+        <h2 class="${CLASSES.titulo} mb-3 !text-[20px]">Atualizar situação da devolução</h2>
+        <form class="flex flex-col gap-4" novalidate>
+          <p class="text-[13px] leading-normal text-texto-suave">${esc(nome)} · inscrição nº ${esc(i.numero ?? "—")} (cancelada em ${dataCurta(i.canceladaEm)}) · valor ${formatarMoeda(i.devolucao?.valor ?? 0)}</p>
+          <p class="flex items-center gap-2 text-[13px] text-texto-suave">Situação atual: ${seloDevolucao(i, true)}</p>
+          <fieldset class="flex flex-col gap-2"><legend class="mb-1 text-sm font-semibold text-chumbo">Nova situação</legend>
+            <div class="flex gap-6">${(["pendente", "devolvido"] as const)
+              .map((v) => `<label class="flex cursor-pointer items-center gap-2 text-[15px] text-chumbo"><input type="radio" name="situacao" value="${v}" ${v === (i.devolucao?.situacao === "devolvido" ? "pendente" : "devolvido") ? "checked" : ""} class="size-[18px] accent-verde-medio" />${v === "pendente" ? "Pendente" : "Devolvido"}</label>`)
+              .join("")}</div></fieldset>
+          <label class="flex flex-col gap-1.5" data-data><span class="text-sm font-semibold text-chumbo">Data da devolução</span>
+            <span class="${CLASSES.campo}">${icone("calendar-days", "size-5 text-chumbo")}<input type="date" name="dataDevolucao" value="${hoje}" max="${hoje}" class="${CLASSES.entrada}" /></span></label>
+          <label class="flex flex-col gap-1.5"><span class="text-sm font-semibold text-chumbo">Observação (opcional)</span>
+            <span class="${CLASSES.campo}">${icone("user", "size-5 text-chumbo")}<input name="observacao" maxlength="200" class="${CLASSES.entrada}" /></span></label>
+          <p class="text-[13px] leading-normal text-texto-suave">O sistema apenas registra a situação. A devolução do valor é feita pelo responsável pelo evento.</p>
+          <div data-erro-modal hidden role="alert" class="flex items-start gap-3 rounded-campo border border-erro-borda bg-erro-fundo p-4">${icone("circle-x", "mt-0.5 size-5 text-erro")}
+            <div><p class="text-sm leading-[1.4] font-semibold text-erro">Não foi possível salvar</p><p data-erro-texto class="text-[15px] leading-normal text-chumbo"></p></div></div>
+          <div class="flex flex-wrap justify-end gap-3"><button type="button" data-cancelar class="${CLASSES.botaoContorno}">Cancelar</button>
+            <button type="submit" class="${CLASSES.botaoPrimario}">${icone("check")}<span data-rotulo-salvar>Salvar situação</span></button></div>
+        </form>`);
+      const form = dialogo.querySelector("form")!;
+      const alternarData = () => (form.querySelector<HTMLElement>("[data-data]")!.hidden = form.situacao.value !== "devolvido");
+      form.addEventListener("change", alternarData);
+      alternarData();
+      dialogo.querySelector("[data-cancelar]")!.addEventListener("click", fechar);
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const d = Object.fromEntries(new FormData(form)) as Record<string, string>;
+        const botao = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
+        botao.disabled = true;
+        form.querySelector<HTMLElement>("[data-erro-modal]")!.hidden = true;
+        try {
+          const nova = await atualizarDevolucao(i.login, {
+            situacao: d.situacao,
+            ...(d.situacao === "devolvido" && d.dataDevolucao && { dataDevolucao: d.dataDevolucao }),
+            ...(d.observacao?.trim() && { observacao: d.observacao.trim() }),
+          });
+          lista = lista.map((x) => (x.login === i.login ? { ...x, ...nova } : x));
+          estado.destaque = i.login;
+          if (estado.filtro === "pendente" && d.situacao === "devolvido") estado.filtro = "todas";
+          aviso = `Devolução de ${nome} registrada como ${d.situacao === "devolvido" ? "Devolvido" : "Pendente"}.`;
+          fechar();
+          desenhar();
+        } catch (err) {
+          const erro = eStatusErro(err);
+          const caixa = form.querySelector<HTMLElement>("[data-erro-modal]")!;
+          caixa.querySelector("[data-erro-texto]")!.textContent = erro.status === 0 ? "A situação não foi alterada. Verifique a conexão e tente novamente." : erro.message;
+          caixa.hidden = false;
+          form.querySelector("[data-rotulo-salvar]")!.textContent = "Tentar novamente";
+          botao.disabled = false;
+        }
+      });
+    }
+
+    inscricoes()
+      .then((todas) => {
+        lista = todas.filter((i) => i.devolucao).sort((a, b) => (b.canceladaEm ?? "").localeCompare(a.canceladaEm ?? ""));
+        raiz.addEventListener("input", (e) => {
+          if ((e.target as HTMLElement).id === "busca") {
+            estado.busca = (e.target as HTMLInputElement).value;
+            estado.pagina = 1;
+            desenhar(true);
+          }
+        });
+        raiz.addEventListener("change", (e) => {
+          if ((e.target as HTMLElement).id === "filtro") {
+            estado.filtro = (e.target as HTMLSelectElement).value;
+            estado.pagina = 1;
+            estado.destaque = "";
+            desenhar();
+          }
+        });
+        raiz.addEventListener("click", (e) => {
+          const alvo = e.target as HTMLElement;
+          const pag = alvo.closest<HTMLElement>("[data-pag]");
+          if (pag) {
+            estado.pagina += Number(pag.dataset.pag);
+            desenhar();
+            return;
+          }
+          const b = alvo.closest<HTMLElement>("[data-login]");
+          const i = b && lista.find((x) => x.login === b.dataset.login);
+          if (i) abrirAtualizacao(i);
+        });
+        desenhar();
+      })
+      .catch((e) => (raiz.innerHTML = erroCarregar(e)));
+  }
+</script>

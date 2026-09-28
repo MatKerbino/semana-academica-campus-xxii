@@ -1,0 +1,155 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+---
+
+<AdminLayout titulo="Forma de pagamento" ativo="pagamento">
+  <div id="conteudo" class="flex flex-col gap-6" aria-live="polite"></div>
+</AdminLayout>
+
+<script>
+  import {
+    abrirModal, CLASSES, cabecalhoPagina, dataHora, erroCarregar, esc, eStatusErro, formaPagamento, formaParticipacaoCartao, formaTexto,
+    formatarMoeda, icone, iniciarPainel, salvarFormaPagamento, toast, type FormaPagamento, type Modalidade,
+  } from "../../lib/admin-api";
+
+  if (iniciarPainel()) {
+    const raiz = document.getElementById("conteudo")!;
+    let vigente: FormaPagamento;
+    const f = { modalidade: "nao_monetaria" as Modalidade, descricao: "", orientacoes: "", valor: "", orientPag: "" };
+    let erros: Record<string, string> = {};
+
+    const carregarForm = (v: FormaPagamento) => {
+      f.modalidade = v.modalidade;
+      f.descricao = v.modalidade === "nao_monetaria" ? (v.descricao ?? "") : "";
+      f.orientacoes = v.modalidade === "nao_monetaria" ? (v.orientacoes ?? "") : "";
+      f.valor = v.modalidade === "monetaria" && v.valor != null ? v.valor.toFixed(2).replace(".", ",") : "";
+      f.orientPag = v.modalidade === "monetaria" ? (v.descricao ?? "") : "";
+    };
+    const numero = () => Number(f.valor.replace(/\./g, "").replace(",", "."));
+    const comoForma = (): FormaPagamento =>
+      f.modalidade === "monetaria"
+        ? { modalidade: "monetaria", valor: Number.isFinite(numero()) && numero() > 0 ? numero() : null, descricao: f.orientPag || null }
+        : { modalidade: "nao_monetaria", valor: null, descricao: f.descricao || null, orientacoes: f.orientacoes || null };
+
+    const entrada = (nome: keyof typeof f, rotulo: string, opcoes: { obrigatorio?: boolean; ajuda?: string; placeholder?: string; inputmode?: string }) => {
+      const erro = erros[nome];
+      return `<div class="flex flex-col gap-1.5"><label for="c-${nome}" class="text-sm leading-[1.4] font-semibold text-chumbo">${rotulo}${opcoes.obrigatorio ? " *" : ""}</label>
+        <div class="${CLASSES.campo} ${erro ? "!border-2 !border-erro" : ""}">${icone("user", `size-5 ${erro ? "text-erro" : "text-chumbo"}`)}
+          <input id="c-${nome}" data-campo="${nome}" value="${esc(f[nome])}" placeholder="${esc(opcoes.placeholder ?? "")}" ${opcoes.inputmode ? `inputmode="${opcoes.inputmode}"` : ""} ${erro ? 'aria-invalid="true"' : ""} aria-describedby="e-${nome}" class="${CLASSES.entrada}" />
+          ${erro ? icone("triangle-alert", "size-[18px] text-erro") : ""}</div>
+        ${erro ? `<p id="e-${nome}" class="text-[13px] text-erro">${esc(erro)}</p>` : opcoes.ajuda ? `<p id="e-${nome}" class="text-[13px] text-texto-suave">${esc(opcoes.ajuda)}</p>` : ""}</div>`;
+    };
+
+    const previa = () => formaParticipacaoCartao(comoForma().modalidade === "monetaria" || comoForma().descricao ? comoForma() : { ...comoForma(), descricao: "—" });
+
+    const cartaoVigente = () => {
+      const t = formaTexto(vigente);
+      return `<section class="${CLASSES.cartao} flex flex-col gap-3 !p-5" aria-labelledby="t-vig"><h2 id="t-vig" class="${CLASSES.titulo}">Forma vigente atual</h2>
+        <p class="flex items-start gap-2 text-[13px] leading-normal text-chumbo">${icone("sprout", "mt-0.5 size-4 text-verde-medio")}<span>${t.rotulo} · ${esc(t.titulo)}</span></p>
+        ${vigente.atualizadoEm ? `<p class="flex items-start gap-2 text-[13px] leading-normal text-chumbo">${icone("history", "mt-0.5 size-4 text-verde-medio")}<span>Última alteração: ${dataHora(vigente.atualizadoEm).replace(" ", " às ")}${vigente.atualizadoPor ? ` por ${esc(vigente.atualizadoPor)}` : ""}</span></p>` : ""}</section>`;
+    };
+
+    const desenhar = () => {
+      const nao = f.modalidade === "nao_monetaria";
+      raiz.innerHTML = `
+        ${cabecalhoPagina("Forma de pagamento ou compensação", "Defina a forma de participação desta edição. Ela é única e vale para todos os participantes na inscrição e em Minha inscrição.")}
+        <div class="grid items-start gap-6 lg:grid-cols-[1fr_350px]">
+          <form id="form" novalidate class="${CLASSES.cartao} flex flex-col gap-4"><h2 class="${CLASSES.titulo}">Configuração da forma vigente</h2>
+            <fieldset class="flex flex-col gap-2"><legend class="mb-1 text-sm font-semibold text-chumbo">Modalidade</legend>
+              <div class="flex flex-wrap gap-6">${(
+                [["nao_monetaria", "Não monetária"], ["monetaria", "Monetária"]] as const
+              )
+                .map(([v, t]) => `<label class="flex cursor-pointer items-center gap-2 text-[15px] text-chumbo"><input type="radio" name="modalidade" value="${v}" ${f.modalidade === v ? "checked" : ""} class="size-[18px] accent-verde-medio" />${t}</label>`)
+                .join("")}</div></fieldset>
+            ${
+              nao
+                ? entrada("descricao", "Descrição da compensação exigida", { obrigatorio: true, placeholder: "Descreva a compensação exigida", ajuda: "Texto livre, sem lista fixa. Ex.: alimento não perecível, brinquedo, material escolar, livro." }) +
+                  entrada("orientacoes", "Orientações de entrega", { placeholder: "Ex.: Entregue no credenciamento do evento." })
+                : entrada("valor", "Valor por participante (R$)", { obrigatorio: true, inputmode: "decimal", placeholder: "0,00", ajuda: "Informe o valor cobrado de cada participante." }) +
+                  entrada("orientPag", "Orientações de pagamento", { placeholder: "Ex.: PIX informado por e-mail após a confirmação da inscrição." })
+            }
+            <div class="flex items-start gap-3 rounded-campo border border-info-borda bg-info-fundo p-4">${icone("info", "mt-0.5 size-5 text-info-texto")}<p class="text-[15px] leading-normal text-chumbo">Os participantes não escolhem a modalidade: todos verão somente a forma salva aqui.</p></div>
+            <div data-erro-geral role="alert" hidden class="rounded-campo border border-erro-borda bg-erro-fundo p-4 text-sm font-semibold text-erro"></div>
+            <div class="flex flex-wrap justify-end gap-3"><button type="button" data-descartar class="${CLASSES.botaoContorno}">Descartar</button>
+              <button type="submit" class="${CLASSES.botaoPrimario}">${icone("check")}Salvar forma de pagamento</button></div></form>
+          <div class="flex flex-col gap-4"><div class="flex flex-col gap-3"><h2 class="text-sm leading-[1.4] font-semibold text-chumbo">Como os participantes verão</h2><div id="previa">${previa()}</div></div>
+            <div id="vigente">${cartaoVigente()}</div></div>
+        </div>`;
+    };
+
+    function confirmar() {
+      const forma = comoForma();
+      const t = formaTexto(forma);
+      const { dialogo, fechar } = abrirModal(`
+        <div class="flex items-center gap-3"><span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-info-fundo text-info-texto">${icone("info", "size-5")}</span>
+          <h2 class="${CLASSES.titulo} !text-[20px]">Aplicar nova forma a todos?</h2></div>
+        <p class="mt-4 text-[15px] leading-normal text-chumbo">A forma “${t.rotulo} · ${esc(t.titulo)}” passará a ser exibida para todos na inscrição e em Minha inscrição. Participantes não poderão escolher outra modalidade.</p>
+        <div data-erro-modal hidden role="alert" class="mt-4 rounded-campo border border-erro-borda bg-erro-fundo p-4 text-sm font-semibold text-erro"></div>
+        <div class="mt-6 flex flex-wrap justify-end gap-3"><button type="button" data-voltar class="${CLASSES.botaoContorno}">Voltar</button>
+          <button type="button" data-aplicar class="${CLASSES.botaoPrimario}">Salvar e aplicar</button></div>`);
+      dialogo.querySelector("[data-voltar]")!.addEventListener("click", fechar);
+      dialogo.querySelector<HTMLButtonElement>("[data-aplicar]")!.addEventListener("click", async (e) => {
+        const botao = e.currentTarget as HTMLButtonElement;
+        botao.disabled = true;
+        try {
+          const corpo =
+            forma.modalidade === "monetaria"
+              ? { modalidade: forma.modalidade, valor: forma.valor, descricao: forma.descricao ?? "" }
+              : { modalidade: forma.modalidade, descricao: forma.descricao, orientacoes: forma.orientacoes ?? "" };
+          vigente = await salvarFormaPagamento(corpo);
+          fechar();
+          document.getElementById("vigente")!.innerHTML = cartaoVigente();
+          toast("Forma de pagamento salva. Já aparece para todos os participantes.");
+        } catch (err) {
+          const caixa = dialogo.querySelector<HTMLElement>("[data-erro-modal]")!;
+          caixa.textContent = eStatusErro(err).message;
+          caixa.hidden = false;
+          botao.disabled = false;
+        }
+      });
+    }
+
+    formaPagamento()
+      .then((v) => {
+        vigente = v;
+        carregarForm(v);
+        desenhar();
+        raiz.addEventListener("change", (e) => {
+          const el = e.target as HTMLInputElement;
+          if (el.name === "modalidade") {
+            f.modalidade = el.value as Modalidade;
+            erros = {};
+            desenhar();
+          }
+        });
+        raiz.addEventListener("input", (e) => {
+          const el = e.target as HTMLInputElement;
+          const nome = el.dataset.campo as keyof typeof f | undefined;
+          if (!nome) return;
+          f[nome] = el.value as never;
+          document.getElementById("previa")!.innerHTML = previa();
+        });
+        raiz.addEventListener("click", (e) => {
+          if ((e.target as HTMLElement).closest("[data-descartar]")) {
+            carregarForm(vigente);
+            erros = {};
+            desenhar();
+          }
+        });
+        raiz.addEventListener("submit", (e) => {
+          e.preventDefault();
+          erros = {};
+          if (f.modalidade === "nao_monetaria" && !f.descricao.trim()) erros.descricao = "A descrição da compensação é obrigatória.";
+          if (f.modalidade === "monetaria" && !(numero() > 0)) erros.valor = "Informe um valor maior que zero.";
+          if (Object.keys(erros).length) {
+            desenhar();
+            raiz.querySelector<HTMLElement>("[aria-invalid=true]")?.focus();
+            return;
+          }
+          f.descricao = f.descricao.trim();
+          confirmar();
+        });
+      })
+      .catch((e) => (raiz.innerHTML = erroCarregar(e)));
+  }
+</script>

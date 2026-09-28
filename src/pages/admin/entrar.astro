@@ -1,0 +1,47 @@
+---
+import { LogIn, ShieldCheck } from "@lucide/astro";
+import Alerta from "../../components/Alerta.astro";
+import Campo from "../../components/Campo.astro";
+import CartaoAcesso from "../../components/CartaoAcesso.astro";
+
+const botao = "flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-verde-cta px-[22px] py-3 text-[15px] leading-[1.3] font-bold text-verde-noite hover:brightness-95 disabled:opacity-60";
+---
+
+<CartaoAcesso titulo="Painel administrativo" descricao="Área restrita a usuários com permissão de administrador da Semana Acadêmica.">
+  <ShieldCheck slot="icone" class="size-8" aria-hidden="true" />
+  <form id="form" novalidate class="flex w-full flex-col gap-4">
+    <Alerta tipo="erro" titulo="Não foi possível entrar" geral />
+    <Campo nome="login" rotulo="Login" icone="usuario" placeholder="Digite seu login" autocomplete="username" />
+    <Campo nome="senha" rotulo="Senha" tipo="password" icone="cadeado" placeholder="Digite sua senha" autocomplete="current-password" ajuda="A senha não é exibida enquanto você digita." />
+    <button type="submit" class={botao}>
+      <LogIn class="size-[18px]" aria-hidden="true" />
+      Entrar no painel
+    </button>
+  </form>
+</CartaoAcesso>
+
+<script>
+  import { api, destinoSeguro, limparErro, mostrarErro, salvarSessao, type Sessao } from "../../lib/api";
+  import { caminho } from "../../lib/admin-api";
+
+  const form = document.querySelector<HTMLFormElement>("#form")!;
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    limparErro(form);
+    const d = Object.fromEntries(new FormData(form)) as Record<string, string>;
+    const botao = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
+    botao.disabled = true;
+    try {
+      const r = await api<Sessao>("/login", { metodo: "POST", corpo: { login: d.login.trim().toLowerCase(), senha: d.senha }, auth: false });
+      salvarSessao({ token: r.token, expiraEm: r.expiraEm, usuario: r.usuario });
+      if (r.usuario.papel !== "admin") {
+        location.href = caminho("/admin/acesso-negado");
+        return;
+      }
+      location.href = destinoSeguro(new URLSearchParams(location.search).get("voltar"), "/admin");
+    } catch (err) {
+      mostrarErro(form, err);
+      botao.disabled = false;
+    }
+  });
+</script>

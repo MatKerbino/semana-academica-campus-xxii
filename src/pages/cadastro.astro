@@ -1,47 +1,78 @@
 ---
+import { CircleCheck, LogIn, UserPlus } from "@lucide/astro";
 import { url } from "../lib/url";
+import Alerta from "../components/Alerta.astro";
 import Campo from "../components/Campo.astro";
-import CartaoForm from "../components/CartaoForm.astro";
+import CartaoAcesso from "../components/CartaoAcesso.astro";
+
+const botao = "flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-verde-cta px-[22px] py-3 text-[15px] leading-[1.3] font-bold text-verde-noite hover:brightness-95 disabled:opacity-60";
 ---
 
-<CartaoForm titulo="Criar conta" descricao="O cadastro pede somente login e senha. Seus dados pessoais são informados depois, na inscrição.">
-  <form id="form" novalidate class="grid gap-3">
-    <p data-erro-geral role="alert" hidden class="rounded-lg bg-red-50 p-2 text-sm font-semibold text-red-700"></p>
-    <Campo nome="login" rotulo="Login" autocomplete="username" minlength={3} maxlength={32} ajuda="3 a 32 caracteres: letras minúsculas, números, ponto, hífen ou sublinhado." />
-    <Campo nome="senha" rotulo="Senha" tipo="password" autocomplete="new-password" minlength={8} ajuda="Mínimo de 8 caracteres." />
-    <Campo nome="confirmacaoSenha" rotulo="Confirmar senha" tipo="password" autocomplete="new-password" />
-    <button type="submit" class="w-full cursor-pointer rounded-full bg-verde-cta px-6 py-2.5 text-[15px] font-bold text-verde-noite shadow disabled:opacity-60">Criar conta</button>
-    <p class="text-center text-sm text-chumbo">
-      Já tem conta? <a href={url("/entrar")} class="font-semibold text-azul hover:underline">Entrar</a>
+<CartaoAcesso titulo="Criar conta" descricao="Crie seu acesso com login e senha. Seus dados pessoais serão pedidos depois, na inscrição." ativo="/entrar">
+  <UserPlus slot="icone" class="size-8" aria-hidden="true" />
+  <form id="form" novalidate class="flex w-full flex-col gap-4">
+    <Alerta tipo="erro" titulo="Não foi possível criar a conta" geral />
+    <Campo nome="login" rotulo="Login" icone="usuario" placeholder="Digite seu login" autocomplete="username" minlength={3} maxlength={32} ajuda="Nome de usuário que você usará para entrar." />
+    <Campo nome="senha" rotulo="Senha" tipo="password" icone="cadeado" placeholder="Digite sua senha" autocomplete="new-password" minlength={8} ajuda="A senha não é exibida enquanto você digita." />
+    <Campo nome="confirmacaoSenha" rotulo="Confirmar senha" tipo="password" icone="cadeado" placeholder="Digite sua senha" autocomplete="new-password" ajuda="Digite a mesma senha novamente." />
+    <Alerta tipo="info">Criar a conta não faz a sua inscrição na Semana Acadêmica.</Alerta>
+    <button type="submit" class={botao}>
+      <UserPlus class="size-[18px]" aria-hidden="true" />
+      Criar conta
+    </button>
+    <p class="flex items-center justify-center gap-1 text-[15px] text-chumbo">
+      Já tem conta?
+      <a href={url("/entrar")} class="flex items-center gap-2 rounded-full px-2 py-3 font-bold text-verde-medio hover:underline">
+        <LogIn class="size-[18px]" aria-hidden="true" />
+        Entrar
+      </a>
     </p>
   </form>
-  <p id="sucesso" role="status" hidden class="rounded-lg bg-green-50 p-3 text-sm text-verde-escuro">
-    Conta criada! Ela ainda não é uma inscrição no evento.
-    <a href={url("/entrar")} class="font-semibold text-azul hover:underline">Entrar para se inscrever</a>.
-  </p>
-</CartaoForm>
+
+  <div id="sucesso" hidden class="flex w-full flex-col items-center gap-4 text-center">
+    <div class="flex size-16 items-center justify-center rounded-full bg-verde-claro text-verde-escuro">
+      <CircleCheck class="size-8" aria-hidden="true" />
+    </div>
+    <h2 class="text-[32px] leading-[1.3] font-bold text-verde-escuro">Conta criada!</h2>
+    <p class="text-[15px] leading-normal text-chumbo">
+      Sua conta <span data-login></span> foi criada. Você ainda não está inscrito(a) na Semana Acadêmica.
+    </p>
+    <Alerta tipo="info" titulo="Próximo passo" class="w-full text-left">Entre com seu login e senha para iniciar a sua inscrição.</Alerta>
+    <a href={url("/entrar?voltar=" + encodeURIComponent(url("/inscricao")))} class={botao}>
+      <LogIn class="size-[18px]" aria-hidden="true" />
+      Entrar e fazer inscrição
+    </a>
+  </div>
+</CartaoAcesso>
 
 <script>
-  import { api, erroCampos, limparErro, mostrarErro } from "../lib/api";
+  import { api, ApiError, erroCampos, limparErro, mostrarErro } from "../lib/api";
   const form = document.querySelector<HTMLFormElement>("#form")!;
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     limparErro(form);
     const d = Object.fromEntries(new FormData(form)) as Record<string, string>;
+    d.login = (d.login ?? "").trim().toLowerCase();
     const campos: Record<string, string> = {};
-    if (!/^[a-z0-9._-]{3,32}$/.test(d.login ?? "")) campos.login = "Use 3 a 32 caracteres: letras minúsculas, números, ponto, hífen ou sublinhado.";
+    if (!/^[a-z0-9._-]{3,32}$/.test(d.login)) campos.login = "Use de 3 a 32 caracteres: letras minúsculas, números, ponto, hífen ou sublinhado.";
     if ((d.senha ?? "").length < 8) campos.senha = "A senha deve ter no mínimo 8 caracteres.";
-    if (d.senha !== d.confirmacaoSenha) campos.confirmacaoSenha = "A confirmação deve ser igual à senha.";
-    if (Object.keys(campos).length) return mostrarErro(form, erroCampos(campos));
+    if (d.senha !== d.confirmacaoSenha) campos.confirmacaoSenha = "As senhas não conferem.";
+    if (Object.keys(campos).length) {
+      return mostrarErro(form, erroCampos(campos, campos.confirmacaoSenha && Object.keys(campos).length === 1 ? "A senha e a confirmação da senha estão diferentes." : "Corrija os campos destacados."));
+    }
     const botao = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
     botao.disabled = true;
     try {
       await api("/cadastro", { metodo: "POST", corpo: d, auth: false });
       form.hidden = true;
       const ok = document.querySelector<HTMLElement>("#sucesso")!;
+      ok.querySelector("[data-login]")!.textContent = d.login;
       ok.hidden = false;
+      document.querySelector<HTMLElement>("[data-cabecalho]")!.hidden = true;
     } catch (err) {
-      mostrarErro(form, err);
+      if (err instanceof ApiError && err.status === 409) {
+        mostrarErro(form, erroCampos({ login: "Este login já está em uso. Escolha outro." }, "Já existe uma conta com este login."));
+      } else mostrarErro(form, err);
     } finally {
       botao.disabled = false;
     }

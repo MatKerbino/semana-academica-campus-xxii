@@ -1,0 +1,136 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+---
+
+<AdminLayout titulo="Inscrição" ativo="inscricoes">
+  <div id="conteudo" class="flex flex-col gap-6" aria-live="polite"></div>
+</AdminLayout>
+
+<script>
+  import {
+    abrirModal, atualizarPagamento, cartaoAtividade, CLASSES, dataHora, erroCarregar, esc, eStatusErro, formaPagamento,
+    formatarCPF, formatarData, formatarMoeda, formatarTelefone, historicoLinhas, icone, iniciarPainel, inscricao, rotuloPerfil, seloDevolucao,
+    seloInscricao, seloPagamento, toast, type FormaPagamento, type InscricaoAdmin,
+  } from "../../lib/admin-api";
+  import { url } from "../../lib/url";
+
+  if (iniciarPainel()) {
+    const raiz = document.getElementById("conteudo")!;
+    const login = new URLSearchParams(location.search).get("login") ?? "";
+    let atual: InscricaoAdmin;
+    let forma: FormaPagamento | null = null;
+    let aviso = sessionStorage.getItem("admin:aviso");
+    sessionStorage.removeItem("admin:aviso");
+
+    const campo = (rotulo: string, valor: string) =>
+      `<div><dt class="text-[13px] text-texto-suave">${rotulo}</dt><dd class="text-[15px] leading-normal break-words text-chumbo">${esc(valor)}</dd></div>`;
+
+    const textoForma = (i: InscricaoAdmin) => {
+      const p = i.pagamento ?? forma;
+      if (!p) return "";
+      return p.modalidade === "monetaria" ? `pagamento de ${formatarMoeda(p.valor ?? 0)} por participante` : `${(p.descricao ?? "").replace(/^./, (c) => c.toLowerCase())}`;
+    };
+
+    function desenhar() {
+      const i = atual;
+      const d = i.dados;
+      const nome = d.nome ?? i.login;
+      const ultimoPag = [...(i.historico ?? [])].reverse().find((h) => h.evento.startsWith("pagamento_"));
+      const devolucaoTexto =
+        i.devolucao?.situacao === "pendente"
+          ? `Devolução de ${formatarMoeda(i.devolucao.valor ?? 0)} pendente: o responsável pelo evento deve devolver o valor e o administrador registra a conclusão.`
+          : i.devolucao?.situacao === "devolvido"
+            ? `Devolução de ${formatarMoeda(i.devolucao.valor ?? 0)} registrada em ${dataHora(i.devolucao.atualizadaEm)}.`
+            : "Só existe devolução quando a forma é monetária e a inscrição é cancelada.";
+      const meta = [i.numero ? `Nº ${i.numero}` : null, i.confirmadaEm ? `confirmada em ${formatarData(i.confirmadaEm.slice(0, 10))}` : null, i.canceladaEm ? `cancelada em ${formatarData(i.canceladaEm.slice(0, 10))}` : null, `conta ${i.login}`].filter(Boolean).join(" · ");
+
+      raiz.innerHTML = `
+        <div class="flex flex-col gap-3">
+          <p class="text-[13px] text-texto-suave"><a href="${url("/admin/inscricoes")}" class="text-verde-medio hover:underline">Inscrições</a> <span class="mx-1">/</span> ${esc(i.numero ? `Nº ${i.numero}` : i.login)}</p>
+          <h1 class="text-[32px] leading-[1.3] font-bold text-verde-escuro max-lg:text-[26px]">Inscrição de ${esc(nome)}</h1>
+          <div class="flex flex-wrap items-center gap-3">${seloInscricao(i.status, true, "Inscrição ")}<span class="text-[13px] text-texto-suave max-lg:hidden">${esc(meta)}</span></div>
+        </div>
+        <div class="grid gap-6 lg:grid-cols-[1fr_332px]">
+          <div class="flex flex-col gap-6 max-lg:order-2">
+            <section class="${CLASSES.cartao}" aria-labelledby="t-dados"><h2 id="t-dados" class="${CLASSES.titulo} mb-4">Dados do participante</h2>
+              <dl class="grid gap-x-8 gap-y-4 sm:grid-cols-2">${campo("Nome completo", nome)}${campo("CPF", formatarCPF(d.cpf))}${campo("E-mail", d.email ?? "—")}${campo("Telefone", formatarTelefone(d.telefone))}${campo("Data de nascimento", formatarData(d.dataNascimento))}${campo("Perfil", d.perfil ? rotuloPerfil[d.perfil] : "—")}</dl></section>
+            <section class="${CLASSES.cartao}" aria-labelledby="t-ativ"><h2 id="t-ativ" class="${CLASSES.titulo} mb-4">Atividades selecionadas (${i.atividades.length})</h2>
+              <ul class="flex flex-col gap-3">${i.atividades.map(cartaoAtividade).join("") || `<li class="text-sm text-texto-suave">Nenhuma atividade selecionada.</li>`}</ul></section>
+            <section class="${CLASSES.cartao} max-lg:hidden" aria-labelledby="t-hist"><h2 id="t-hist" class="${CLASSES.titulo} mb-3">Histórico da inscrição</h2>
+              <ul class="flex flex-col gap-2.5">${historicoLinhas(i)}</ul></section>
+          </div>
+          <div class="flex flex-col gap-4 max-lg:order-1">
+            <section class="${CLASSES.cartao} flex flex-col gap-3 !p-5" aria-labelledby="t-pag"><h2 id="t-pag" class="${CLASSES.titulo}">Pagamento ou compensação</h2>
+              <p class="flex items-center gap-2 text-[13px] text-texto-suave">Situação atual: ${seloPagamento(i, true)}</p>
+              ${textoForma(i) ? `<p class="flex items-start gap-2 text-[13px] leading-normal text-chumbo">${icone("sprout", "mt-0.5 size-4 text-verde-medio")}<span>Forma vigente: ${esc(textoForma(i))}</span></p>` : ""}
+              ${i.situacaoPagamento === "regularizada" && ultimoPag ? `<p class="flex items-start gap-2 text-[13px] leading-normal text-chumbo">${icone("circle-check", "mt-0.5 size-4 text-verde-medio")}<span>Atualizado em ${dataHora(ultimoPag.em).replace(" ", " às ")}</span></p>` : ""}
+              ${i.status === "confirmada" ? `<button type="button" data-atualizar class="${CLASSES.botaoPrimario}">${icone("pencil")}Atualizar situação</button>` : ""}</section>
+            <section class="${CLASSES.cartao} flex flex-col gap-3 !p-5" aria-labelledby="t-dev"><h2 id="t-dev" class="${CLASSES.titulo}">Devolução do pagamento</h2>
+              <div>${seloDevolucao(i, true)}</div><p class="text-[13px] leading-normal text-texto-suave">${esc(devolucaoTexto)}</p>
+              ${i.devolucao ? `<a href="${url("/admin/devolucoes")}" class="text-sm font-bold text-verde-medio hover:underline">Ver em Devoluções</a>` : ""}</section>
+            <section class="${CLASSES.cartao} flex flex-col gap-3 !p-5 max-lg:hidden" aria-labelledby="t-pol"><h2 id="t-pol" class="${CLASSES.titulo}">Política de Privacidade</h2>
+              <p class="flex items-start gap-2 text-[13px] leading-normal text-chumbo">${icone("circle-check", "mt-0.5 size-4 text-verde-medio")}<span>${i.aceiteEm ? `Aceite registrado em ${dataHora(i.aceiteEm).replace(" ", " às ")} · versão ${esc(i.versaoPolitica ?? "1.0")}` : "Aceite não registrado."}</span></p></section>
+          </div>
+        </div>`;
+      if (aviso) {
+        toast(aviso);
+        aviso = null;
+      }
+    }
+
+    function abrirAtualizacao() {
+      const i = atual;
+      const nome = i.dados.nome ?? i.login;
+      const { dialogo, fechar } = abrirModal(`
+        <h2 class="${CLASSES.titulo} mb-3 !text-[20px]">Atualizar pagamento ou compensação</h2>
+        <form class="flex flex-col gap-4" novalidate>
+          <p class="text-[13px] leading-normal text-texto-suave">Inscrição nº ${esc(i.numero ?? "—")} · ${esc(nome)}. Somente esta inscrição será alterada.</p>
+          <p class="flex items-center gap-2 text-[13px] text-texto-suave">Situação atual: ${seloPagamento(i, true)}</p>
+          <fieldset class="flex flex-col gap-2"><legend class="mb-1 text-sm font-semibold text-chumbo">Nova situação</legend>
+            <div class="flex gap-6">${(["pendente", "regularizada"] as const)
+              .map((v) => `<label class="flex cursor-pointer items-center gap-2 text-[15px] text-chumbo"><input type="radio" name="situacao" value="${v}" ${v === (i.situacaoPagamento === "regularizada" ? "pendente" : "regularizada") ? "checked" : ""} class="size-[18px] accent-verde-medio" />${v === "pendente" ? "Pendente" : "Regularizada"}</label>`)
+              .join("")}</div></fieldset>
+          <label class="flex flex-col gap-1.5"><span class="text-sm font-semibold text-chumbo">Observação (opcional)</span>
+            <span class="${CLASSES.campo}">${icone("user", "size-5 text-chumbo")}<input name="observacao" maxlength="200" class="${CLASSES.entrada}" /></span></label>
+          <div data-erro-modal hidden role="alert" class="flex items-start gap-3 rounded-campo border border-erro-borda bg-erro-fundo p-4">${icone("circle-x", "mt-0.5 size-5 text-erro")}
+            <div><p class="text-sm leading-[1.4] font-semibold text-erro">Não foi possível salvar</p><p data-erro-texto class="text-[15px] leading-normal text-chumbo"></p></div></div>
+          <div class="flex flex-wrap justify-end gap-3"><button type="button" data-cancelar class="${CLASSES.botaoContorno}">Cancelar</button>
+            <button type="submit" class="${CLASSES.botaoPrimario}">${icone("check")}<span data-rotulo-salvar>Salvar situação</span></button></div>
+        </form>`);
+      const form = dialogo.querySelector("form")!;
+      dialogo.querySelector("[data-cancelar]")!.addEventListener("click", fechar);
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const dados = Object.fromEntries(new FormData(form)) as Record<string, string>;
+        const botao = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
+        botao.disabled = true;
+        form.querySelector<HTMLElement>("[data-erro-modal]")!.hidden = true;
+        try {
+          const nova = await atualizarPagamento(i.login, { situacao: dados.situacao, ...(dados.observacao?.trim() && { observacao: dados.observacao.trim() }) });
+          fechar();
+          atual = { ...atual, ...nova };
+          aviso = `Situação atualizada para ${dados.situacao === "regularizada" ? "Regularizada" : "Pendente"} (inscrição nº ${atual.numero ?? "—"}).`;
+          desenhar();
+        } catch (err) {
+          const erro = eStatusErro(err);
+          const caixa = form.querySelector<HTMLElement>("[data-erro-modal]")!;
+          caixa.querySelector("[data-erro-texto]")!.textContent = erro.status === 0 ? "A situação não foi alterada. Verifique a conexão e tente novamente." : erro.message;
+          caixa.hidden = false;
+          form.querySelector("[data-rotulo-salvar]")!.textContent = "Tentar novamente";
+          botao.disabled = false;
+        }
+      });
+    }
+
+    Promise.all([inscricao(login), formaPagamento().catch(() => null)])
+      .then(([i, f]) => {
+        atual = i;
+        forma = f;
+        desenhar();
+        raiz.addEventListener("click", (e) => {
+          if ((e.target as HTMLElement).closest("[data-atualizar]")) abrirAtualizacao();
+        });
+      })
+      .catch((e) => (raiz.innerHTML = erroCarregar(e)));
+  }
+</script>

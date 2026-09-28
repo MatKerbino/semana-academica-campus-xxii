@@ -50,7 +50,7 @@ export type Atividade = {
 export const atividades: Atividade[] = [
   {
     slug: "credenciamento",
-    titulo: "Credenciamento e entrega dos alimentos",
+    titulo: "Credenciamento e entrega da forma de participação",
     tipo: "organizacao",
     dia: "21-10",
     hora: "08h00",
@@ -626,19 +626,35 @@ export const porTipo = (...tipos: TipoAtividade[]) => atividades.filter((a) => t
 export const palestrantePor = (slug?: string) => palestrantes.find((p) => p.slug === slug);
 
 /** Tipos que o participante pode escolher na inscrição (RN-05). Espelha o catálogo da API. */
-export const tiposSelecionaveis: TipoAtividade[] = ["palestra", "minicurso", "curso", "banner", "artigo"];
+export const tiposSelecionaveis: TipoAtividade[] = ["palestra", "mesa-redonda", "minicurso", "curso", "banner", "artigo"];
 
 export const catalogoSelecionavel = porTipo(...tiposSelecionaveis).map((a) => ({
   slug: a.slug,
   titulo: a.titulo,
-  tipo: a.tipo,
-  tipoRotulo: { palestra: "Palestras", minicurso: "Minicursos", curso: "Cursos", banner: "Exposição de Banners", artigo: "Apresentação de artigos" }[a.tipo as string]!,
-  dia: dias.find((d) => d.id === a.dia)!.rotulo,
+  tipo: a.tipo === "mesa-redonda" ? "palestra" : a.tipo,
+  dia: a.dia,
+  data: a.dia.replace("-", "/"),
+  hora: a.hora,
   horario: a.horario,
   local: a.local,
-  vagas: a.vagas,
+  vagas: a.vagas ? Number.parseInt(a.vagas, 10) || null : null,
 }));
 
 /** Caminho da página única de atividades com a atividade selecionada (RN-06). */
 export const linkAtividade = (slug: string, de?: string) =>
   `/atividades?atividade=${slug}${de ? `&de=${de}` : ""}`;
+
+/** Tag de tipo (ícone + texto, sem fundo) usada no cronograma, nas atividades e no seletor. */
+export const tagsTipo: Record<TipoAtividade, { rotulo: string; icone: "mic" | "apresentacao" | "capelo" | "imagem" | "arquivo"; cor: string } | null> = {
+  palestra: { rotulo: "Palestra", icone: "mic", cor: "text-verde-medio" },
+  "mesa-redonda": { rotulo: "Palestra", icone: "mic", cor: "text-verde-medio" },
+  minicurso: { rotulo: "Minicurso", icone: "apresentacao", cor: "text-info-texto" },
+  curso: { rotulo: "Curso", icone: "capelo", cor: "text-curso" },
+  banner: { rotulo: "Exposição de Banners", icone: "imagem", cor: "text-divisor" },
+  artigo: { rotulo: "Apresentação de artigos", icone: "arquivo", cor: "text-chumbo" },
+  cerimonia: null,
+  organizacao: null,
+};
+
+/** Atividades que aparecem na página de Atividades (as demais são programação geral do cronograma). */
+export const atividadesListadas = atividades.filter((a) => tagsTipo[a.tipo] !== null);

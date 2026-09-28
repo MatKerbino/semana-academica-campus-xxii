@@ -1,0 +1,128 @@
+---
+import "../styles/global.css";
+import {
+  Apple, ArrowLeft, Ban, Banknote, Check, ChevronDown, CircleCheck, CircleX, Clock, EllipsisVertical, Eye, FileText, GraduationCap,
+  History, Image, Info, LayoutDashboard, Leaf, ListChecks, Lock, LogOut, MapPin, Menu, MicVocal, Minus, PackageCheck, Pencil,
+  Presentation, Search, Settings, Sprout, TriangleAlert, Undo2, User, UserCog, Users, Wallet, X, CalendarDays,
+} from "@lucide/astro";
+import { url } from "../lib/url";
+
+interface Props {
+  titulo: string;
+  ativo: "geral" | "participantes" | "inscricoes" | "devolucoes" | "pagamento" | "conta";
+}
+const { titulo, ativo } = Astro.props;
+
+const itens = [
+  { id: "geral", href: "/admin", rotulo: "Visão geral", Icone: LayoutDashboard },
+  { id: "participantes", href: "/admin/participantes", rotulo: "Participantes", Icone: Users },
+  { id: "inscricoes", href: "/admin/inscricoes", rotulo: "Inscrições", Icone: ListChecks },
+  { id: "devolucoes", href: "/admin/devolucoes", rotulo: "Devoluções", Icone: Undo2 },
+  { id: "pagamento", href: "/admin/forma-de-pagamento", rotulo: "Forma de pagamento", Icone: Wallet },
+  { id: "conta", href: "/admin/conta", rotulo: "Conta", Icone: UserCog },
+] as const;
+
+/* Ícones clonados pelo cliente (lib/admin-api.ts › icone). */
+const icones = {
+  apple: Apple, "arrow-left": ArrowLeft, ban: Ban, banknote: Banknote, check: Check, "chevron-down": ChevronDown, "circle-check": CircleCheck,
+  "circle-x": CircleX, clock: Clock, "ellipsis-vertical": EllipsisVertical, eye: Eye, "file-text": FileText, "graduation-cap": GraduationCap,
+  history: History, image: Image, info: Info, lock: Lock, "map-pin": MapPin, "mic-vocal": MicVocal, minus: Minus, "package-check": PackageCheck,
+  pencil: Pencil, presentation: Presentation, search: Search, settings: Settings, sprout: Sprout, "triangle-alert": TriangleAlert, "undo-2": Undo2,
+  user: User, x: X, "calendar-days": CalendarDays, "log-out": LogOut, users: Users, wallet: Wallet,
+};
+---
+
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href={url("/favicon.svg")} type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
+    <title>{titulo} · Painel de Administração</title>
+  </head>
+  <body class="bg-palha">
+    <div id="admin-raiz" hidden class="flex min-h-dvh">
+      <div id="admin-fundo" hidden class="fixed inset-0 z-30 bg-verde-noite/60 lg:hidden"></div>
+
+      <!-- Menu lateral: fixo no desktop, gaveta no mobile. -->
+      <aside
+        id="admin-menu"
+        class="fixed inset-y-0 left-0 z-40 flex w-[248px] -translate-x-full flex-col gap-1.5 overflow-y-auto bg-verde-escuro px-4 py-5 transition-transform lg:translate-x-0"
+      >
+        <a href={url("/admin")} class="flex items-center gap-2.5 px-2 py-1">
+          <Leaf class="size-[26px] text-verde-cta" aria-hidden="true" />
+          <span class="flex flex-col leading-[1.3]">
+            <span class="text-sm font-semibold text-white">SEMANA ACADÊMICA</span>
+            <span class="text-[13px] text-verde-claro">Administração</span>
+          </span>
+        </a>
+        <hr class="my-1.5 h-px border-0 bg-divisor" />
+        <nav aria-label="Painel administrativo" class="flex flex-col gap-1.5">
+          {
+            itens.map(({ id, href, rotulo, Icone }) => (
+              <a
+                href={url(href)}
+                aria-current={ativo === id ? "page" : undefined}
+                class:list={[
+                  "flex items-center gap-3 rounded-campo px-3 py-2.5 text-[15px] leading-[1.3] text-white hover:bg-divisor/60",
+                  ativo === id ? "bg-divisor font-semibold" : "font-normal",
+                ]}
+              >
+                <Icone class:list={["size-5", ativo === id && "text-verde-cta"]} aria-hidden="true" />
+                {rotulo}
+              </a>
+            ))
+          }
+        </nav>
+        <button type="button" data-sair class="mt-auto flex cursor-pointer items-center gap-3 rounded-campo px-3 py-2.5 text-[15px] font-semibold text-white hover:bg-divisor/60 lg:hidden">
+          <LogOut class="size-5" aria-hidden="true" />
+          Sair
+        </button>
+      </aside>
+
+      <div class="flex min-w-0 flex-1 flex-col lg:pl-[248px]">
+        <!-- Barra superior -->
+        <header class="sticky top-0 z-20 flex h-[68px] items-center gap-4 border-b border-borda bg-white px-4 lg:px-6">
+          <button
+            type="button"
+            data-abrir-menu
+            aria-label="Abrir menu"
+            aria-controls="admin-menu"
+            aria-expanded="false"
+            class="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-campo border-[1.5px] border-borda text-verde-escuro lg:hidden"
+          >
+            <Menu class="size-5" aria-hidden="true" />
+          </button>
+          <div class="min-w-0 flex-1 leading-[1.4]">
+            <p class="text-lg font-semibold text-verde-escuro max-lg:text-base">
+              <span class="max-lg:hidden">Painel de Administração</span><span class="lg:hidden">Administração</span>
+            </p>
+            <p class="text-[13px] leading-normal text-texto-suave max-lg:hidden">1ª Semana Acadêmica do Campus XXII</p>
+          </div>
+          <div class="flex items-center gap-2.5">
+            <span data-admin-iniciais class="flex size-9 items-center justify-center rounded-full bg-verde-claro text-sm font-semibold text-verde-escuro"></span>
+            <span class="flex flex-col leading-[1.4] max-lg:hidden">
+              <span data-admin-nome class="text-sm font-semibold text-chumbo"></span>
+              <span class="text-[13px] leading-normal text-texto-suave">Administrador</span>
+            </span>
+          </div>
+          <button type="button" data-sair class="flex cursor-pointer items-center gap-2 rounded-full px-2 py-3 text-[15px] leading-[1.3] font-bold text-verde-medio hover:underline max-lg:hidden">
+            <LogOut class="size-[18px]" aria-hidden="true" />
+            Sair
+          </button>
+        </header>
+
+        <main class="flex flex-col gap-6 px-4 py-6 lg:px-6 lg:py-8">
+          <slot />
+        </main>
+      </div>
+    </div>
+
+    <div id="admin-icones" hidden>
+      {Object.entries(icones).map(([nome, Icone]) => <span data-i={nome}><Icone /></span>)}
+    </div>
+  </body>
+</html>

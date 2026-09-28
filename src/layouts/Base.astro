@@ -1,7 +1,7 @@
 ---
 import { url } from "../lib/url";
 import "../styles/global.css";
-import { ClipboardList, Leaf, Mail, Menu } from "@lucide/astro";
+import { Leaf, LogIn, Menu, UserPlus, X } from "@lucide/astro";
 import { evento } from "../data/evento";
 
 interface Props {
@@ -9,40 +9,38 @@ interface Props {
   descricao?: string;
   /** Página ativa no menu, pelo href. */
   ativo?: string;
+  /** "amplo": mais respiro no topo e na base, como nas telas de Início, Cronograma e Atividades. */
+  espaco?: "compacto" | "amplo" | "acesso";
 }
 
-const { titulo, descricao = evento.descricao, ativo } = Astro.props;
+const { titulo, descricao = evento.descricao, ativo, espaco = "compacto" } = Astro.props;
 
 const menu = [
   { href: "/", rotulo: "Início" },
   { href: "/cronograma", rotulo: "Cronograma" },
   { href: "/atividades", rotulo: "Atividades" },
-  { href: "/artigos", rotulo: "Artigos" },
   { href: "/palestrantes", rotulo: "Palestrantes" },
+  { href: "/artigos", rotulo: "Artigos" },
   { href: "/patrocinadores", rotulo: "Patrocinadores" },
   { href: "/local", rotulo: "Local" },
 ];
 
-/* Rodapé do protótipo: navegação secundária agrupada em linhas, como na tela 01. */
 const navRodape = [
   [
     { href: "/", rotulo: "Início" },
     { href: "/cronograma", rotulo: "Cronograma" },
+    { href: "/atividades", rotulo: "Atividades" },
     { href: "/local", rotulo: "Local" },
   ],
   [
-    { href: "/atividades", rotulo: "Atividades" },
-    { href: "/inscricao", rotulo: "Inscrição" },
-    { href: "/politica-de-privacidade", rotulo: "Privacidade" },
-  ],
-  [
-    { href: "/artigos", rotulo: "Artigos" },
     { href: "/palestrantes", rotulo: "Palestrantes" },
+    { href: "/artigos", rotulo: "Artigos" },
     { href: "/patrocinadores", rotulo: "Patrocinadores" },
   ],
 ];
 
-const inscricao = url("/inscricao");
+const botaoEntrar =
+  "flex items-center gap-2 rounded-full border-[1.5px] border-white/35 px-4 py-[11px] text-sm leading-[1.3] font-bold text-white hover:border-white";
 ---
 
 <html lang="pt-BR">
@@ -59,185 +57,203 @@ const inscricao = url("/inscricao");
     <title>{titulo} · {evento.nome}</title>
     <meta name="description" content={descricao} />
   </head>
-  <body class="h-dvh overflow-hidden bg-palha">
-    <div class="grid h-dvh grid-rows-[auto_1fr_auto]">
-      <!-- Cabeçalho fixo: 18px/48px e botão de inscrição sempre visível (tela 01 do protótipo). -->
-      <header class="z-20 bg-verde-escuro text-white shadow-md">
-        <div class="mx-auto flex max-w-[1440px] items-center gap-6 px-6 py-[18px] lg:px-12">
-          <a href={url("/")} class="flex shrink-0 items-center gap-2.5">
-            <Leaf class="size-[26px] text-verde-cta" aria-hidden="true" />
-            <span>
-              <span class="block text-base leading-[130%] font-bold tracking-[0.6px] text-white uppercase">
-                Semana Acadêmica
-              </span>
-              <span class="block text-[11px] leading-[130%] font-medium tracking-[0.4px] text-verde-claro">
-                Campus XXII · UEPA · 2025
-              </span>
-            </span>
-          </a>
+  <body class="flex min-h-dvh flex-col bg-palha">
+    <header class="bg-verde-escuro text-white drop-shadow-[0_2px_3px_rgba(0,0,0,0.15)]">
+      <div class="mx-auto flex h-[124px] max-w-[1440px] items-center gap-6 px-4 lg:h-auto lg:px-12 lg:py-[18px]">
+        <a href={url("/")} class="flex shrink-0 items-center gap-2.5">
+          <Leaf class="size-[26px] text-verde-cta" aria-hidden="true" />
+          <span>
+            <span class="block text-base leading-[1.3] font-bold tracking-[0.6px] text-white uppercase">Semana Acadêmica</span>
+            <span class="block text-[11px] leading-[1.3] font-medium tracking-[0.4px] text-verde-claro">Campus XXII · UEPA · 2025</span>
+          </span>
+        </a>
 
-          <nav aria-label="Navegação principal" class="mx-auto hidden xl:block">
-            <ul class="flex flex-wrap items-center gap-x-4 gap-y-1 text-tabela leading-[130%]">
-              {
-                menu.map((item) => (
-                  <li>
-                    <a
-                      href={url(item.href)}
-                      aria-current={ativo === item.href ? "page" : undefined}
-                      class:list={[
-                        "rounded transition-colors hover:text-verde-cta",
-                        ativo === item.href ? "font-semibold text-verde-cta" : "font-medium text-white",
-                      ]}
-                    >
-                      {item.rotulo}
-                    </a>
-                  </li>
-                ))
-              }
-            </ul>
-          </nav>
+        <nav aria-label="Navegação principal" class="hidden flex-1 lg:block">
+          <ul class="flex items-center justify-center gap-[18px] text-[13px] leading-[1.3]">
+            {
+              menu.map((item) => (
+                <li>
+                  <a
+                    href={url(item.href)}
+                    aria-current={ativo === item.href ? "page" : undefined}
+                    class:list={[
+                      "hover:text-verde-cta",
+                      ativo === item.href ? "font-semibold text-verde-cta" : "font-medium text-white",
+                    ]}
+                  >
+                    {item.rotulo}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
 
-          <div data-sessao-nav data-classe="rounded text-tabela font-medium text-white hover:text-verde-cta" class="ml-auto hidden items-center gap-4 xl:flex"></div>
-
+        <div class="ml-auto hidden items-center gap-2.5 lg:flex">
+          <div data-sessao class="flex items-center gap-2.5">
+            <a href={url("/entrar")} class={botaoEntrar}>
+              <LogIn class="size-4" aria-hidden="true" />
+              Entrar
+            </a>
+          </div>
           <a
-            href={inscricao}
-            class="ml-auto flex shrink-0 items-center gap-2 rounded-full bg-verde-cta px-[22px] py-3 text-sm leading-[130%] font-bold text-verde-noite shadow transition-transform hover:scale-[1.03] xl:ml-0"
+            href={url("/inscricao")}
+            data-inscreva
+            class="flex items-center gap-2 rounded-full bg-verde-cta px-[22px] py-[11px] text-sm leading-[1.3] font-bold text-verde-noite hover:brightness-95"
           >
-            <ClipboardList class="size-4" aria-hidden="true" />
-            Realizar Inscrição
+            <UserPlus class="size-4" aria-hidden="true" />
+            Inscreva-se
           </a>
-
-          <details class="relative xl:hidden">
-            <summary
-              class="flex cursor-pointer items-center gap-1 rounded border border-white/30 px-2 py-2 text-tabela [&::-webkit-details-marker]:hidden"
-              aria-label="Abrir menu"
-            >
-              <Menu class="size-4" aria-hidden="true" />
-            </summary>
-            <nav
-              aria-label="Navegação principal"
-              class="absolute right-0 z-30 mt-2 w-56 rounded-cartao border border-borda bg-white p-2 text-chumbo shadow-xl"
-            >
-              <ul class="text-sm">
-                {
-                  menu.map((item) => (
-                    <li>
-                      <a
-                        href={url(item.href)}
-                        aria-current={ativo === item.href ? "page" : undefined}
-                        class:list={[
-                          "block rounded px-3 py-2 hover:bg-creme",
-                          ativo === item.href && "font-semibold text-verde-medio",
-                        ]}
-                      >
-                        {item.rotulo}
-                      </a>
-                    </li>
-                  ))
-                }
-              </ul>
-              <div data-sessao-nav data-classe="block rounded px-3 py-2 hover:bg-creme" class="border-t border-borda pt-1 text-sm"></div>
-            </nav>
-          </details>
         </div>
-      </header>
 
-      <main class="rolagem-interna overflow-y-auto">
-        <div class="mx-auto max-w-[1440px] px-6 py-3 lg:px-10 xl:px-16">
-          <slot />
+        <div class="ml-auto flex items-center gap-2 lg:hidden">
+          <a
+            href={url("/entrar")}
+            data-entrar-icone
+            aria-label="Entrar"
+            class="flex size-10 items-center justify-center rounded-[10px] border-[1.5px] border-white/35"
+          >
+            <LogIn class="size-[18px]" aria-hidden="true" />
+          </a>
+          <button
+            type="button"
+            data-abrir-menu
+            aria-label="Abrir menu"
+            aria-expanded="false"
+            aria-controls="menu-mobile"
+            class="flex size-10 cursor-pointer items-center justify-center rounded-[10px] border-[1.5px] border-white/35"
+          >
+            <Menu class="size-[18px]" aria-hidden="true" />
+          </button>
         </div>
-      </main>
+      </div>
+    </header>
 
-      <!-- Rodapé institucional do protótipo, em versão compacta para caber na tela fixa. -->
-      <footer class="z-20 bg-verde-escuro text-verde-claro shadow-[0_-2px_8px_rgba(0,0,0,0.15)]">
-        <div class="mx-auto max-w-[1440px] px-6 pt-3 pb-2 lg:px-12">
-          <div class="hidden gap-x-8 xl:grid xl:grid-cols-[1.35fr_1fr_1fr_1.1fr]">
-            <section>
-              <h2 class="text-[15px] font-bold text-white">1ª Semana Acadêmica</h2>
-              <p class="text-tabela">Campus XXII — Ananindeua/PA · {evento.periodo}</p>
-            </section>
-
-            <nav aria-label="Navegação do rodapé">
-              <h2 class="text-[15px] font-bold text-white">Navegação</h2>
-              {
-                navRodape.map((linha) => (
-                  <p class="text-tabela">
-                    {linha.map((item, i) => (
-                      <>
-                        {i > 0 && <span class="mx-1 text-verde-claro/50">·</span>}
-                        <a href={url(item.href)} class="hover:text-verde-cta hover:underline">
-                          {item.rotulo}
-                        </a>
-                      </>
-                    ))}
-                  </p>
-                ))
-              }
-            </nav>
-
-            <section class="text-azul-claro">
-              <h2 class="flex items-center gap-2 text-[15px] font-bold text-white">
-                <Mail class="size-4 text-azul-claro" aria-hidden="true" />
-                Inscrição
-              </h2>
-              <p class="text-tabela">
-                <a href={inscricao} class="hover:underline">Inscreva-se pelo site</a>
-              </p>
-              <p class="text-tabela">Custo: <span data-custo>1 kg de alimento não perecível</span></p>
-              <p class="text-tabela">Aberto à comunidade interna e externa</p>
-            </section>
-
-            <section>
-              <h2 class="text-[15px] font-bold text-white">Realização</h2>
-              {evento.realizacao.map((orgao) => <p class="text-tabela">{orgao}</p>)}
-            </section>
-          </div>
-
-          <!-- Telas estreitas: resumo em uma linha, para não consumir a altura útil. -->
-          <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-tabela xl:hidden">
-            <span class="font-bold text-white">1ª Semana Acadêmica · Campus XXII</span>
-            <span>{evento.periodo}</span>
-            <a href={inscricao} class="text-azul-claro hover:underline">Inscreva-se pelo site</a>
-            <span>Custo: <span data-custo>1 kg de alimento não perecível</span></span>
-          </div>
-
-          <hr class="mt-2.5 h-px border-0 bg-divisor" />
-          <p class="mt-1.5 text-xs">
-            © 2025 · {evento.nome} — UEPA. Site de divulgação institucional. Todos os direitos reservados.
-          </p>
+    <div id="menu-mobile" hidden class="fixed inset-0 z-50 overflow-y-auto bg-verde-escuro text-white lg:hidden">
+      <div class="flex items-center justify-between px-4 py-8">
+        <span class="text-xs font-semibold tracking-[0.6px] uppercase">Semana Acadêmica</span>
+        <button type="button" data-fechar-menu aria-label="Fechar menu" class="cursor-pointer">
+          <X class="size-6" aria-hidden="true" />
+        </button>
+      </div>
+      <nav aria-label="Navegação principal" class="px-6 py-3">
+        <ul class="space-y-[22px] text-lg font-semibold">
+          {
+            menu.map((item) => (
+              <li>
+                <a href={url(item.href)} aria-current={ativo === item.href ? "page" : undefined} class:list={[ativo === item.href && "text-verde-cta"]}>
+                  {item.rotulo}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+      <div class="mt-10 space-y-3 px-4 pb-10">
+        <a
+          href={url("/inscricao")}
+          class="flex items-center justify-center gap-2 rounded-full bg-verde-cta px-6 py-3 text-[15px] font-bold text-verde-noite"
+        >
+          <UserPlus class="size-4" aria-hidden="true" />
+          Inscreva-se
+        </a>
+        <div data-sessao-mobile>
+          <a href={url("/entrar")} class="flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-[15px] font-bold text-verde-escuro">
+            <LogIn class="size-4" aria-hidden="true" />
+            Entrar
+          </a>
         </div>
-      </footer>
+      </div>
     </div>
+
+    <main class="mx-auto w-full max-w-[1440px] flex-1 px-4 md:px-8 lg:px-16" class:list={[espaco === "amplo" ? "pt-6 pb-10" : espaco === "acesso" ? "py-8 lg:py-12" : "py-3"]}>
+      <slot />
+    </main>
+
+    <footer class="bg-verde-escuro text-verde-claro">
+      <div class="mx-auto max-w-[1440px] px-4 py-[14px] lg:px-12">
+        <div class="hidden gap-8 lg:flex">
+          <section class="flex-1">
+            <h2 class="text-[15px] leading-[1.3] font-bold text-white">1ª Semana Acadêmica</h2>
+            <p class="mt-0.5 text-[13px] leading-[1.3]">Campus XXII — Ananindeua/PA · {evento.periodo}</p>
+          </section>
+          <nav aria-label="Navegação do rodapé" class="flex-1">
+            <h2 class="text-[15px] leading-[1.3] font-bold text-white">Navegação</h2>
+            {
+              navRodape.map((linha) => (
+                <p class="mt-0.5 text-[13px] leading-[1.3]">
+                  {linha.map((item, i) => (
+                    <>
+                      {i > 0 && " · "}
+                      <a href={url(item.href)} class="hover:text-verde-cta">{item.rotulo}</a>
+                    </>
+                  ))}
+                </p>
+              ))
+            }
+          </nav>
+          <section class="flex-1 text-azul-claro">
+            <h2 class="text-[15px] leading-[1.3] font-bold text-white">Participação</h2>
+            <p class="mt-0.5 text-[13px] leading-[1.3]">Aberta à comunidade interna e externa</p>
+            <p class="mt-0.5 text-[13px] leading-[1.3]">Forma de participação definida pela organização</p>
+            <p class="mt-0.5 text-[13px] leading-[1.3]"><a href={`mailto:${evento.email}`} class="hover:underline">{evento.email}</a></p>
+          </section>
+          <section class="flex-1">
+            <h2 class="text-[15px] leading-[1.3] font-bold text-white">Realização</h2>
+            {evento.realizacao.map((orgao) => <p class="mt-0.5 text-[13px] leading-[1.3]">{orgao}</p>)}
+          </section>
+        </div>
+
+        <div class="lg:hidden">
+          <p class="text-[15px] leading-[1.3] font-bold text-white">1ª Semana Acadêmica · Campus XXII</p>
+          <p class="mt-0.5 text-[13px] leading-[1.3]">{evento.periodo}</p>
+          <p class="mt-0.5 text-[13px] leading-[1.3]">{evento.email}</p>
+        </div>
+
+        <hr class="mt-2.5 h-px border-0 bg-divisor" />
+        <p class="mt-2.5 text-xs leading-[1.3]">
+          © 2025 · {evento.nome} — UEPA. Todos os direitos reservados.
+        </p>
+      </div>
+    </footer>
   </body>
 </html>
 
 <script>
-  import { api, descreverPagamento, sair, sessao, type Pagamento } from "../lib/api";
+  import { sair, sessao } from "../lib/api";
   import { url } from "../lib/url";
 
-  // Navegação conforme a sessão (Entrar / Minha inscrição / Admin / Sair).
-  const s = sessao();
-  document.querySelectorAll<HTMLElement>("[data-sessao-nav]").forEach((nav) => {
-    const c = nav.dataset.classe ?? "";
-    const link = (href: string, rotulo: string) => `<a href="${url(href)}" class="${c}">${rotulo}</a>`;
-    nav.innerHTML = s
-      ? [
-          link("/minha-inscricao", "Minha inscrição"),
-          s.usuario.papel === "admin" ? link("/admin", "Admin") : "",
-          `<button type="button" data-sair class="${c} cursor-pointer text-left">Sair</button>`,
-        ].join("")
-      : link("/entrar", "Entrar");
-    nav.querySelector("[data-sair]")?.addEventListener("click", () => {
-      sair();
-      location.href = url("/");
-    });
-  });
+  const menu = document.getElementById("menu-mobile")!;
+  const abrir = document.querySelector<HTMLButtonElement>("[data-abrir-menu]")!;
+  const alternar = (aberto: boolean) => {
+    menu.hidden = !aberto;
+    abrir.setAttribute("aria-expanded", String(aberto));
+    document.body.style.overflow = aberto ? "hidden" : "";
+  };
+  abrir.addEventListener("click", () => alternar(true));
+  menu.querySelector("[data-fechar-menu]")!.addEventListener("click", () => alternar(false));
 
-  // A forma de pagamento vigente é definida pelo administrador: substitui o texto padrão quando a API responde.
-  const custos = document.querySelectorAll<HTMLElement>("[data-custo]");
-  if (custos.length) {
-    api<Pagamento>("/pagamento", { auth: false })
-      .then((p) => custos.forEach((el) => (el.textContent = descreverPagamento(p))))
-      .catch(() => {});
+  // Autenticado: chip (iniciais + login, leva à Minha área) e Sair, no lugar de Entrar e Inscreva-se.
+  const s = sessao();
+  if (s) {
+    const area = s.usuario.papel === "admin" ? "/admin" : "/minha-area";
+    const iniciais = s.usuario.login.replace(/[^a-z0-9]/gi, " ").trim().split(/\s+/).map((p) => p[0]).slice(0, 2).join("").toUpperCase();
+    const sairIcone = '<svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>';
+    const borda = "border-[1.5px] border-white/35 rounded-full text-white hover:border-white";
+    document.querySelector("[data-sessao]")!.innerHTML =
+      `<a href="${url(area)}" class="flex items-center gap-2 ${borda} py-1.5 pr-3.5 pl-1.5 text-[13px] font-semibold">` +
+      `<span class="flex size-[26px] items-center justify-center rounded-full bg-verde-claro text-[10px] font-bold text-verde-escuro">${iniciais}</span>${s.usuario.login}</a>` +
+      `<button type="button" data-sair class="flex cursor-pointer items-center gap-2 ${borda} px-4 py-[11px] text-sm leading-[1.3] font-bold">${sairIcone}Sair</button>`;
+    document.querySelector("[data-inscreva]")?.remove();
+    document.querySelector("[data-sessao-mobile]")!.innerHTML =
+      `<a href="${url(area)}" class="mb-3 block text-center text-sm font-semibold text-white">${s.usuario.login}</a>` +
+      '<button type="button" data-sair class="flex w-full cursor-pointer items-center justify-center rounded-full bg-white px-6 py-3 text-[15px] font-bold text-verde-escuro">Sair</button>';
+    document.querySelector<HTMLAnchorElement>("[data-entrar-icone]")!.href = url(area);
+    document.querySelectorAll("[data-sair]").forEach((b) =>
+      b.addEventListener("click", () => {
+        sair();
+        location.href = url("/");
+      }),
+    );
   }
 </script>

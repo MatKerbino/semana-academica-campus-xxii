@@ -1,0 +1,61 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+---
+
+<AdminLayout titulo="Visão geral" ativo="geral">
+  <div id="conteudo" class="flex flex-col gap-6" aria-live="polite"></div>
+</AdminLayout>
+
+<script>
+  import {
+    botaoOlho, cabecalhoColuna, cabecalhoPagina, CLASSES, dataHora, erroCarregar, esc, formaParticipacaoCartao, formatarCPF, icone,
+    iniciarPainel, resumo, rotuloPerfil, seloDevolucao, seloInscricao, seloPagamento, contar,
+  } from "../../lib/admin-api";
+  import { url } from "../../lib/url";
+
+  if (iniciarPainel()) {
+    const raiz = document.getElementById("conteudo")!;
+    resumo()
+      .then((r) => {
+        const cartao = (href: string | null, tom: string, ic: string, rotulo: string, n: number) => {
+          const corpo = `<span class="flex items-center gap-3"><span class="flex size-10 shrink-0 items-center justify-center rounded-full ${tom}">${icone(ic, "size-5")}</span><span class="text-[15px] leading-normal text-texto-suave xl:whitespace-nowrap">${rotulo}</span></span><span class="text-[32px] leading-[1.3] font-bold text-verde-escuro">${n}</span>`;
+          const classe = "flex flex-1 basis-56 flex-col gap-3 rounded-cartao border border-borda bg-white p-5 shadow-[0_1px_1.5px_rgba(15,41,8,0.08)]";
+          return href ? `<a href="${href}" class="${classe} hover:bg-palha">${corpo}</a>` : `<div class="${classe}">${corpo}</div>`;
+        };
+        const linhas = r.recentes
+          .map(
+            (i) => `<tr class="border-b border-borda last:border-0 hover:bg-palha">
+              <td class="px-3 py-3"><a href="${url("/admin/inscricao")}?login=${encodeURIComponent(i.login)}" class="block"><span class="block text-sm leading-[1.4] font-semibold text-chumbo">${esc(i.dados.nome ?? i.login)}</span><span class="block text-[13px] text-texto-suave">CPF ${formatarCPF(i.dados.cpf)}</span></a></td>
+              <td class="px-3 py-3 text-[13px] text-chumbo">${i.dados.perfil ? rotuloPerfil[i.dados.perfil] : "—"}</td>
+              <td class="px-3 py-3 text-[13px] text-chumbo whitespace-nowrap">${contar(i.atividades.length, "atividade", "atividades")}</td>
+              <td class="px-3 py-3">${seloInscricao(i.status)}</td><td class="px-3 py-3">${seloPagamento(i)}</td><td class="px-3 py-3">${seloDevolucao(i)}</td>
+              <td class="px-3 py-3">${botaoOlho(`${url("/admin/inscricao")}?login=${encodeURIComponent(i.login)}`, `Ver inscrição de ${i.dados.nome ?? i.login}`)}</td></tr>`,
+          )
+          .join("");
+
+        raiz.innerHTML = `
+            ${cabecalhoPagina("Visão geral", `Resumo da 1ª Semana Acadêmica · atualizado em ${dataHora(r.atualizadoEm).replace(" ", " às ")}.`)}
+            <div class="flex flex-wrap gap-4">
+              ${cartao(null, "bg-verde-claro text-verde-escuro", "users", "Inscrições confirmadas", r.inscricoesConfirmadas)}
+              ${cartao(`${url("/admin/inscricoes")}?pagamento=pendente`, "bg-pendente-fundo text-pendente-texto", "apple", "Compensações pendentes", r.compensacoesPendentes)}
+              ${cartao(null, "bg-entregue-fundo text-entregue-texto", "package-check", "Compensações regularizadas", r.compensacoesRegularizadas)}
+              ${cartao(`${url("/admin/participantes")}?inscricao=sem`, "bg-info-fundo text-info-texto", "circle-check", "Contas sem inscrição", r.contasSemInscricao)}
+            </div>
+            <section class="${CLASSES.cartao} flex flex-col gap-3" aria-labelledby="t-forma">
+              <div class="flex flex-wrap items-center gap-3"><h2 id="t-forma" class="${CLASSES.titulo}">Forma de participação vigente</h2><span class="flex-1"></span>
+                <a href="${url("/admin/forma-de-pagamento")}" class="${CLASSES.botaoContorno}">${icone("settings")}Alterar forma de pagamento</a></div>
+              <div class="flex flex-wrap items-center gap-6">${formaParticipacaoCartao(r.pagamento, "w-full sm:w-[420px]")}
+                <p class="min-w-48 flex-1 text-[13px] leading-normal text-texto-suave">É a única forma exibida a todos os participantes na inscrição e em Minha inscrição.</p></div>
+            </section>
+            <section class="flex flex-col gap-3" aria-labelledby="t-rec">
+              <div class="flex items-center gap-3"><h2 id="t-rec" class="${CLASSES.titulo}">Inscrições recentes</h2><span class="flex-1"></span>
+                <a href="${url("/admin/inscricoes")}" class="rounded-full px-2 py-3 text-[15px] leading-[1.3] font-bold text-verde-medio hover:underline">Ver todas as inscrições</a></div>
+              <div class="overflow-x-auto rounded-cartao border border-borda bg-white"><table class="w-full min-w-[900px] border-collapse">
+                <caption class="sr-only">Inscrições mais recentes</caption>
+                <thead class="border-b border-borda bg-palha"><tr>${["Participante", "Perfil", "Atividades", "Inscrição", "Pagamento/ compensação", "Devolução", "Ações"].map((t) => `<th scope="col" class="${cabecalhoColuna}">${t}</th>`).join("")}</tr></thead>
+                <tbody>${linhas || `<tr><td colspan="7" class="px-3 py-6 text-center text-sm text-texto-suave">Nenhuma inscrição registrada.</td></tr>`}</tbody></table></div>
+            </section>`;
+      })
+      .catch((e) => (raiz.innerHTML = erroCarregar(e)));
+  }
+</script>
