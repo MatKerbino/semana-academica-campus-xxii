@@ -1,0 +1,18 @@
+---
+import PaginaCabecalho from "./PaginaCabecalho.astro";
+import Base from "../layouts/Base.astro";
+
+interface Props {
+  titulo: string;
+  descricao: string;
+  ativo?: string;
+}
+const { titulo, descricao, ativo } = Astro.props;
+---
+
+<Base titulo={titulo} ativo={ativo}>
+  <PaginaCabecalho titulo={titulo} descricao={descricao} trilha={[{ href: "/", rotulo: "Início" }]} />
+  <div class="mx-auto max-w-[520px] rounded-cartao border border-borda bg-white p-5">
+    <slot />
+  </div>
+</Base>

@@ -1,0 +1,49 @@
+---
+import { url } from "../lib/url";
+import Campo from "../components/Campo.astro";
+import CartaoForm from "../components/CartaoForm.astro";
+---
+
+<CartaoForm titulo="Criar conta" descricao="O cadastro pede somente login e senha. Seus dados pessoais são informados depois, na inscrição.">
+  <form id="form" novalidate class="grid gap-3">
+    <p data-erro-geral role="alert" hidden class="rounded-lg bg-red-50 p-2 text-sm font-semibold text-red-700"></p>
+    <Campo nome="login" rotulo="Login" autocomplete="username" minlength={3} maxlength={32} ajuda="3 a 32 caracteres: letras minúsculas, números, ponto, hífen ou sublinhado." />
+    <Campo nome="senha" rotulo="Senha" tipo="password" autocomplete="new-password" minlength={8} ajuda="Mínimo de 8 caracteres." />
+    <Campo nome="confirmacaoSenha" rotulo="Confirmar senha" tipo="password" autocomplete="new-password" />
+    <button type="submit" class="w-full cursor-pointer rounded-full bg-verde-cta px-6 py-2.5 text-[15px] font-bold text-verde-noite shadow disabled:opacity-60">Criar conta</button>
+    <p class="text-center text-sm text-chumbo">
+      Já tem conta? <a href={url("/entrar")} class="font-semibold text-azul hover:underline">Entrar</a>
+    </p>
+  </form>
+  <p id="sucesso" role="status" hidden class="rounded-lg bg-green-50 p-3 text-sm text-verde-escuro">
+    Conta criada! Ela ainda não é uma inscrição no evento.
+    <a href={url("/entrar")} class="font-semibold text-azul hover:underline">Entrar para se inscrever</a>.
+  </p>
+</CartaoForm>
+
+<script>
+  import { api, erroCampos, limparErro, mostrarErro } from "../lib/api";
+  const form = document.querySelector<HTMLFormElement>("#form")!;
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    limparErro(form);
+    const d = Object.fromEntries(new FormData(form)) as Record<string, string>;
+    const campos: Record<string, string> = {};
+    if (!/^[a-z0-9._-]{3,32}$/.test(d.login ?? "")) campos.login = "Use 3 a 32 caracteres: letras minúsculas, números, ponto, hífen ou sublinhado.";
+    if ((d.senha ?? "").length < 8) campos.senha = "A senha deve ter no mínimo 8 caracteres.";
+    if (d.senha !== d.confirmacaoSenha) campos.confirmacaoSenha = "A confirmação deve ser igual à senha.";
+    if (Object.keys(campos).length) return mostrarErro(form, erroCampos(campos));
+    const botao = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
+    botao.disabled = true;
+    try {
+      await api("/cadastro", { metodo: "POST", corpo: d, auth: false });
+      form.hidden = true;
+      const ok = document.querySelector<HTMLElement>("#sucesso")!;
+      ok.hidden = false;
+    } catch (err) {
+      mostrarErro(form, err);
+    } finally {
+      botao.disabled = false;
+    }
+  });
+</script>

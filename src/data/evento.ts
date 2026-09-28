@@ -57,7 +57,7 @@ export const atividades: Atividade[] = [
     horario: "08h00 às 09h00",
     local: "Hall do Bloco A",
     descricao: [
-      "Momento de recepção dos participantes inscritos por e-mail. Na chegada, o participante entrega 1 kg de alimento não perecível e retira o crachá de identificação, necessário para o acesso às atividades com número limitado de vagas.",
+      "Momento de recepção dos participantes inscritos pelo site. Na chegada, o participante entrega 1 kg de alimento não perecível e retira o crachá de identificação, necessário para o acesso às atividades com número limitado de vagas.",
       "A entrega do alimento é o único custo de participação no evento e a arrecadação é destinada a instituições parceiras da universidade.",
     ],
   },
@@ -624,3 +624,21 @@ export const rotulosTipo: Record<TipoAtividade, string> = {
 export const porTipo = (...tipos: TipoAtividade[]) => atividades.filter((a) => tipos.includes(a.tipo));
 
 export const palestrantePor = (slug?: string) => palestrantes.find((p) => p.slug === slug);
+
+/** Tipos que o participante pode escolher na inscrição (RN-05). Espelha o catálogo da API. */
+export const tiposSelecionaveis: TipoAtividade[] = ["palestra", "minicurso", "curso", "banner", "artigo"];
+
+export const catalogoSelecionavel = porTipo(...tiposSelecionaveis).map((a) => ({
+  slug: a.slug,
+  titulo: a.titulo,
+  tipo: a.tipo,
+  tipoRotulo: { palestra: "Palestras", minicurso: "Minicursos", curso: "Cursos", banner: "Exposição de Banners", artigo: "Apresentação de artigos" }[a.tipo as string]!,
+  dia: dias.find((d) => d.id === a.dia)!.rotulo,
+  horario: a.horario,
+  local: a.local,
+  vagas: a.vagas,
+}));
+
+/** Caminho da página única de atividades com a atividade selecionada (RN-06). */
+export const linkAtividade = (slug: string, de?: string) =>
+  `/atividades?atividade=${slug}${de ? `&de=${de}` : ""}`;

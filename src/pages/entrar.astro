@@ -1,0 +1,39 @@
+---
+import { url } from "../lib/url";
+import Campo from "../components/Campo.astro";
+import CartaoForm from "../components/CartaoForm.astro";
+---
+
+<CartaoForm titulo="Entrar" descricao="Acesse sua conta para realizar ou consultar sua inscrição." ativo="/entrar">
+  <form id="form" novalidate class="grid gap-3">
+    <p data-erro-geral role="alert" hidden class="rounded-lg bg-red-50 p-2 text-sm font-semibold text-red-700"></p>
+    <Campo nome="login" rotulo="Login" autocomplete="username" />
+    <Campo nome="senha" rotulo="Senha" tipo="password" autocomplete="current-password" />
+    <button type="submit" class="w-full cursor-pointer rounded-full bg-verde-cta px-6 py-2.5 text-[15px] font-bold text-verde-noite shadow disabled:opacity-60">Entrar</button>
+    <p class="flex flex-wrap justify-between gap-2 text-sm">
+      <a href={url("/cadastro")} class="font-semibold text-azul hover:underline">Criar conta</a>
+      <a href={url("/recuperar-senha")} class="font-semibold text-azul hover:underline">Esqueci minha senha</a>
+    </p>
+  </form>
+</CartaoForm>
+
+<script>
+  import { api, destinoSeguro, limparErro, mostrarErro, salvarSessao, type Sessao } from "../lib/api";
+  const form = document.querySelector<HTMLFormElement>("#form")!;
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    limparErro(form);
+    const d = Object.fromEntries(new FormData(form)) as Record<string, string>;
+    const botao = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
+    botao.disabled = true;
+    try {
+      const r = await api<Sessao>("/login", { metodo: "POST", corpo: { login: d.login.trim().toLowerCase(), senha: d.senha }, auth: false });
+      salvarSessao({ token: r.token, expiraEm: r.expiraEm, usuario: r.usuario });
+      const padrao = r.usuario.papel === "admin" ? "/admin" : "/minha-inscricao";
+      location.href = destinoSeguro(new URLSearchParams(location.search).get("voltar"), padrao);
+    } catch (err) {
+      mostrarErro(form, err);
+      botao.disabled = false;
+    }
+  });
+</script>

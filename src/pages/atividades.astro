@@ -1,0 +1,152 @@
+---
+import { url } from "../lib/url";
+import { ChevronLeft, ExternalLink, Info } from "@lucide/astro";
+import PaginaCabecalho from "../components/PaginaCabecalho.astro";
+import Base from "../layouts/Base.astro";
+import { atividades, dias, palestrantePor, rotulosTipo, type TipoAtividade } from "../data/evento";
+
+/* Página única de atividades (RN-04): filtro por tipo e atividade selecionada via ?atividade=slug ou #slug (RN-06). */
+const filtros: { id: string; rotulo: string; tipos: TipoAtividade[]; nota?: string }[] = [
+  { id: "todas", rotulo: "Todas", tipos: [] },
+  { id: "palestra", rotulo: "Palestras", tipos: ["palestra", "mesa-redonda"], nota: "Realizadas no Auditório Central, com acesso por ordem de chegada mediante crachá." },
+  { id: "minicurso", rotulo: "Minicursos", tipos: ["minicurso"], nota: "Práticos, de 3 horas, com vagas limitadas. Chegue 15 minutos antes para o credenciamento." },
+  { id: "curso", rotulo: "Cursos", tipos: ["curso"], nota: "Cursos de extensão de 8 horas; o certificado exige presença nos dois encontros." },
+  { id: "banner", rotulo: "Banners", tipos: ["banner"], nota: "Pôster de 90 × 120 cm em retrato; montagem até 30 minutos antes; um autor presente durante a sessão." },
+  { id: "artigo", rotulo: "Artigos", tipos: ["artigo"], nota: "15 minutos de apresentação e 5 de arguição. Templates na página de Artigos e Materiais." },
+  { id: "outras", rotulo: "Outras", tipos: ["cerimonia", "organizacao"] },
+];
+const filtroDe = (tipo: TipoAtividade) => filtros.find((f) => f.tipos.includes(tipo))!.id;
+---
+
+<Base titulo="Atividades" ativo="/atividades">
+  <PaginaCabecalho
+    titulo="Atividades do evento"
+    descricao="Todas as atividades da Semana Acadêmica em uma só página. Filtre por tipo ou abra uma atividade a partir do cronograma."
+    trilha={[{ href: "/", rotulo: "Início" }]}
+  />
+
+  <a
+    data-voltar
+    hidden
+    href={url("/cronograma")}
+    class="mb-3 inline-flex items-center gap-1 rounded-full border border-verde-escuro bg-white px-3.5 py-1.5 text-tabela font-semibold text-verde-escuro hover:bg-palha"
+  >
+    <ChevronLeft class="size-4" aria-hidden="true" />
+    Voltar para o Cronograma
+  </a>
+
+  <div role="group" aria-label="Filtrar por tipo" class="flex flex-wrap gap-2">
+    {
+      filtros.map((f) => (
+        <button
+          type="button"
+          data-filtro={f.id}
+          aria-pressed={f.id === "todas" ? "true" : "false"}
+          class="cursor-pointer rounded-full border border-verde-medio/40 bg-white px-4 py-1 text-tabela font-semibold text-verde-escuro transition-colors hover:border-verde-medio aria-pressed:border-verde-escuro aria-pressed:bg-verde-escuro aria-pressed:text-white"
+        >
+          {f.rotulo}
+        </button>
+      ))
+    }
+  </div>
+
+  {
+    filtros
+      .filter((f) => f.nota)
+      .map((f) => (
+        <p data-nota={f.id} hidden class="mt-2 flex items-start gap-2 rounded-cartao bg-creme px-4 py-2 text-sm text-chumbo">
+          <Info class="mt-0.5 size-4 shrink-0 text-verde-medio" aria-hidden="true" />
+          {f.nota}
+        </p>
+      ))
+  }
+
+  <div class="mt-3 grid gap-3 lg:grid-cols-2">
+    {
+      atividades.map((a) => {
+        const dia = dias.find((d) => d.id === a.dia)!;
+        const palestrante = palestrantePor(a.palestrante);
+        return (
+          <article
+            id={a.slug}
+            data-atividade={a.slug}
+            data-tipo={filtroDe(a.tipo)}
+            class="scroll-mt-3 rounded-cartao border border-borda bg-white p-4 data-[selecionada]:border-2 data-[selecionada]:border-verde-cta data-[selecionada]:bg-palha data-[selecionada]:shadow-lg"
+          >
+            <div class="flex flex-wrap gap-2 text-xs font-bold">
+              <span class="rounded-full bg-verde-escuro px-2.5 py-0.5 text-white">{rotulosTipo[a.tipo]}</span>
+              <span class="rounded-full bg-creme px-2.5 py-0.5 text-verde-escuro">{dia.rotulo} · {a.horario}</span>
+              {a.vagas && <span class="rounded-full bg-creme px-2.5 py-0.5 text-verde-escuro">{a.vagas}</span>}
+              {a.cargaHoraria && <span class="rounded-full bg-creme px-2.5 py-0.5 text-verde-escuro">{a.cargaHoraria}</span>}
+            </div>
+            <h2 class="mt-2 text-[17px] leading-tight font-semibold text-verde-escuro">{a.titulo}</h2>
+            <p class="mt-1 text-tabela text-chumbo/70">{a.local}{palestrante && ` · ${palestrante.nome}`}</p>
+            {a.descricao.map((p) => <p class="mt-2 text-sm text-chumbo">{p}</p>)}
+            {
+              a.topicos && (
+                <details class="mt-2 group">
+                  <summary class="cursor-pointer text-tabela font-semibold text-azul">Tópicos e orientações</summary>
+                  <ul class="mt-1.5 space-y-1">
+                    {a.topicos.map((t) => (
+                      <li class="flex gap-2 text-tabela text-chumbo">
+                        <span class="mt-2 size-1.5 shrink-0 rounded-full bg-verde-medio" aria-hidden="true" />
+                        {t}
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )
+            }
+            {
+              palestrante && (
+                <p class="mt-2 flex flex-wrap items-center gap-x-3 text-tabela">
+                  <a href={url("/palestrantes")} class="font-semibold text-verde-medio hover:underline">
+                    {palestrante.nome}
+                  </a>
+                  <a href={palestrante.lattes} target="_blank" rel="noopener" class="flex items-center gap-1 text-azul hover:underline">
+                    Currículo Lattes
+                    <ExternalLink class="size-3" aria-hidden="true" />
+                  </a>
+                </p>
+              )
+            }
+          </article>
+        );
+      })
+    }
+  </div>
+
+  <p data-vazio hidden class="mt-3 rounded-cartao bg-creme p-4 text-sm text-chumbo">Nenhuma atividade neste tipo.</p>
+</Base>
+
+<script>
+  const cartoes = [...document.querySelectorAll<HTMLElement>("[data-atividade]")];
+  const botoes = [...document.querySelectorAll<HTMLButtonElement>("[data-filtro]")];
+  const notas = [...document.querySelectorAll<HTMLElement>("[data-nota]")];
+
+  const filtrar = (id: string) => {
+    botoes.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.filtro === id)));
+    notas.forEach((n) => (n.hidden = n.dataset.nota !== id));
+    let visiveis = 0;
+    cartoes.forEach((c) => {
+      const mostrar = id === "todas" || c.dataset.tipo === id;
+      c.hidden = !mostrar;
+      if (mostrar) visiveis++;
+    });
+    document.querySelector<HTMLElement>("[data-vazio]")!.hidden = visiveis > 0;
+  };
+  botoes.forEach((b) => b.addEventListener("click", () => filtrar(b.dataset.filtro!)));
+
+  const params = new URLSearchParams(location.search);
+  const slug = params.get("atividade") ?? decodeURIComponent(location.hash.slice(1));
+  const alvo = cartoes.find((c) => c.dataset.atividade === slug);
+  if (alvo) {
+    filtrar(alvo.dataset.tipo!);
+    alvo.dataset.selecionada = "";
+    alvo.querySelector("details")?.setAttribute("open", "");
+    alvo.tabIndex = -1;
+    alvo.scrollIntoView({ block: "start" });
+    alvo.focus({ preventScroll: true });
+  }
+  if (params.get("de") === "cronograma") document.querySelector<HTMLElement>("[data-voltar]")!.hidden = false;
+</script>

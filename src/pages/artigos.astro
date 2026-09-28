@@ -1,10 +1,10 @@
 ---
+import { url } from "../lib/url";
 import { CalendarClock, Download, ExternalLink } from "@lucide/astro";
 import Abas from "../components/Abas.astro";
-import CartaoAtividade from "../components/CartaoAtividade.astro";
 import PaginaCabecalho from "../components/PaginaCabecalho.astro";
 import Base from "../layouts/Base.astro";
-import { materiais, porTipo, prazos, regrasSubmissao } from "../data/evento";
+import { linkAtividade, materiais, porTipo, prazos, regrasSubmissao } from "../data/evento";
 
 const sessoes = porTipo("artigo");
 ---
@@ -25,7 +25,18 @@ const sessoes = porTipo("artigo");
     ]}
   >
     <div data-painel="sessoes" class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-      {sessoes.map((atividade) => <CartaoAtividade atividade={atividade} />)}
+      {
+        sessoes.map((a) => (
+          <article class="flex flex-col rounded-cartao border border-verde-medio bg-palha p-4">
+            <h3 class="text-[17px] leading-tight font-semibold text-verde-escuro">{a.titulo}</h3>
+            <p class="mt-1 text-tabela text-chumbo/80">{a.horario} · {a.local}</p>
+            <p class="mt-2 line-clamp-2 text-sm text-chumbo">{a.descricao[0]}</p>
+            <a href={url(linkAtividade(a.slug))} class="mt-auto pt-2 text-tabela font-semibold text-azul hover:underline">
+              Ver na página de Atividades
+            </a>
+          </article>
+        ))
+      }
     </div>
 
     <div data-painel="templates" class="grid gap-5 md:grid-cols-3">

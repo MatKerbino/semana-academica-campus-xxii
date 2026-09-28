@@ -1,0 +1,46 @@
+---
+import { url } from "../lib/url";
+import Campo from "../components/Campo.astro";
+import CartaoForm from "../components/CartaoForm.astro";
+---
+
+<CartaoForm titulo="Recuperar acesso" descricao="Para redefinir a senha, confirme os dados informados na sua inscrição. Sua senha atual nunca é exibida.">
+  <form id="form" novalidate class="grid gap-3">
+    <p data-erro-geral role="alert" hidden class="rounded-lg bg-red-50 p-2 text-sm font-semibold text-red-700"></p>
+    <Campo nome="login" rotulo="Login" autocomplete="username" />
+    <Campo nome="cpf" rotulo="CPF da inscrição" inputmode="numeric" maxlength={14} />
+    <Campo nome="dataNascimento" rotulo="Data de nascimento da inscrição" tipo="date" />
+    <Campo nome="novaSenha" rotulo="Nova senha" tipo="password" autocomplete="new-password" minlength={8} />
+    <Campo nome="confirmacaoNovaSenha" rotulo="Confirmar nova senha" tipo="password" autocomplete="new-password" />
+    <button type="submit" class="w-full cursor-pointer rounded-full bg-verde-cta px-6 py-2.5 text-[15px] font-bold text-verde-noite shadow disabled:opacity-60">Redefinir senha</button>
+    <p class="text-center text-sm text-chumbo">
+      <a href={url("/entrar")} class="font-semibold text-azul hover:underline">Voltar para o login</a>
+    </p>
+  </form>
+  <p id="sucesso" role="status" hidden class="rounded-lg bg-green-50 p-3 text-sm text-verde-escuro">
+    Senha redefinida. <a href={url("/entrar")} class="font-semibold text-azul hover:underline">Entrar com a nova senha</a>.
+  </p>
+</CartaoForm>
+
+<script>
+  import { api, erroCampos, limparErro, mostrarErro, soDigitos } from "../lib/api";
+  const form = document.querySelector<HTMLFormElement>("#form")!;
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    limparErro(form);
+    const d = Object.fromEntries(new FormData(form)) as Record<string, string>;
+    if (d.novaSenha !== d.confirmacaoNovaSenha)
+      return mostrarErro(form, erroCampos({ confirmacaoNovaSenha: "A confirmação deve ser igual à nova senha." }));
+    const botao = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
+    botao.disabled = true;
+    try {
+      await api("/recuperar-senha", { metodo: "POST", corpo: { ...d, login: d.login.trim().toLowerCase(), cpf: soDigitos(d.cpf) }, auth: false });
+      form.hidden = true;
+      document.querySelector<HTMLElement>("#sucesso")!.hidden = false;
+    } catch (err) {
+      mostrarErro(form, err);
+    } finally {
+      botao.disabled = false;
+    }
+  });
+</script>

@@ -1,7 +1,7 @@
 ---
 import { url } from "../lib/url";
 import "../styles/global.css";
-import { Leaf, Mail, Menu } from "@lucide/astro";
+import { ClipboardList, Leaf, Mail, Menu } from "@lucide/astro";
 import { evento } from "../data/evento";
 
 interface Props {
@@ -16,10 +16,7 @@ const { titulo, descricao = evento.descricao, ativo } = Astro.props;
 const menu = [
   { href: "/", rotulo: "Início" },
   { href: "/cronograma", rotulo: "Cronograma" },
-  { href: "/minicursos", rotulo: "Minicursos" },
-  { href: "/palestras", rotulo: "Palestras" },
-  { href: "/cursos", rotulo: "Cursos" },
-  { href: "/banners", rotulo: "Banners" },
+  { href: "/atividades", rotulo: "Atividades" },
   { href: "/artigos", rotulo: "Artigos" },
   { href: "/palestrantes", rotulo: "Palestrantes" },
   { href: "/patrocinadores", rotulo: "Patrocinadores" },
@@ -34,10 +31,9 @@ const navRodape = [
     { href: "/local", rotulo: "Local" },
   ],
   [
-    { href: "/minicursos", rotulo: "Minicursos" },
-    { href: "/palestras", rotulo: "Palestras" },
-    { href: "/cursos", rotulo: "Cursos" },
-    { href: "/banners", rotulo: "Banners" },
+    { href: "/atividades", rotulo: "Atividades" },
+    { href: "/inscricao", rotulo: "Inscrição" },
+    { href: "/politica-de-privacidade", rotulo: "Privacidade" },
   ],
   [
     { href: "/artigos", rotulo: "Artigos" },
@@ -46,7 +42,7 @@ const navRodape = [
   ],
 ];
 
-const inscricao = `mailto:${evento.email}?subject=${encodeURIComponent("Inscrição — 1ª Semana Acadêmica do Campus XXII")}`;
+const inscricao = url("/inscricao");
 ---
 
 <html lang="pt-BR">
@@ -101,11 +97,13 @@ const inscricao = `mailto:${evento.email}?subject=${encodeURIComponent("Inscriç
             </ul>
           </nav>
 
+          <div data-sessao-nav data-classe="rounded text-tabela font-medium text-white hover:text-verde-cta" class="ml-auto hidden items-center gap-4 xl:flex"></div>
+
           <a
             href={inscricao}
             class="ml-auto flex shrink-0 items-center gap-2 rounded-full bg-verde-cta px-[22px] py-3 text-sm leading-[130%] font-bold text-verde-noite shadow transition-transform hover:scale-[1.03] xl:ml-0"
           >
-            <Mail class="size-4" aria-hidden="true" />
+            <ClipboardList class="size-4" aria-hidden="true" />
             Realizar Inscrição
           </a>
 
@@ -138,6 +136,7 @@ const inscricao = `mailto:${evento.email}?subject=${encodeURIComponent("Inscriç
                   ))
                 }
               </ul>
+              <div data-sessao-nav data-classe="block rounded px-3 py-2 hover:bg-creme" class="border-t border-borda pt-1 text-sm"></div>
             </nav>
           </details>
         </div>
@@ -182,9 +181,9 @@ const inscricao = `mailto:${evento.email}?subject=${encodeURIComponent("Inscriç
                 Inscrição
               </h2>
               <p class="text-tabela">
-                <a href={inscricao} class="hover:underline">{evento.email}</a>
+                <a href={inscricao} class="hover:underline">Inscreva-se pelo site</a>
               </p>
-              <p class="text-tabela">Custo: 1 kg de alimento não perecível</p>
+              <p class="text-tabela">Custo: <span data-custo>1 kg de alimento não perecível</span></p>
               <p class="text-tabela">Aberto à comunidade interna e externa</p>
             </section>
 
@@ -198,8 +197,8 @@ const inscricao = `mailto:${evento.email}?subject=${encodeURIComponent("Inscriç
           <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-tabela xl:hidden">
             <span class="font-bold text-white">1ª Semana Acadêmica · Campus XXII</span>
             <span>{evento.periodo}</span>
-            <a href={inscricao} class="text-azul-claro hover:underline">{evento.email}</a>
-            <span>Inscrição: 1 kg de alimento não perecível</span>
+            <a href={inscricao} class="text-azul-claro hover:underline">Inscreva-se pelo site</a>
+            <span>Custo: <span data-custo>1 kg de alimento não perecível</span></span>
           </div>
 
           <hr class="mt-2.5 h-px border-0 bg-divisor" />
@@ -211,3 +210,34 @@ const inscricao = `mailto:${evento.email}?subject=${encodeURIComponent("Inscriç
     </div>
   </body>
 </html>
+
+<script>
+  import { api, descreverPagamento, sair, sessao, type Pagamento } from "../lib/api";
+  import { url } from "../lib/url";
+
+  // Navegação conforme a sessão (Entrar / Minha inscrição / Admin / Sair).
+  const s = sessao();
+  document.querySelectorAll<HTMLElement>("[data-sessao-nav]").forEach((nav) => {
+    const c = nav.dataset.classe ?? "";
+    const link = (href: string, rotulo: string) => `<a href="${url(href)}" class="${c}">${rotulo}</a>`;
+    nav.innerHTML = s
+      ? [
+          link("/minha-inscricao", "Minha inscrição"),
+          s.usuario.papel === "admin" ? link("/admin", "Admin") : "",
+          `<button type="button" data-sair class="${c} cursor-pointer text-left">Sair</button>`,
+        ].join("")
+      : link("/entrar", "Entrar");
+    nav.querySelector("[data-sair]")?.addEventListener("click", () => {
+      sair();
+      location.href = url("/");
+    });
+  });
+
+  // A forma de pagamento vigente é definida pelo administrador: substitui o texto padrão quando a API responde.
+  const custos = document.querySelectorAll<HTMLElement>("[data-custo]");
+  if (custos.length) {
+    api<Pagamento>("/pagamento", { auth: false })
+      .then((p) => custos.forEach((el) => (el.textContent = descreverPagamento(p))))
+      .catch(() => {});
+  }
+</script>

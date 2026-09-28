@@ -95,7 +95,7 @@ Cabeçalho e rodapé são fixos e a rolagem acontece só dentro do conteúdo. Pa
 - Cabeçalho e rodapé fixos; a rolagem ocorre **apenas dentro da área de conteúdo** (`src/layouts/Base.astro`).
 - Conteúdo dividido em **abas** (`src/components/Abas.astro`) na Página Inicial, no Cronograma e em Artigos, para caber em uma tela.
 - Botão "Realizar Inscrição" (verde #33d40c) fixo no cabeçalho em todas as páginas.
-- Páginas de atividade têm "Voltar para o Cronograma" e trilha de navegação.
+- A página de Atividades mostra "Voltar para o Cronograma" quando aberta a partir dele (`?de=cronograma`).
 - Todo o conteúdo vem de um único arquivo: `src/data/evento.ts`.
 
 ## Rastreabilidade
@@ -104,11 +104,12 @@ Cabeçalho e rodapé são fixos e a rolagem acontece só dentro do conteúdo. Pa
 |---|---|---|
 | Página Inicial | `src/pages/index.astro` | RF-01, RF-02, RF-09, RF-10, RF-11 · US-01, US-11 |
 | Cronograma | `src/pages/cronograma.astro` | RF-03 · US-02 |
-| Página da atividade | `src/pages/atividades/[slug].astro` | RF-06 · US-03 |
-| Minicursos | `src/pages/minicursos.astro` | RF-07 · US-04 |
-| Palestras | `src/pages/palestras.astro` | RF-07 · US-05 |
-| Cursos | `src/pages/cursos.astro` | RF-07 · US-06 |
-| Exposição de Banners | `src/pages/banners.astro` | RF-07 · US-06 |
+| Atividades (página única, filtro por tipo e `?atividade=slug`) | `src/pages/atividades.astro` | RN-04, RN-05, RN-06 · US-03 |
+| Inscrição (assistente em 3 etapas) | `src/pages/inscricao.astro` | US-11 a US-16 |
+| Minha inscrição (consulta, edição, cancelamento, devolução) | `src/pages/minha-inscricao.astro` | US-17 a US-21 |
+| Cadastro / Entrar / Recuperar senha | `src/pages/cadastro.astro`, `entrar.astro`, `recuperar-senha.astro` | US-08 a US-10 |
+| Política de Privacidade | `src/pages/politica-de-privacidade.astro` | US-13 |
+| Painel administrativo | `src/pages/admin.astro` | US-22 a US-27 |
 | Artigos e Materiais | `src/pages/artigos.astro` | RF-07, RF-12 · US-07 |
 | Palestrantes | `src/pages/palestrantes.astro` | RF-05, RF-13 · US-08 |
 | Patrocinadores | `src/pages/patrocinadores.astro` | RF-08 · US-10 |
@@ -120,4 +121,12 @@ Cabeçalho e rodapé são fixos e a rolagem acontece só dentro do conteúdo. Pa
 - **Links de templates** (`materiais`): URLs do Google Docs são provisórias.
 - **E-mails e Currículo Lattes dos palestrantes**: os links de Lattes apontam para lattes.cnpq.br sem o ID de cada pesquisador.
 
-Sem cadastro, login ou processamento de inscrição (US-11 AC-04/AC-05): a inscrição é feita por e-mail via `mailto:`.
+## API e inscrições
+
+O site continua estático, mas as telas de conta, inscrição e admin consomem a API (repo `semana-academica-api`, contrato em `docs/API.md`).
+A URL vem de `PUBLIC_API_URL` (ver `.env.example`; `.env.development` aponta para `http://localhost:3000`, e `.env.production`
+deve conter a Function URL da Lambda). A sessão (token) fica em `localStorage` (`src/lib/api.ts`); a proteção de rotas no cliente é
+só conveniência — a autorização real é feita pela API.
+
+As páginas antigas `/minicursos`, `/palestras`, `/cursos`, `/banners` e `/atividades/<slug>` foram unificadas em `/atividades` (RN-04).
+Se o CloudFront tiver regras específicas para essas rotas (ver seção acima), elas podem ser removidas.

@@ -1,0 +1,248 @@
+---
+import Abas from "../components/Abas.astro";
+import PaginaCabecalho from "../components/PaginaCabecalho.astro";
+import Base from "../layouts/Base.astro";
+
+const campo = "mt-1 w-full rounded-lg border border-borda bg-white px-3 py-2 text-sm text-chumbo";
+const primario = "cursor-pointer rounded-full bg-verde-cta px-5 py-2 text-sm font-bold text-verde-noite shadow disabled:opacity-60";
+---
+
+<Base titulo="Painel administrativo" ativo="/admin">
+  <PaginaCabecalho titulo="Painel administrativo" descricao="Gerencie a forma de pagamento, os prazos, os participantes e as inscrições." trilha={[{ href: "/", rotulo: "Início" }]} />
+
+  <p id="aviso" role="status" hidden class="mb-3 rounded-lg bg-green-50 p-3 text-sm font-semibold text-verde-escuro"></p>
+  <p data-erro-geral role="alert" hidden class="mb-3 rounded-lg bg-red-50 p-3 text-sm font-semibold text-red-700"></p>
+
+  <Abas
+    rotuloLista="Seções do painel"
+    abas={[
+      { id: "inscricoes", rotulo: "Inscrições" },
+      { id: "participantes", rotulo: "Participantes" },
+      { id: "pagamento", rotulo: "Forma de pagamento" },
+      { id: "prazos", rotulo: "Prazos" },
+    ]}
+  >
+    <div data-painel="inscricoes">
+      <div class="overflow-x-auto rounded-cartao border border-borda bg-white">
+        <table class="w-full text-left text-sm">
+          <caption class="sr-only">Inscrições realizadas</caption>
+          <thead class="bg-creme text-tabela text-verde-escuro">
+            <tr>
+              <th scope="col" class="px-3 py-2">Participante</th>
+              <th scope="col" class="px-3 py-2">Contato</th>
+              <th scope="col" class="px-3 py-2">Situação</th>
+              <th scope="col" class="px-3 py-2">Atividades</th>
+              <th scope="col" class="px-3 py-2">Pagamento / compensação</th>
+              <th scope="col" class="px-3 py-2">Devolução</th>
+            </tr>
+          </thead>
+          <tbody id="linhas-inscricoes"></tbody>
+        </table>
+      </div>
+      <p id="vazio-inscricoes" hidden class="mt-2 text-sm text-chumbo">Nenhuma inscrição registrada.</p>
+    </div>
+
+    <div data-painel="participantes">
+      <div class="overflow-x-auto rounded-cartao border border-borda bg-white">
+        <table class="w-full text-left text-sm">
+          <caption class="sr-only">Participantes cadastrados</caption>
+          <thead class="bg-creme text-tabela text-verde-escuro">
+            <tr>
+              <th scope="col" class="px-3 py-2">Login</th>
+              <th scope="col" class="px-3 py-2">Nome</th>
+              <th scope="col" class="px-3 py-2">Conta criada em</th>
+              <th scope="col" class="px-3 py-2">Inscrição</th>
+            </tr>
+          </thead>
+          <tbody id="linhas-participantes"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div data-painel="pagamento">
+      <form id="form-pagamento" novalidate class="grid max-w-[560px] gap-3 rounded-cartao border border-borda bg-white p-4">
+        <p data-erro-geral role="alert" hidden class="rounded-lg bg-red-50 p-2 text-sm font-semibold text-red-700"></p>
+        <fieldset>
+          <legend class="text-sm font-semibold text-verde-escuro">Modalidade (única para todo o evento)</legend>
+          <label class="mt-1 flex items-center gap-2 text-sm"><input type="radio" name="modalidade" value="nao_monetaria" class="accent-verde-medio" /> Não monetária (alimento, brinquedo, material escolar…)</label>
+          <label class="mt-1 flex items-center gap-2 text-sm"><input type="radio" name="modalidade" value="monetaria" class="accent-verde-medio" /> Monetária (valor em reais)</label>
+        </fieldset>
+        <div id="grupo-valor" hidden>
+          <label for="pag-valor" class="block text-sm font-semibold text-verde-escuro">Valor (R$)</label>
+          <input id="pag-valor" name="valor" type="number" min="0.01" step="0.01" inputmode="decimal" class={campo} aria-describedby="erro-valor" />
+          <p id="erro-valor" data-erro="valor" class="mt-0.5 text-xs font-semibold text-red-700"></p>
+        </div>
+        <div id="grupo-descricao">
+          <label for="pag-descricao" class="block text-sm font-semibold text-verde-escuro">Descrição da compensação</label>
+          <textarea id="pag-descricao" name="descricao" rows="3" maxlength="300" class={campo} aria-describedby="erro-descricao"></textarea>
+          <p id="erro-descricao" data-erro="descricao" class="mt-0.5 text-xs font-semibold text-red-700"></p>
+        </div>
+        <div><button type="submit" class={primario}>Salvar forma de pagamento</button></div>
+      </form>
+    </div>
+
+    <div data-painel="prazos">
+      <form id="form-prazos" class="grid max-w-[560px] gap-3 rounded-cartao border border-borda bg-white p-4">
+        <p data-erro-geral role="alert" hidden class="rounded-lg bg-red-50 p-2 text-sm font-semibold text-red-700"></p>
+        <div>
+          <label for="prazo-cancelamento" class="block text-sm font-semibold text-verde-escuro">Prazo para cancelamento</label>
+          <input id="prazo-cancelamento" name="prazoCancelamento" type="datetime-local" class={campo} />
+        </div>
+        <div>
+          <label for="prazo-alteracao" class="block text-sm font-semibold text-verde-escuro">Prazo para alterar atividades</label>
+          <input id="prazo-alteracao" name="prazoAlteracao" type="datetime-local" class={campo} />
+        </div>
+        <p class="text-xs text-chumbo/70">Deixe em branco para não limitar por data.</p>
+        <div><button type="submit" class={primario}>Salvar prazos</button></div>
+      </form>
+    </div>
+  </Abas>
+</Base>
+
+<script>
+  import {
+    api, erroCampos, esc, exigirLogin, formatarCPF, formatarDataHora, formatarMoeda, limparErro, mostrarErro,
+    rotuloSituacaoInscricao, type Inscricao, type Pagamento,
+  } from "../lib/api";
+
+  const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
+  type Linha = Inscricao & { login: string };
+  const paraLocal = (iso: string | null) => {
+    if (!iso) return "";
+    const d = new Date(iso);
+    return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  };
+  const aviso = (msg: string) => {
+    const a = $("#aviso");
+    a.textContent = msg;
+    a.hidden = false;
+  };
+  const opcoes = (atual: string, itens: [string, string][]) =>
+    itens.map(([v, r]) => `<option value="${v}" ${v === atual ? "selected" : ""}>${r}</option>`).join("");
+  const selectCls = "rounded-lg border border-borda bg-white px-2 py-1 text-tabela";
+
+  if (exigirLogin("admin")) {
+    carregarInscricoes();
+    carregarParticipantes();
+    carregarPagamento();
+  }
+
+  async function carregarInscricoes() {
+    try {
+      const { inscricoes } = await api<{ inscricoes: Linha[] }>("/admin/inscricoes");
+      $("#vazio-inscricoes").hidden = inscricoes.length > 0;
+      $("#linhas-inscricoes").innerHTML = inscricoes
+        .map((i) => {
+          const d = i.dados ?? {};
+          return `<tr class="odd:bg-white even:bg-palha align-top" data-login="${esc(i.login)}">
+            <td class="px-3 py-2"><strong>${esc(d.nome ?? "—")}</strong><br><span class="text-tabela text-chumbo/70">${esc(i.login)} · CPF ${esc(formatarCPF(d.cpf) || "—")}</span></td>
+            <td class="px-3 py-2 text-tabela">${esc(d.email ?? "—")}<br>${esc(d.telefone ?? "")}</td>
+            <td class="px-3 py-2">${rotuloSituacaoInscricao[i.status]}<br><span class="text-tabela text-chumbo/70">${formatarDataHora(i.atualizadaEm)}</span></td>
+            <td class="px-3 py-2 text-tabela">${i.atividades.length ? esc(i.atividades.join(", ")) : "—"}</td>
+            <td class="px-3 py-2">${
+              i.status === "confirmada" || i.situacaoPagamento
+                ? `<label class="sr-only" for="pg-${esc(i.login)}">Situação do pagamento de ${esc(i.login)}</label>
+                   <select id="pg-${esc(i.login)}" data-acao="pagamento" class="${selectCls}">${opcoes(i.situacaoPagamento ?? "pendente", [["pendente", "Pendente"], ["regularizada", "Regularizada"]])}</select>`
+                : "—"
+            }</td>
+            <td class="px-3 py-2">${
+              i.devolucao
+                ? `<label class="sr-only" for="dv-${esc(i.login)}">Situação da devolução de ${esc(i.login)}</label>
+                   <select id="dv-${esc(i.login)}" data-acao="devolucao" class="${selectCls}">${opcoes(i.devolucao.situacao, [["pendente", "Pendente"], ["devolvido", "Devolvido"]])}</select>
+                   ${i.devolucao.valor != null ? `<br><span class="text-tabela">${formatarMoeda(i.devolucao.valor)}</span>` : ""}`
+                : "—"
+            }</td>
+          </tr>`;
+        })
+        .join("");
+    } catch (e) {
+      mostrarErro(document.body, e);
+    }
+  }
+
+  $("#linhas-inscricoes").addEventListener("change", async (ev) => {
+    const sel = ev.target as HTMLSelectElement;
+    const acao = sel.dataset.acao;
+    if (!acao) return;
+    const login = (sel.closest("tr") as HTMLElement).dataset.login!;
+    limparErro(document.body);
+    try {
+      await api(`/admin/inscricoes/${encodeURIComponent(login)}/${acao}`, { metodo: "PATCH", corpo: { situacao: sel.value } });
+      aviso(`Situação de ${acao === "pagamento" ? "pagamento" : "devolução"} de ${login} atualizada.`);
+    } catch (e) {
+      mostrarErro(document.body, e);
+      carregarInscricoes();
+    }
+  });
+
+  async function carregarParticipantes() {
+    try {
+      const { participantes } = await api<{ participantes: { login: string; criadoEm: string; nome: string | null; statusInscricao: keyof typeof rotuloSituacaoInscricao | null }[] }>("/admin/participantes");
+      $("#linhas-participantes").innerHTML = participantes
+        .map(
+          (p) => `<tr class="odd:bg-white even:bg-palha"><td class="px-3 py-2">${esc(p.login)}</td><td class="px-3 py-2">${esc(p.nome ?? "—")}</td>
+            <td class="px-3 py-2">${formatarDataHora(p.criadoEm)}</td><td class="px-3 py-2">${p.statusInscricao ? rotuloSituacaoInscricao[p.statusInscricao] : "Sem inscrição"}</td></tr>`,
+        )
+        .join("");
+    } catch (e) {
+      mostrarErro(document.body, e);
+    }
+  }
+
+  // Forma de pagamento
+  const formPag = $<HTMLFormElement>("#form-pagamento");
+  const alternar = () => {
+    const monetaria = (formPag.elements.namedItem("modalidade") as RadioNodeList).value === "monetaria";
+    $("#grupo-valor").hidden = !monetaria;
+    $("#grupo-descricao").hidden = monetaria;
+  };
+  formPag.addEventListener("change", alternar);
+
+  async function carregarPagamento() {
+    try {
+      const p = await api<Pagamento>("/pagamento", { auth: false });
+      (formPag.elements.namedItem("modalidade") as RadioNodeList).value = p.modalidade;
+      (formPag.elements.namedItem("valor") as HTMLInputElement).value = p.valor != null ? String(p.valor) : "";
+      (formPag.elements.namedItem("descricao") as HTMLTextAreaElement).value = p.descricao ?? "";
+      $<HTMLInputElement>("#prazo-cancelamento").value = paraLocal(p.prazoCancelamento);
+      $<HTMLInputElement>("#prazo-alteracao").value = paraLocal(p.prazoAlteracao);
+      alternar();
+    } catch (e) {
+      mostrarErro(document.body, e);
+    }
+  }
+
+  formPag.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    limparErro(formPag);
+    const modalidade = (formPag.elements.namedItem("modalidade") as RadioNodeList).value;
+    const valor = Number((formPag.elements.namedItem("valor") as HTMLInputElement).value);
+    const descricao = (formPag.elements.namedItem("descricao") as HTMLTextAreaElement).value.trim();
+    if (!modalidade) return mostrarErro(formPag, erroCampos({}, "Selecione a modalidade."));
+    if (modalidade === "monetaria" && !(valor > 0)) return mostrarErro(formPag, erroCampos({ valor: "Informe um valor maior que zero." }));
+    if (modalidade === "nao_monetaria" && !descricao) return mostrarErro(formPag, erroCampos({ descricao: "Descreva a compensação exigida." }));
+    try {
+      await api("/admin/pagamento", { metodo: "PUT", corpo: modalidade === "monetaria" ? { modalidade, valor } : { modalidade, descricao } });
+      aviso("Forma de pagamento salva. Ela vale para todas as novas inscrições e para a página inicial.");
+    } catch (e) {
+      mostrarErro(formPag, e);
+    }
+  });
+
+  // Prazos
+  const formPrazos = $<HTMLFormElement>("#form-prazos");
+  formPrazos.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    limparErro(formPrazos);
+    const iso = (nome: string) => {
+      const v = (formPrazos.elements.namedItem(nome) as HTMLInputElement).value;
+      return v ? new Date(v).toISOString() : null;
+    };
+    try {
+      await api("/admin/prazos", { metodo: "PUT", corpo: { prazoCancelamento: iso("prazoCancelamento"), prazoAlteracao: iso("prazoAlteracao") } });
+      aviso("Prazos salvos.");
+    } catch (e) {
+      mostrarErro(formPrazos, e);
+    }
+  });
+</script>

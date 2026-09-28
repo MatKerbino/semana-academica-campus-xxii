@@ -1,0 +1,291 @@
+---
+import { url } from "../lib/url";
+import { ClipboardList, Info } from "@lucide/astro";
+import Campo from "../components/Campo.astro";
+import PaginaCabecalho from "../components/PaginaCabecalho.astro";
+import Base from "../layouts/Base.astro";
+import { catalogoSelecionavel } from "../data/evento";
+
+const perfis = [
+  { valor: "estudante", rotulo: "Estudante" },
+  { valor: "professor", rotulo: "Professor(a)" },
+  { valor: "profissional", rotulo: "Profissional" },
+  { valor: "outro", rotulo: "Outro" },
+];
+const botao = "cursor-pointer rounded-full px-6 py-2.5 text-[15px] font-bold shadow disabled:opacity-60";
+const primario = `${botao} bg-verde-cta text-verde-noite`;
+const secundario = `${botao} border-2 border-verde-escuro bg-white text-verde-escuro shadow-none`;
+---
+
+<Base titulo="Inscrição" ativo="/inscricao">
+  <PaginaCabecalho
+    titulo="Inscrição na Semana Acadêmica"
+    descricao="A inscrição é feita aqui no site, em três etapas. Criar a conta e se inscrever são coisas diferentes: a conta só vale como inscrição depois da sua confirmação."
+    trilha={[{ href: "/", rotulo: "Início" }]}
+  />
+
+  <script type="application/json" id="catalogo" set:html={JSON.stringify(catalogoSelecionavel)} />
+
+  <div class="mb-3 flex items-start gap-3 rounded-cartao border border-azul/40 bg-white p-4">
+    <Info class="mt-0.5 size-5 shrink-0 text-azul" aria-hidden="true" />
+    <div class="text-sm text-chumbo">
+      <p class="font-semibold text-verde-escuro">Como funciona</p>
+      <ol class="mt-1 list-decimal space-y-0.5 pl-5">
+        <li>Crie uma conta (login e senha) ou entre.</li>
+        <li>Informe seus dados pessoais e escolha as atividades.</li>
+        <li>Revise, aceite a Política de Privacidade e confirme.</li>
+      </ol>
+      <p class="mt-2">Participação: <strong data-custo>1 kg de alimento não perecível</strong>.</p>
+    </div>
+  </div>
+
+  <!-- Visitante sem sessão -->
+  <div id="anonimo" hidden class="rounded-cartao bg-creme p-5">
+    <h2 class="text-lg font-semibold text-verde-escuro">Para começar, acesse sua conta</h2>
+    <div class="mt-3 flex flex-wrap gap-3">
+      <a href={url("/cadastro")} class={primario}>Criar conta</a>
+      <a href={url("/entrar?voltar=" + encodeURIComponent(url("/inscricao")))} id="link-entrar" class={secundario}>Já tenho conta</a>
+    </div>
+  </div>
+
+  <div id="carregando" role="status" class="rounded-cartao bg-white p-5 text-sm text-chumbo" hidden>Carregando sua inscrição…</div>
+  <p id="erro-carga" role="alert" hidden class="rounded-lg bg-red-50 p-3 text-sm font-semibold text-red-700"></p>
+
+  <div id="mensagem" hidden class="rounded-cartao bg-creme p-5"></div>
+
+  <div id="inicio" hidden class="rounded-cartao bg-creme p-5">
+    <h2 class="text-lg font-semibold text-verde-escuro">Você ainda não iniciou sua inscrição</h2>
+    <p class="mt-1 text-sm text-chumbo">Ter uma conta não é estar inscrito. Inicie a inscrição para preencher seus dados.</p>
+    <button type="button" id="iniciar" class={`mt-3 ${primario}`}>
+      <ClipboardList class="mr-1 inline size-4" aria-hidden="true" />
+      Iniciar inscrição
+    </button>
+  </div>
+
+  <div id="assistente" hidden>
+    <ol id="passos" class="mb-3 flex flex-wrap gap-2 text-tabela font-semibold" aria-label="Etapas da inscrição"></ol>
+    <p data-erro-geral role="alert" hidden class="mb-3 rounded-lg bg-red-50 p-2 text-sm font-semibold text-red-700"></p>
+
+    <form id="etapa-1" hidden novalidate class="grid gap-3 rounded-cartao border border-borda bg-white p-5 md:grid-cols-2">
+      <h2 class="text-lg font-semibold text-verde-escuro md:col-span-2">1. Dados pessoais</h2>
+      <p data-erro-geral role="alert" hidden class="rounded-lg bg-red-50 p-2 text-sm font-semibold text-red-700 md:col-span-2"></p>
+      <Campo nome="nome" rotulo="Nome completo" autocomplete="name" />
+      <Campo nome="cpf" rotulo="CPF" inputmode="numeric" maxlength={14} ajuda="Somente números ou no formato 000.000.000-00." />
+      <Campo nome="email" rotulo="E-mail" tipo="email" autocomplete="email" />
+      <Campo nome="telefone" rotulo="Telefone" tipo="tel" autocomplete="tel" inputmode="tel" ajuda="Com DDD." />
+      <Campo nome="dataNascimento" rotulo="Data de nascimento" tipo="date" autocomplete="bday" />
+      <Campo nome="perfil" rotulo="Perfil" opcoes={perfis} />
+      <div class="flex justify-end md:col-span-2">
+        <button type="submit" class={primario}>Salvar e continuar</button>
+      </div>
+    </form>
+
+    <section id="etapa-2" hidden class="rounded-cartao border border-borda bg-white p-5">
+      <h2 class="text-lg font-semibold text-verde-escuro">2. Atividades</h2>
+      <p class="mt-1 text-sm text-chumbo">Escolha as atividades das quais deseja participar. Atividades sem vagas ficam indisponíveis.</p>
+      <div id="seletor" class="mt-3 grid gap-3"></div>
+      <div class="mt-4 flex flex-wrap justify-between gap-3">
+        <button type="button" data-voltar class={secundario}>Voltar</button>
+        <button type="button" id="salvar-atividades" class={primario}>Salvar e continuar</button>
+      </div>
+    </section>
+
+    <section id="etapa-3" hidden class="rounded-cartao border border-borda bg-white p-5">
+      <h2 class="text-lg font-semibold text-verde-escuro">3. Revisar e confirmar</h2>
+      <div id="resumo" class="mt-3 grid gap-3 md:grid-cols-2"></div>
+      <div class="mt-4 rounded-cartao bg-creme p-3 text-sm text-chumbo">
+        <p class="font-semibold text-verde-escuro">Forma de pagamento / compensação</p>
+        <p id="pagamento-vigente" class="mt-1"></p>
+      </div>
+      <label class="mt-4 flex cursor-pointer items-start gap-2 text-sm text-chumbo">
+        <input type="checkbox" id="aceite" class="mt-1 size-4 accent-verde-medio" />
+        <span>
+          Li e aceito a
+          <a href={url("/politica-de-privacidade")} target="_blank" rel="noopener" class="font-semibold text-azul hover:underline">Política de Privacidade</a>
+          (abre em nova aba).
+        </span>
+      </label>
+      <p id="erro-aceite" class="mt-1 text-xs font-semibold text-red-700"></p>
+      <div class="mt-4 flex flex-wrap justify-between gap-3">
+        <button type="button" data-voltar class={secundario}>Voltar</button>
+        <button type="button" id="confirmar" class={primario}>Confirmar inscrição</button>
+      </div>
+    </section>
+  </div>
+</Base>
+
+<script>
+  import {
+    ApiError, api, caminho, descreverPagamento, esc, formatarCPF, formatarData, limparErro, mostrarErro, erroCampos,
+    rotuloPerfil, sessao, soDigitos, type Dados, type Inscricao, type Pagamento, type Vagas,
+  } from "../lib/api";
+  import { renderSeletor, type ItemCatalogo } from "../lib/seletor";
+
+  const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
+  const mostrar = (id: string, ligado: boolean) => ($(id).hidden = !ligado);
+  const catalogo: ItemCatalogo[] = JSON.parse($("#catalogo").textContent!);
+  const rotulosEtapas = ["Dados pessoais", "Atividades", "Revisar e confirmar"];
+
+  let inscricao: Inscricao | null = null;
+  let pagamento: Pagamento;
+  let vagas: Vagas = {};
+  let etapa = 1;
+  let lerSelecao: () => string[] = () => [];
+
+  const s = sessao();
+  if (!s) {
+    mostrar("#anonimo", true);
+  } else {
+    iniciar();
+  }
+
+  async function iniciar() {
+    mostrar("#carregando", true);
+    try {
+      const [insc, pag, v] = await Promise.all([
+        api<{ inscricao: Inscricao }>("/inscricao").catch((e) => (e instanceof ApiError && e.status === 404 ? null : Promise.reject(e))),
+        api<Pagamento>("/pagamento", { auth: false }),
+        api<{ atividades: Vagas }>("/atividades/vagas", { auth: false }).catch(() => ({ atividades: {} as Vagas })),
+      ]);
+      inscricao = insc?.inscricao ?? null;
+      pagamento = pag;
+      vagas = v.atividades;
+      mostrar("#carregando", false);
+      renderizar();
+    } catch (e) {
+      mostrar("#carregando", false);
+      const el = $("#erro-carga");
+      el.textContent = e instanceof ApiError ? e.message : "Erro inesperado.";
+      el.hidden = false;
+    }
+  }
+
+  function renderizar() {
+    ["#inicio", "#assistente", "#mensagem"].forEach((i) => mostrar(i, false));
+    if (!inscricao) return mostrar("#inicio", true);
+    if (inscricao.status !== "rascunho") {
+      const cancelada = inscricao.status === "cancelada";
+      $("#mensagem").innerHTML = `<h2 class="text-lg font-semibold text-verde-escuro">${cancelada ? "Sua inscrição foi cancelada" : "Sua inscrição já está confirmada"}</h2>
+        <p class="mt-1 text-sm text-chumbo">${cancelada ? "O histórico da inscrição foi mantido." : "Você pode consultar, editar ou cancelar sua inscrição na sua área."}</p>
+        <a href="${caminho("/minha-inscricao")}" class="mt-3 inline-block rounded-full bg-verde-cta px-6 py-2.5 text-[15px] font-bold text-verde-noite shadow">Ver minha inscrição</a>`;
+      return mostrar("#mensagem", true);
+    }
+    mostrar("#assistente", true);
+    irPara(etapa);
+  }
+
+  function irPara(n: number) {
+    etapa = n;
+    limparErro($("#assistente"));
+    $("#passos").innerHTML = rotulosEtapas
+      .map(
+        (r, i) =>
+          `<li aria-current="${i + 1 === n ? "step" : "false"}" class="rounded-full px-4 py-1 ${i + 1 === n ? "bg-verde-escuro text-white" : i + 1 < n ? "bg-verde-claro text-verde-escuro" : "border border-verde-medio/40 bg-white text-verde-escuro"}">${i + 1}. ${r}</li>`,
+      )
+      .join("");
+    [1, 2, 3].forEach((i) => mostrar(`#etapa-${i}`, i === n));
+    if (n === 1) preencherDados();
+    if (n === 2) lerSelecao = renderSeletor($("#seletor"), catalogo, vagas, inscricao!.atividades, inscricao!.atividades);
+    if (n === 3) renderizarResumo();
+    ($(`#etapa-${n}`).querySelector("h2") as HTMLElement).tabIndex = -1;
+    ($(`#etapa-${n}`).querySelector("h2") as HTMLElement).focus();
+  }
+
+  function preencherDados() {
+    const f = $<HTMLFormElement>("#etapa-1");
+    const d = inscricao!.dados ?? {};
+    (["nome", "cpf", "email", "telefone", "dataNascimento", "perfil"] as const).forEach((k) => {
+      const el = f.elements.namedItem(k) as HTMLInputElement | null;
+      if (el && d[k] !== undefined) el.value = k === "cpf" ? formatarCPF(d.cpf) : d[k]!;
+    });
+  }
+
+  $("#iniciar").addEventListener("click", async () => {
+    try {
+      inscricao = (await api<{ inscricao: Inscricao }>("/inscricao", { metodo: "POST" })).inscricao;
+      renderizar();
+    } catch (e) {
+      const el = $("#erro-carga");
+      el.textContent = e instanceof ApiError ? e.message : "Erro inesperado.";
+      el.hidden = false;
+    }
+  });
+
+  $<HTMLFormElement>("#etapa-1").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const f = ev.currentTarget as HTMLFormElement;
+    limparErro(f);
+    const v = Object.fromEntries(new FormData(f)) as Record<string, string>;
+    const dados: Dados = {
+      nome: v.nome.trim(),
+      cpf: soDigitos(v.cpf),
+      email: v.email.trim(),
+      telefone: soDigitos(v.telefone),
+      dataNascimento: v.dataNascimento,
+      perfil: v.perfil as Dados["perfil"],
+    };
+    const campos: Record<string, string> = {};
+    if (!dados.nome) campos.nome = "Informe o nome.";
+    if (dados.cpf!.length !== 11) campos.cpf = "O CPF deve ter 11 dígitos.";
+    if (!/^\S+@\S+\.\S+$/.test(dados.email!)) campos.email = "Informe um e-mail válido.";
+    if (!/^\d{10,11}$/.test(dados.telefone!)) campos.telefone = "Informe o telefone com DDD (10 ou 11 dígitos).";
+    if (!dados.dataNascimento) campos.dataNascimento = "Informe a data de nascimento.";
+    if (!dados.perfil) campos.perfil = "Selecione o perfil.";
+    if (Object.keys(campos).length) return mostrarErro(f, erroCampos(campos));
+    try {
+      inscricao = (await api<{ inscricao: Inscricao }>("/inscricao", { metodo: "PUT", corpo: { dados } })).inscricao;
+      irPara(2);
+    } catch (e) {
+      mostrarErro(f, e);
+    }
+  });
+
+  $("#salvar-atividades").addEventListener("click", async () => {
+    try {
+      inscricao = (await api<{ inscricao: Inscricao }>("/inscricao", { metodo: "PUT", corpo: { atividades: lerSelecao() } })).inscricao;
+      irPara(3);
+    } catch (e) {
+      mostrarErro($("#assistente"), e);
+    }
+  });
+
+  document.querySelectorAll("[data-voltar]").forEach((b) => b.addEventListener("click", () => irPara(etapa - 1)));
+
+  function renderizarResumo() {
+    const d = inscricao!.dados;
+    const linhas: [string, string][] = [
+      ["Nome", d.nome ?? "—"], ["CPF", formatarCPF(d.cpf)], ["E-mail", d.email ?? "—"], ["Telefone", d.telefone ?? "—"],
+      ["Nascimento", formatarData(d.dataNascimento)], ["Perfil", d.perfil ? rotuloPerfil[d.perfil] : "—"],
+    ];
+    const escolhidas = catalogo.filter((a) => inscricao!.atividades.includes(a.slug));
+    $("#resumo").innerHTML = `
+      <div class="rounded-cartao bg-palha p-3"><h3 class="font-semibold text-verde-escuro">Seus dados</h3>
+        <dl class="mt-1 text-sm">${linhas.map(([k, val]) => `<div class="flex gap-2"><dt class="w-24 shrink-0 font-semibold">${k}</dt><dd>${esc(val)}</dd></div>`).join("")}</dl>
+        <button type="button" data-editar="1" class="mt-2 cursor-pointer text-tabela font-semibold text-azul hover:underline">Corrigir dados</button></div>
+      <div class="rounded-cartao bg-palha p-3"><h3 class="font-semibold text-verde-escuro">Atividades selecionadas</h3>
+        ${escolhidas.length ? `<ul class="mt-1 list-disc pl-5 text-sm">${escolhidas.map((a) => `<li>${esc(a.titulo)} <span class="text-chumbo/70">(${esc(a.dia)}, ${esc(a.horario)})</span></li>`).join("")}</ul>` : `<p class="mt-1 text-sm text-chumbo">Nenhuma atividade selecionada.</p>`}
+        <button type="button" data-editar="2" class="mt-2 cursor-pointer text-tabela font-semibold text-azul hover:underline">Alterar atividades</button></div>`;
+    document.querySelectorAll<HTMLElement>("[data-editar]").forEach((b) => b.addEventListener("click", () => irPara(Number(b.dataset.editar))));
+    $("#pagamento-vigente").textContent = descreverPagamento(pagamento);
+    $<HTMLInputElement>("#aceite").checked = inscricao!.aceitePrivacidade;
+  }
+
+  $("#confirmar").addEventListener("click", async () => {
+    $("#erro-aceite").textContent = "";
+    limparErro($("#assistente"));
+    if (!$<HTMLInputElement>("#aceite").checked) {
+      $("#erro-aceite").textContent = "É obrigatório aceitar a Política de Privacidade para confirmar.";
+      return $<HTMLInputElement>("#aceite").focus();
+    }
+    const botao = $<HTMLButtonElement>("#confirmar");
+    botao.disabled = true;
+    try {
+      await api("/inscricao", { metodo: "PUT", corpo: { aceitePrivacidade: true } });
+      await api("/inscricao/confirmar", { metodo: "POST" });
+      location.href = caminho("/minha-inscricao?confirmada=1");
+    } catch (e) {
+      mostrarErro($("#assistente"), e);
+      botao.disabled = false;
+    }
+  });
+</script>

@@ -4,7 +4,7 @@ import { ExternalLink, Mail } from "@lucide/astro";
 import Abas from "../components/Abas.astro";
 import PaginaCabecalho from "../components/PaginaCabecalho.astro";
 import Base from "../layouts/Base.astro";
-import { atividades, palestrantes, type AreaTematica } from "../data/evento";
+import { atividades, linkAtividade, palestrantes, type AreaTematica } from "../data/evento";
 
 const areas: AreaTematica[] = ["Educação", "Saúde", "Tecnologia", "Meio Ambiente"];
 const colunas = (n: number) =>
@@ -49,7 +49,7 @@ const iniciais = (nome: string) => {
                       {suas.map((a, i) => (
                         <>
                           {i > 0 && <span class="text-chumbo/40">, </span>}
-                          <a href={url(`/atividades/${a.slug}`)} class="text-azul hover:underline">
+                          <a href={url(linkAtividade(a.slug))} class="text-azul hover:underline">
                             {a.titulo.replace(/^(Minicurso|Palestra|Curso|Mesa-redonda|Artigos?):\s*/, "")}
                           </a>
                         </>

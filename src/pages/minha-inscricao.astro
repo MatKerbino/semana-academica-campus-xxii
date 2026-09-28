@@ -1,0 +1,268 @@
+---
+import { url } from "../lib/url";
+import Campo from "../components/Campo.astro";
+import PaginaCabecalho from "../components/PaginaCabecalho.astro";
+import Base from "../layouts/Base.astro";
+import { catalogoSelecionavel } from "../data/evento";
+
+const perfis = [
+  { valor: "estudante", rotulo: "Estudante" },
+  { valor: "professor", rotulo: "Professor(a)" },
+  { valor: "profissional", rotulo: "Profissional" },
+  { valor: "outro", rotulo: "Outro" },
+];
+const botao = "cursor-pointer rounded-full px-5 py-2 text-sm font-bold disabled:opacity-60";
+const primario = `${botao} bg-verde-cta text-verde-noite shadow`;
+const secundario = `${botao} border-2 border-verde-escuro bg-white text-verde-escuro`;
+const perigo = `${botao} border-2 border-red-700 bg-white text-red-700`;
+---
+
+<Base titulo="Minha inscrição" ativo="/minha-inscricao">
+  <PaginaCabecalho
+    titulo="Minha inscrição"
+    descricao="Acompanhe seus dados, atividades, pagamento e a situação da inscrição."
+    trilha={[{ href: "/", rotulo: "Início" }]}
+  />
+  <script type="application/json" id="catalogo" set:html={JSON.stringify(catalogoSelecionavel)} />
+
+  <div id="carregando" role="status" class="rounded-cartao bg-white p-5 text-sm">Carregando…</div>
+  <p id="aviso" role="status" hidden class="mb-3 rounded-lg bg-green-50 p-3 text-sm font-semibold text-verde-escuro"></p>
+  <p data-erro-geral role="alert" hidden class="mb-3 rounded-lg bg-red-50 p-3 text-sm font-semibold text-red-700"></p>
+
+  <div id="sem-inscricao" hidden class="rounded-cartao bg-creme p-5">
+    <p class="text-sm text-chumbo">Você ainda não possui inscrição no evento.</p>
+    <a href={url("/inscricao")} class={`mt-3 inline-block ${primario}`}>Realizar inscrição</a>
+  </div>
+
+  <div id="conteudo" hidden class="grid gap-3 lg:grid-cols-2">
+    <section class="rounded-cartao border border-borda bg-white p-4 lg:col-span-2" aria-labelledby="t-situacao">
+      <h2 id="t-situacao" class="text-lg font-semibold text-verde-escuro">Situação</h2>
+      <dl id="situacao" class="mt-2 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2"></dl>
+      <div id="devolucao" hidden class="mt-3 rounded-lg bg-creme p-3 text-sm"></div>
+      <div id="rascunho" hidden class="mt-3 rounded-lg bg-creme p-3 text-sm">
+        Sua inscrição ainda não foi confirmada.
+        <a href={url("/inscricao")} class="font-semibold text-azul hover:underline">Continuar inscrição</a>
+      </div>
+    </section>
+
+    <section class="rounded-cartao border border-borda bg-white p-4" aria-labelledby="t-dados">
+      <h2 id="t-dados" class="text-lg font-semibold text-verde-escuro">Dados</h2>
+      <dl id="dados" class="mt-2 text-sm"></dl>
+      <button type="button" id="editar-dados" class={`mt-3 ${secundario}`} hidden>Editar dados</button>
+      <form id="form-dados" hidden novalidate class="mt-3 grid gap-3">
+        <p data-erro-geral role="alert" hidden class="rounded-lg bg-red-50 p-2 text-sm font-semibold text-red-700"></p>
+        <Campo nome="nome" rotulo="Nome completo" autocomplete="name" />
+        <Campo nome="cpf" rotulo="CPF" inputmode="numeric" maxlength={14} />
+        <Campo nome="email" rotulo="E-mail" tipo="email" autocomplete="email" />
+        <Campo nome="telefone" rotulo="Telefone" tipo="tel" inputmode="tel" />
+        <Campo nome="dataNascimento" rotulo="Data de nascimento" tipo="date" />
+        <Campo nome="perfil" rotulo="Perfil" opcoes={perfis} />
+        <div class="flex gap-3">
+          <button type="submit" class={primario}>Salvar</button>
+          <button type="button" data-cancelar-edicao class={secundario}>Cancelar</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="rounded-cartao border border-borda bg-white p-4" aria-labelledby="t-atividades">
+      <h2 id="t-atividades" class="text-lg font-semibold text-verde-escuro">Atividades</h2>
+      <ul id="atividades" class="mt-2 list-disc space-y-1 pl-5 text-sm"></ul>
+      <button type="button" id="editar-atividades" class={`mt-3 ${secundario}`} hidden>Editar atividades</button>
+      <div id="area-atividades" hidden class="mt-3">
+        <p id="prazo-atividades" class="mb-2 text-tabela text-chumbo/70"></p>
+        <div id="seletor" class="grid gap-3"></div>
+        <div class="mt-3 flex gap-3">
+          <button type="button" id="salvar-atividades" class={primario}>Salvar atividades</button>
+          <button type="button" data-cancelar-edicao class={secundario}>Cancelar</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="rounded-cartao border border-borda bg-white p-4 lg:col-span-2" aria-labelledby="t-pag">
+      <h2 id="t-pag" class="text-lg font-semibold text-verde-escuro">Forma de pagamento ou compensação</h2>
+      <p id="pagamento" class="mt-2 text-sm"></p>
+      <div id="cancelamento" hidden class="mt-4 border-t border-borda pt-3">
+        <p id="prazo-cancelamento" class="mb-2 text-tabela text-chumbo/70"></p>
+        <button type="button" id="cancelar" class={perigo}>Cancelar inscrição</button>
+      </div>
+    </section>
+  </div>
+
+  <dialog id="dialogo" aria-labelledby="dialogo-titulo" class="m-auto max-w-md rounded-cartao p-5 backdrop:bg-black/50">
+    <h2 id="dialogo-titulo" class="text-lg font-semibold text-verde-escuro">Cancelar inscrição?</h2>
+    <p class="mt-2 text-sm text-chumbo">
+      Sua inscrição será marcada como cancelada. O histórico é mantido e sua conta não é excluída.
+      <span id="dialogo-devolucao"></span>
+    </p>
+    <div class="mt-4 flex justify-end gap-3">
+      <button type="button" id="dialogo-nao" class={secundario}>Manter inscrição</button>
+      <button type="button" id="dialogo-sim" class={perigo}>Sim, cancelar</button>
+    </div>
+  </dialog>
+</Base>
+
+<script>
+  import {
+    ApiError, api, descreverPagamento, erroCampos, esc, exigirLogin, formatarCPF, formatarData, formatarDataHora,
+    formatarMoeda, limparErro, mostrarErro, rotuloDevolucao, rotuloPerfil, rotuloSituacaoInscricao,
+    rotuloSituacaoPagamento, soDigitos, type Dados, type Inscricao, type Pagamento, type Vagas,
+  } from "../lib/api";
+  import { renderSeletor, type ItemCatalogo } from "../lib/seletor";
+
+  const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
+  const catalogo: ItemCatalogo[] = JSON.parse($("#catalogo").textContent!);
+  let inscricao: Inscricao;
+  let pagamento: Pagamento;
+  let lerSelecao: () => string[] = () => [];
+  
+
+  if (exigirLogin()) carregar();
+
+  async function carregar() {
+    try {
+      const [r, pag] = await Promise.all([
+        api<{ inscricao: Inscricao }>("/inscricao").catch((e) => (e instanceof ApiError && e.status === 404 ? null : Promise.reject(e))),
+        api<Pagamento>("/pagamento", { auth: false }),
+      ]);
+      pagamento = pag;
+      $("#carregando").hidden = true;
+      if (!r) return ($("#sem-inscricao").hidden = false);
+      inscricao = r.inscricao;
+      render();
+      if (new URLSearchParams(location.search).get("confirmada")) {
+        const a = $("#aviso");
+        a.textContent = "Inscrição confirmada com sucesso!";
+        a.hidden = false;
+      }
+    } catch (e) {
+      $("#carregando").hidden = true;
+      mostrarErro(document.body, e);
+    }
+  }
+
+  const dl = (linhas: [string, string][]) =>
+    linhas.map(([k, v]) => `<div class="flex gap-2"><dt class="w-36 shrink-0 font-semibold text-verde-escuro">${k}</dt><dd>${esc(v)}</dd></div>`).join("");
+
+  function render() {
+    $("#conteudo").hidden = false;
+    const i = inscricao;
+    const p = i.pagamento ?? pagamento;
+    $("#situacao").innerHTML = dl([
+      ["Inscrição", rotuloSituacaoInscricao[i.status]],
+      ["Pagamento/compensação", i.situacaoPagamento ? rotuloSituacaoPagamento[i.situacaoPagamento] : "—"],
+      ["Criada em", formatarDataHora(i.criadaEm)],
+      ["Confirmada em", formatarDataHora(i.confirmadaEm)],
+      ...(i.canceladaEm ? ([["Cancelada em", formatarDataHora(i.canceladaEm)]] as [string, string][]) : []),
+    ]);
+    $("#rascunho").hidden = i.status !== "rascunho";
+    const dev = $("#devolucao");
+    dev.hidden = !i.devolucao;
+    if (i.devolucao)
+      dev.innerHTML = `<strong>Devolução do pagamento:</strong> ${rotuloDevolucao[i.devolucao.situacao]}${i.devolucao.valor != null ? ` (${formatarMoeda(i.devolucao.valor)})` : ""}
+        — atualizada em ${formatarDataHora(i.devolucao.atualizadaEm)}. ${i.devolucao.situacao === "pendente" ? "A devolução será feita pela organização do evento." : ""}`;
+
+    const d = i.dados ?? {};
+    $("#dados").innerHTML = dl([
+      ["Nome", d.nome ?? "—"], ["CPF", formatarCPF(d.cpf) || "—"], ["E-mail", d.email ?? "—"], ["Telefone", d.telefone ?? "—"],
+      ["Nascimento", formatarData(d.dataNascimento)], ["Perfil", d.perfil ? rotuloPerfil[d.perfil] : "—"],
+    ]);
+    const escolhidas = catalogo.filter((a) => i.atividades.includes(a.slug));
+    $("#atividades").innerHTML = escolhidas.length
+      ? escolhidas.map((a) => `<li>${esc(a.titulo)} <span class="text-chumbo/70">(${esc(a.dia)}, ${esc(a.horario)})</span></li>`).join("")
+      : `<li class="list-none text-chumbo">Nenhuma atividade selecionada.</li>`;
+    $("#pagamento").textContent = descreverPagamento(p);
+
+    $("#editar-dados").hidden = !i.podeEditar;
+    $("#editar-atividades").hidden = !i.podeAlterarAtividades;
+    $("#cancelamento").hidden = !i.podeCancelar;
+    $("#prazo-cancelamento").textContent = pagamento.prazoCancelamento ? `Prazo para cancelamento: até ${formatarDataHora(pagamento.prazoCancelamento)}.` : "";
+    $("#prazo-atividades").textContent = pagamento.prazoAlteracao ? `Alterações permitidas até ${formatarDataHora(pagamento.prazoAlteracao)}.` : "";
+    fecharEdicoes();
+  }
+
+  function fecharEdicoes() {
+    $("#form-dados").hidden = true;
+    $("#area-atividades").hidden = true;
+  }
+  document.querySelectorAll("[data-cancelar-edicao]").forEach((b) => b.addEventListener("click", () => { limparErro(document.body); fecharEdicoes(); }));
+
+  // Editar dados
+  $("#editar-dados").addEventListener("click", () => {
+    fecharEdicoes();
+    const f = $<HTMLFormElement>("#form-dados");
+    const d = inscricao.dados ?? {};
+    (["nome", "cpf", "email", "telefone", "dataNascimento", "perfil"] as const).forEach((k) => {
+      (f.elements.namedItem(k) as HTMLInputElement).value = k === "cpf" ? formatarCPF(d.cpf) : (d[k] ?? "");
+    });
+    f.hidden = false;
+    (f.elements.namedItem("nome") as HTMLInputElement).focus();
+  });
+  $<HTMLFormElement>("#form-dados").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const f = ev.currentTarget as HTMLFormElement;
+    limparErro(f);
+    const v = Object.fromEntries(new FormData(f)) as Record<string, string>;
+    const dados: Dados = { nome: v.nome.trim(), cpf: soDigitos(v.cpf), email: v.email.trim(), telefone: soDigitos(v.telefone), dataNascimento: v.dataNascimento, perfil: v.perfil as Dados["perfil"] };
+    const campos: Record<string, string> = {};
+    if (!dados.nome) campos.nome = "Informe o nome.";
+    if (dados.cpf!.length !== 11) campos.cpf = "O CPF deve ter 11 dígitos.";
+    if (!/^\S+@\S+\.\S+$/.test(dados.email!)) campos.email = "Informe um e-mail válido.";
+    if (!/^\d{10,11}$/.test(dados.telefone!)) campos.telefone = "Informe o telefone com DDD.";
+    if (!dados.dataNascimento) campos.dataNascimento = "Informe a data de nascimento.";
+    if (!dados.perfil) campos.perfil = "Selecione o perfil.";
+    if (Object.keys(campos).length) return mostrarErro(f, erroCampos(campos));
+    try {
+      inscricao = (await api<{ inscricao: Inscricao }>("/inscricao", { metodo: "PUT", corpo: { dados } })).inscricao;
+      render();
+      avisar("Dados atualizados.");
+    } catch (e) {
+      mostrarErro(f, e);
+    }
+  });
+
+  // Editar atividades
+  $("#editar-atividades").addEventListener("click", async () => {
+    fecharEdicoes();
+    const v = await api<{ atividades: Vagas }>("/atividades/vagas", { auth: false }).catch(() => ({ atividades: {} as Vagas }));
+    lerSelecao = renderSeletor($("#seletor"), catalogo, v.atividades, inscricao.atividades, inscricao.atividades);
+    $("#area-atividades").hidden = false;
+  });
+  $("#salvar-atividades").addEventListener("click", async () => {
+    limparErro(document.body);
+    try {
+      inscricao = (await api<{ inscricao: Inscricao }>("/inscricao", { metodo: "PUT", corpo: { atividades: lerSelecao() } })).inscricao;
+      render();
+      avisar("Atividades atualizadas.");
+    } catch (e) {
+      mostrarErro(document.body, e);
+    }
+  });
+
+  // Cancelar inscrição
+  const dialogo = $<HTMLDialogElement>("#dialogo");
+  $("#cancelar").addEventListener("click", () => {
+    $("#dialogo-devolucao").textContent =
+      inscricao.pagamento?.modalidade === "monetaria" && inscricao.situacaoPagamento === "regularizada"
+        ? "Como houve pagamento, será registrada uma pendência de devolução."
+        : "";
+    dialogo.showModal();
+  });
+  $("#dialogo-nao").addEventListener("click", () => dialogo.close());
+  $("#dialogo-sim").addEventListener("click", async () => {
+    dialogo.close();
+    try {
+      inscricao = (await api<{ inscricao: Inscricao }>("/inscricao/cancelar", { metodo: "POST" })).inscricao;
+      render();
+      avisar("Inscrição cancelada.");
+    } catch (e) {
+      mostrarErro(document.body, e);
+    }
+  });
+
+  function avisar(msg: string) {
+    const a = $("#aviso");
+    a.textContent = msg;
+    a.hidden = false;
+    a.scrollIntoView({ block: "nearest" });
+  }
+</script>

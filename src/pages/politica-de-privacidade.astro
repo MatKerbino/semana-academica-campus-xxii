@@ -1,0 +1,34 @@
+---
+import PaginaCabecalho from "../components/PaginaCabecalho.astro";
+import Base from "../layouts/Base.astro";
+import { evento } from "../data/evento";
+
+const secoes = [
+  { titulo: "1. Quem trata seus dados", texto: `A organização da ${evento.nome} (UEPA — Campus XXII) é a responsável pelo tratamento dos dados pessoais coletados neste site. Contato: ${evento.email}.` },
+  { titulo: "2. Quais dados coletamos", texto: "Login e senha (armazenada apenas de forma criptografada, nunca em texto aberto) ao criar a conta; e, na inscrição: nome, CPF, e-mail, telefone, data de nascimento, perfil (estudante, professor(a), profissional ou outro), atividades escolhidas e situação do pagamento ou da compensação." },
+  { titulo: "3. Para que usamos", texto: "Identificar você, registrar e gerenciar sua inscrição, controlar as vagas das atividades, comunicar informações do evento, acompanhar o pagamento/compensação e eventuais devoluções, e emitir certificados." },
+  { titulo: "4. Base legal", texto: "Execução de procedimentos preliminares relacionados à sua participação no evento, a pedido do titular, e seu consentimento, registrado ao marcar o aceite desta política antes de confirmar a inscrição (Lei nº 13.709/2018 — LGPD)." },
+  { titulo: "5. Compartilhamento", texto: "Os dados ficam acessíveis à comissão organizadora e à administração da universidade envolvida no evento. Não vendemos nem compartilhamos seus dados com terceiros para fins comerciais. Os dados são armazenados em infraestrutura de nuvem contratada pela organização." },
+  { titulo: "6. Por quanto tempo guardamos", texto: "Pelo tempo necessário à realização do evento, à emissão de certificados e ao cumprimento de obrigações legais. Inscrições canceladas têm o histórico mantido para controle administrativo, sem excluir a conta do participante." },
+  { titulo: "7. Seus direitos", texto: `Você pode solicitar confirmação do tratamento, acesso, correção, anonimização ou eliminação dos dados, e revogar o consentimento, pelo e-mail ${evento.email}. Você também pode corrigir seus dados na área “Minha inscrição”.` },
+  { titulo: "8. Segurança", texto: "Adotamos medidas técnicas como criptografia da senha, conexão segura (HTTPS) e controle de acesso às funções administrativas. Nenhum sistema é totalmente imune a incidentes; em caso de incidente relevante, os titulares serão informados." },
+];
+---
+
+<Base titulo="Política de Privacidade">
+  <PaginaCabecalho
+    titulo="Política de Privacidade"
+    descricao="Como os dados pessoais das inscrições na Semana Acadêmica são coletados, usados e protegidos."
+    trilha={[{ href: "/", rotulo: "Início" }]}
+  />
+  <div class="grid gap-3 md:grid-cols-2">
+    {
+      secoes.map((s) => (
+        <article class="rounded-cartao border border-borda bg-white p-4">
+          <h2 class="text-base font-semibold text-verde-escuro">{s.titulo}</h2>
+          <p class="mt-1.5 text-sm text-chumbo">{s.texto}</p>
+        </article>
+      ))
+    }
+  </div>
+</Base>

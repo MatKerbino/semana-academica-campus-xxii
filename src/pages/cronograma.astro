@@ -4,13 +4,13 @@ import { ArrowRight, Clock, MapPin } from "@lucide/astro";
 import Abas from "../components/Abas.astro";
 import PaginaCabecalho from "../components/PaginaCabecalho.astro";
 import Base from "../layouts/Base.astro";
-import { atividades, dias, rotulosTipo } from "../data/evento";
+import { atividades, dias, linkAtividade, rotulosTipo } from "../data/evento";
 ---
 
 <Base titulo="Cronograma" ativo="/cronograma">
   <PaginaCabecalho
     titulo="Cronograma do evento"
-    descricao="Programação completa dos quatro dias. Selecione um dia e clique em uma atividade para abrir sua página com a descrição detalhada."
+    descricao="Programação completa dos quatro dias. Selecione um dia e clique em uma atividade para vê-la na página de Atividades."
     trilha={[{ href: "/", rotulo: "Início" }]}
   />
 
@@ -30,7 +30,7 @@ import { atividades, dias, rotulosTipo } from "../data/evento";
                   </span>
                   <span class="min-w-[16rem] flex-1">
                     <a
-                      href={url(`/atividades/${atividade.slug}`)}
+                      href={url(linkAtividade(atividade.slug, "cronograma"))}
                       class="text-tabela font-semibold text-verde-escuro hover:underline"
                     >
                       {atividade.titulo}
@@ -44,7 +44,7 @@ import { atividades, dias, rotulosTipo } from "../data/evento";
                     {rotulosTipo[atividade.tipo]}
                   </span>
                   <a
-                    href={url(`/atividades/${atividade.slug}`)}
+                    href={url(linkAtividade(atividade.slug, "cronograma"))}
                     class="flex items-center gap-1 text-tabela font-semibold text-azul hover:underline"
                   >
                     Ver detalhes
@@ -59,6 +59,6 @@ import { atividades, dias, rotulosTipo } from "../data/evento";
   </Abas>
 
   <p class="mt-4 rounded-cartao border border-azul/40 bg-white p-3 text-tabela text-chumbo/70">
-    Cada atividade possui uma página própria com descrição detalhada, responsável, local e número de vagas.
+    Cada atividade abre na página de Atividades, com descrição detalhada, responsável, local e número de vagas.
   </p>
 </Base>
