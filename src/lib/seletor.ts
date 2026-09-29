@@ -37,12 +37,14 @@ export function montarSeletor({ raiz, catalogo, vagas, selecionadas, salvas = []
   function cartao(a: ItemCatalogo) {
     const sel = marcadas.has(a.slug);
     const bloqueada = semVagas(a);
+    // Já marcada e sem vagas (lotou depois da escolha): continua desmarcável, só não pode ser marcada de novo.
+    const desabilitada = bloqueada && !sel;
     const rest = restantes(a.slug);
     const status = bloqueada
       ? `<span class="inline-flex items-center gap-1.5 rounded-full border border-borda bg-[#eeeeee] px-2.5 py-1 text-[11px] font-bold tracking-[0.4px] text-chumbo uppercase">${ico("proibido", "size-3.5")}Sem vagas</span>`
       : `<span class="text-[13px] leading-[1.4] text-texto-suave">${sel ? "Selecionada · " : ""}${rest == null ? "Entrada livre · sem limite de vagas" : `${rest} de ${a.vagas} vagas restantes`}</span>`;
-    return `<label class="flex w-full items-start gap-3 rounded-campo border p-3.5 ${sel ? "border-2 border-verde-medio bg-verde-claro" : "border-borda bg-white"} ${bloqueada ? "cursor-not-allowed opacity-70" : "cursor-pointer hover:border-verde-medio"} has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-azul">
-      <input type="checkbox" class="peer sr-only" name="atividade" value="${esc(a.slug)}" ${sel ? "checked" : ""} ${bloqueada ? "disabled" : ""} />
+    return `<label class="flex w-full items-start gap-3 rounded-campo border p-3.5 ${sel ? "border-2 border-verde-medio bg-verde-claro" : "border-borda bg-white"} ${desabilitada ? "cursor-not-allowed opacity-70" : "cursor-pointer hover:border-verde-medio"} has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-azul">
+      <input type="checkbox" class="peer sr-only" name="atividade" value="${esc(a.slug)}" ${sel ? "checked" : ""} ${desabilitada ? "disabled" : ""} />
       <span aria-hidden="true" class="mt-0.5 flex size-[18px] shrink-0 items-center justify-center rounded border-[1.5px] ${sel ? "border-verde-medio bg-verde-medio text-white" : "border-chumbo/60 bg-white text-transparent"}">${ico("ok", "size-3")}</span>
       <span class="min-w-0 flex-1 space-y-1">
         <span class="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">${tagTipo(a.tipo)}${status}</span>

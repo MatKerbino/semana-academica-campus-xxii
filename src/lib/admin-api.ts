@@ -156,7 +156,10 @@ export const dataHora = (iso?: string | null, separador = " ") => {
   const p = (n: number) => String(n).padStart(2, "0");
   return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()}${separador}${p(d.getHours())}h${p(d.getMinutes())}`;
 };
-export const dataCurta = (iso?: string | null) => (iso ? formatarData(new Date(iso).toISOString()) : "—");
+export const dataCurta = (iso?: string | null) => {
+  const d = iso ? new Date(iso) : null;
+  return d && !Number.isNaN(d.getTime()) ? formatarData(d.toISOString()) : "—";
+};
 export const contar = (n: number, singular: string, plural: string) => `${n} ${n === 1 ? singular : plural}`;
 
 export const formaTexto = (f: FormaPagamento) =>
