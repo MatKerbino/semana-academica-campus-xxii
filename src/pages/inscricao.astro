@@ -74,7 +74,7 @@ const btnTexto = "inline-flex cursor-pointer items-center gap-2 py-2 text-[15px]
     <!-- Etapa 2 · Atividades -->
     <div id="etapa-2" hidden class="flex flex-col gap-5">
       <Alerta tipo="info" titulo="Escolha suas atividades">
-        Selecione as atividades de que deseja participar. Atividades sem vagas não podem ser selecionadas. Credenciamento, abertura e premiação fazem parte da programação geral e não precisam de seleção.
+        Selecione as atividades de que deseja participar. Atividades sem vagas não podem ser selecionadas. Credenciamento, abertura, encerramento e demais itens da programação geral não precisam de seleção.
       </Alerta>
       <Alerta tipo="erro" titulo="Não foi possível continuar" geral id="erro-etapa-2" />
       <div id="seletor" class="flex flex-col gap-5"></div>
@@ -288,7 +288,7 @@ const btnTexto = "inline-flex cursor-pointer items-center gap-2 py-2 text-[15px]
   // ---- etapa 2 ----
   function desenharSeletor() {
     limparErro($("#etapa-2"));
-    seletor = montarSeletor({ raiz: $("#seletor"), catalogo, vagas, selecionadas: insc.atividades, salvas: [] });
+    seletor = montarSeletor({ raiz: $("#seletor"), catalogo, vagas, selecionadas: insc.atividades.filter((s) => porSlug.has(s)), salvas: [] });
   }
 
   // ---- etapa 3 ----

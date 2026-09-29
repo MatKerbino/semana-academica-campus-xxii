@@ -98,7 +98,7 @@ export const linhaAtividade = (a: ItemCatalogo, extra = "") => `
     <div class="min-w-0 flex-1 space-y-1">
       ${tagTipo(a.tipo)}
       <p class="text-sm leading-[1.4] font-semibold text-chumbo">${esc(a.titulo)}</p>
-      <p class="flex items-center gap-1.5 text-[13px] leading-normal text-texto-suave">${ico("pin", "size-3.5")}${esc(a.local)}</p>
+      ${a.local ? `<p class="flex items-center gap-1.5 text-[13px] leading-normal text-texto-suave">${ico("pin", "size-3.5")}${esc(a.local)}</p>` : ""}
       ${extra}
     </div>
   </li>`;

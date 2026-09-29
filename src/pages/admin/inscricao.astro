@@ -11,6 +11,7 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
     abrirModal, atualizarPagamento, cartaoAtividade, CLASSES, dataHora, erroCarregar, esc, eStatusErro, formaPagamento,
     formatarCPF, formatarData, formatarMoeda, formatarTelefone, historicoLinhas, icone, iniciarPainel, inscricao, rotuloPerfil, seloDevolucao,
     seloInscricao, seloPagamento, toast, type FormaPagamento, type InscricaoAdmin,
+    atividadesConhecidas,
   } from "../../lib/admin-api";
   import { url } from "../../lib/url";
 
@@ -54,8 +55,8 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
           <div class="flex flex-col gap-6 max-lg:order-2">
             <section class="${CLASSES.cartao}" aria-labelledby="t-dados"><h2 id="t-dados" class="${CLASSES.titulo} mb-4">Dados do participante</h2>
               <dl class="grid gap-x-8 gap-y-4 sm:grid-cols-2">${campo("Nome completo", nome)}${campo("CPF", formatarCPF(d.cpf))}${campo("E-mail", d.email ?? "—")}${campo("Telefone", formatarTelefone(d.telefone))}${campo("Data de nascimento", formatarData(d.dataNascimento))}${campo("Perfil", d.perfil ? rotuloPerfil[d.perfil] : "—")}</dl></section>
-            <section class="${CLASSES.cartao}" aria-labelledby="t-ativ"><h2 id="t-ativ" class="${CLASSES.titulo} mb-4">Atividades selecionadas (${i.atividades.length})</h2>
-              <ul class="flex flex-col gap-3">${i.atividades.map(cartaoAtividade).join("") || `<li class="text-sm text-texto-suave">Nenhuma atividade selecionada.</li>`}</ul></section>
+            <section class="${CLASSES.cartao}" aria-labelledby="t-ativ"><h2 id="t-ativ" class="${CLASSES.titulo} mb-4">Atividades selecionadas (${atividadesConhecidas(i.atividades).length})</h2>
+              <ul class="flex flex-col gap-3">${atividadesConhecidas(i.atividades).map(cartaoAtividade).join("") || `<li class="text-sm text-texto-suave">Nenhuma atividade selecionada.</li>`}</ul></section>
             <section class="${CLASSES.cartao} max-lg:hidden" aria-labelledby="t-hist"><h2 id="t-hist" class="${CLASSES.titulo} mb-3">Histórico da inscrição</h2>
               <ul class="flex flex-col gap-2.5">${historicoLinhas(i)}</ul></section>
           </div>

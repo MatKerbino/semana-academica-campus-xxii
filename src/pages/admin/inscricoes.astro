@@ -11,6 +11,7 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
     buscaHtml, botaoOlho, cabecalhoColuna, cabecalhoPagina, contar, erroCarregar, esc, filtroHtml, formatarCPF, icone, iniciarPainel, inscricoes,
     normalizar, paginar, rodapeTabela, rotuloPerfil, seloDevolucao, seloInscricao, seloPagamento, situacaoDevolucao, situacaoPagamento,
     type InscricaoAdmin,
+    atividadesConhecidas,
   } from "../../lib/admin-api";
   import { url } from "../../lib/url";
 
@@ -59,7 +60,7 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
               (i) => `<tr class="border-b border-borda last:border-0 hover:bg-palha">
                 <td class="px-3 py-3"><a href="${href(i)}" class="block"><span class="block text-sm leading-[1.4] font-semibold text-chumbo">${esc(rotulo(i))}</span><span class="block text-[13px] text-texto-suave">CPF ${formatarCPF(i.dados.cpf)}</span></a></td>
                 <td class="px-3 py-3 text-[13px] text-chumbo">${i.dados.perfil ? rotuloPerfil[i.dados.perfil] : "—"}</td>
-                <td class="px-3 py-3 text-[13px] whitespace-nowrap text-chumbo">${contar(i.atividades.length, "atividade", "atividades")}</td>
+                <td class="px-3 py-3 text-[13px] whitespace-nowrap text-chumbo">${contar(atividadesConhecidas(i.atividades).length, "atividade", "atividades")}</td>
                 <td class="px-3 py-3">${seloInscricao(i.status)}</td><td class="px-3 py-3">${seloPagamento(i)}</td><td class="px-3 py-3">${seloDevolucao(i)}</td>
                 <td class="px-3 py-3">${botaoOlho(href(i), `Ver inscrição de ${rotulo(i)}`)}</td></tr>`,
             )
@@ -69,7 +70,7 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
               (i) => `<li class="flex flex-col gap-2 rounded-cartao border border-borda bg-white p-4 shadow-[0_1px_3px_rgba(15,41,8,0.08)]">
                 <div class="flex items-start justify-between gap-3"><div class="min-w-0"><p class="text-sm leading-[1.4] font-semibold text-chumbo">${esc(rotulo(i))}</p>
                   <p class="text-[13px] leading-normal text-chumbo">CPF ${formatarCPF(i.dados.cpf)} · ${i.dados.perfil ? rotuloPerfil[i.dados.perfil] : "—"}</p>
-                  <p class="text-[13px] leading-normal text-chumbo">${contar(i.atividades.length, "atividade selecionada", "atividades selecionadas")}</p></div>
+                  <p class="text-[13px] leading-normal text-chumbo">${contar(atividadesConhecidas(i.atividades).length, "atividade selecionada", "atividades selecionadas")}</p></div>
                   <a href="${href(i)}" aria-label="Abrir inscrição de ${esc(rotulo(i))}" class="flex size-9 shrink-0 items-center justify-center rounded-campo border-[1.5px] border-borda text-verde-escuro">${icone("ellipsis-vertical")}</a></div>
                 <div class="flex flex-col items-start gap-2">${seloInscricao(i.status, true)}${seloPagamento(i, true, "Pagamento ")}</div></li>`,
             )

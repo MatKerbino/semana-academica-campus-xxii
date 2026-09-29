@@ -10,6 +10,7 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
   import {
     CLASSES, contar, dataHora, erroCarregar, esc, formatarCPF, formatarTelefone, icone, iniciarPainel, participante, rotuloPerfil, seloInscricao,
     formatarData,
+    atividadesConhecidas,
   } from "../../lib/admin-api";
   import { url } from "../../lib/url";
 
@@ -44,7 +45,7 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
                 <div>${seloInscricao(i?.status ?? null, true)}</div>
                 ${
                   i
-                    ? `<p class="text-[13px] leading-normal text-chumbo">${i.numero ? `Inscrição nº ${esc(i.numero)}` : "Inscrição em preenchimento"}${i.confirmadaEm ? ` · confirmada em ${formatarData(i.confirmadaEm.slice(0, 10))}` : ""} · ${contar(i.atividades.length, "atividade", "atividades")}</p>
+                    ? `<p class="text-[13px] leading-normal text-chumbo">${i.numero ? `Inscrição nº ${esc(i.numero)}` : "Inscrição em preenchimento"}${i.confirmadaEm ? ` · confirmada em ${formatarData(i.confirmadaEm.slice(0, 10))}` : ""} · ${contar(atividadesConhecidas(i.atividades).length, "atividade", "atividades")}</p>
                        ${i.status === "rascunho" ? "" : `<a href="${url("/admin/inscricao")}?login=${encodeURIComponent(p.login)}" class="${CLASSES.botaoPrimario}">${icone("eye")}Ver inscrição</a>`}`
                     : `<p class="text-[13px] leading-normal text-chumbo">Conta criada, mas a inscrição ainda não foi iniciada.</p>`
                 }</section>

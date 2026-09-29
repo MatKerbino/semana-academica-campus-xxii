@@ -51,7 +51,7 @@ export function montarSeletor({ raiz, catalogo, vagas, selecionadas, salvas = []
         <span class="block text-sm leading-[1.4] font-semibold text-chumbo">${esc(a.titulo)}</span>
         <span class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] leading-normal text-texto-suave">
           <span class="flex items-center gap-1.5">${ico("calendario", "size-3.5")}${esc(a.data)} · ${esc(a.horario)}</span>
-          <span class="flex items-center gap-1.5">${ico("pin", "size-3.5")}${esc(a.local)}</span>
+          ${a.local ? `<span class="flex items-center gap-1.5">${ico("pin", "size-3.5")}${esc(a.local)}</span>` : ""}
         </span>
       </span>
     </label>`;

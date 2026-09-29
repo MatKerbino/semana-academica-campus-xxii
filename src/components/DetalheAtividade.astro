@@ -2,18 +2,18 @@
 import { url } from "../lib/url";
 import { Calendar, Clock, GraduationCap, Info, MapPin, User, UserPlus, Users } from "@lucide/astro";
 import TagTipo from "./TagTipo.astro";
-import { dias, palestrantePor, type Atividade } from "../data/evento";
+import { dias, horarioCompleto, palestrantesDe, type Atividade } from "../data/evento";
 
 interface Props { atividade: Atividade }
 const { atividade: a } = Astro.props;
-const dia = dias.find((d) => d.id === a.dia)!;
-const palestrante = palestrantePor(a.palestrante);
+const datas = [...new Set(a.sessoes.map((s) => dias.find((d) => d.id === s.dia)!.data))].join(" e ");
+const responsaveis = palestrantesDe(a);
 
 const linhas = [
-  { icone: Calendar, rotulo: "Data", valor: dia.data },
-  { icone: Clock, rotulo: "Horário", valor: a.horario },
-  { icone: MapPin, rotulo: "Local", valor: a.local },
-  palestrante && { icone: User, rotulo: "Responsável", valor: palestrante.nome },
+  { icone: Calendar, rotulo: a.sessoes.length > 1 ? "Datas" : "Data", valor: datas },
+  { icone: Clock, rotulo: "Horário", valor: horarioCompleto(a) },
+  a.local && { icone: MapPin, rotulo: "Local", valor: a.local },
+  responsaveis.length > 0 && { icone: User, rotulo: responsaveis.length > 1 ? "Responsáveis" : "Responsável", valor: responsaveis.map((r) => r.nome).join("; ") },
   a.vagas && { icone: Users, rotulo: "Vagas", valor: a.vagas },
   a.cargaHoraria && { icone: GraduationCap, rotulo: "Carga horária", valor: a.cargaHoraria },
 ].filter(Boolean) as { icone: typeof Calendar; rotulo: string; valor: string }[];
@@ -38,23 +38,16 @@ const linhas = [
       ))
     }
   </dl>
-  <h3 class="text-sm leading-[1.4] font-semibold text-chumbo">Descrição</h3>
-  <div class="space-y-4 text-[15px] leading-normal text-chumbo">
-    {
-      a.descricao.map((p) => {
-        const [antes, depois] = p.split("{{forma}}");
-        return depois === undefined ? (
-          <p>{p}</p>
-        ) : (
-          <p>
-            {antes}
-            <span data-forma-part="frase">1 kg de alimento não perecível</span>
-            {depois}
-          </p>
-        );
-      })
-    }
-  </div>
+  {
+    a.descricao.length > 0 && (
+      <>
+        <h3 class="text-sm leading-[1.4] font-semibold text-chumbo">Descrição</h3>
+        <div class="space-y-4 text-[15px] leading-normal text-chumbo">
+          {a.descricao.map((p) => <p>{p}</p>)}
+        </div>
+      </>
+    )
+  }
   {
     a.topicos && (
       <>
@@ -75,7 +68,7 @@ const linhas = [
       Inscrever-se
     </a>
     {
-      palestrante && (
+      responsaveis.length > 0 && (
         <a href={url("/palestrantes")} class="flex items-center gap-2 px-2 py-3 text-[15px] leading-[1.3] font-bold text-verde-medio hover:underline">
           <User class="size-[18px]" aria-hidden="true" />
           Ver responsável

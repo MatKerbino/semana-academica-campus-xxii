@@ -5,7 +5,7 @@ import Abas from "../components/Abas.astro";
 import PaginaCabecalho from "../components/PaginaCabecalho.astro";
 import TagTipo from "../components/TagTipo.astro";
 import Base from "../layouts/Base.astro";
-import { atividades, dias, linkAtividade, tagsTipo } from "../data/evento";
+import { dias, linkAtividade, sessoesDoDia, tagsTipo } from "../data/evento";
 ---
 
 <Base titulo="Cronograma" ativo="/cronograma" espaco="amplo">
@@ -20,13 +20,12 @@ import { atividades, dias, linkAtividade, tagsTipo } from "../data/evento";
           <div data-painel={dia.id}>
             <h2 class="sr-only">{dia.data}</h2>
             <ol class="overflow-hidden rounded-cartao border border-borda bg-white">
-              {atividades
-                .filter((a) => a.dia === dia.id)
-                .map((a) => (
+              {sessoesDoDia(dia.id)
+                .map(({ atividade: a, sessao }) => (
                   <li class="flex flex-col gap-x-5 gap-y-1.5 px-5 py-3.5 even:bg-palha md:flex-row md:items-center">
-                    <span class="flex w-[90px] shrink-0 items-center gap-2 text-sm leading-[1.4] font-semibold text-verde-escuro">
+                    <span class="flex w-[130px] shrink-0 items-center gap-2 text-sm leading-[1.4] font-semibold text-verde-escuro">
                       <Clock class="size-4" aria-hidden="true" />
-                      {a.hora}
+                      {sessao.horario.replace(" às ", "–")}
                     </span>
                     <span class="flex min-w-0 flex-1 flex-col gap-1">
                       {tagsTipo[a.tipo] ? (
@@ -37,10 +36,12 @@ import { atividades, dias, linkAtividade, tagsTipo } from "../data/evento";
                         </span>
                       )}
                       <span class="text-sm leading-[1.4] font-semibold text-chumbo">{a.titulo}</span>
-                      <span class="flex items-center gap-1.5 text-[13px] leading-normal text-texto-suave">
-                        <MapPin class="size-3.5" aria-hidden="true" />
-                        {a.local}
-                      </span>
+                      {a.local && (
+                        <span class="flex items-center gap-1.5 text-[13px] leading-normal text-texto-suave">
+                          <MapPin class="size-3.5" aria-hidden="true" />
+                          {a.local}
+                        </span>
+                      )}
                     </span>
                     {tagsTipo[a.tipo] && (
                       <a

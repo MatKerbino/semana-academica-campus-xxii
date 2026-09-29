@@ -59,7 +59,7 @@ const btnContorno = "inline-flex cursor-pointer items-center justify-center gap-
   let seletor: ReturnType<typeof montarSeletor>;
 
   const montar = () => {
-    seletor = montarSeletor({ raiz, catalogo, vagas, selecionadas: insc.atividades, salvas: insc.atividades });
+    seletor = montarSeletor({ raiz, catalogo, vagas, selecionadas: insc.atividades.filter((s) => catalogo.some((a) => a.slug === s)), salvas: insc.atividades.filter((s) => catalogo.some((a) => a.slug === s)) });
   };
 
   async function iniciar() {

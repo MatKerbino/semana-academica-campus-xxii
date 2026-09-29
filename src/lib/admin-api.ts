@@ -233,14 +233,17 @@ export function tagTipo(tipo: TipoAtividade) {
 }
 
 /** Cartão de atividade (dia/hora, tipo, título e local), como nas telas de detalhe. */
+/** Quantas das atividades da inscrição existem no catálogo atual (slugs antigos são ignorados). */
+export const atividadesConhecidas = (slugs: string[]) => slugs.filter((s) => atividades.some((a) => a.slug === s));
+
 export function cartaoAtividade(slug: string) {
   const a = atividades.find((x) => x.slug === slug);
-  if (!a) return `<li class="rounded-campo border border-borda p-3 text-sm">${esc(slug)}</li>`;
+  if (!a) return ""; // slug desconhecido (atividade de um catálogo antigo): não exibir
   const dia = dias.find((d) => d.id === a.dia)!.rotulo.slice(0, 5);
   return `<li class="flex gap-4 rounded-campo border border-borda bg-white p-3.5">
     <div class="w-11 shrink-0"><p class="text-sm leading-[1.4] font-semibold text-chumbo">${dia}</p><p class="text-[13px] text-texto-suave">${esc(a.hora)}</p></div>
     <div class="flex min-w-0 flex-col gap-1">${tagTipo(a.tipo)}<p class="text-sm leading-[1.4] font-semibold text-chumbo">${esc(a.titulo)}</p>
-    <p class="flex items-center gap-1.5 text-[13px] text-texto-suave">${icone("map-pin", "size-3.5")}${esc(a.local)}</p></div></li>`;
+    ${a.local ? `<p class="flex items-center gap-1.5 text-[13px] text-texto-suave">${icone("map-pin", "size-3.5")}${esc(a.local)}</p>` : ""}</div></li>`;
 }
 
 const EVENTOS: Record<string, string> = {

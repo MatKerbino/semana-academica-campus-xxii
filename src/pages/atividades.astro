@@ -5,7 +5,7 @@ import DetalheAtividade from "../components/DetalheAtividade.astro";
 import PaginaCabecalho from "../components/PaginaCabecalho.astro";
 import TagTipo from "../components/TagTipo.astro";
 import Base from "../layouts/Base.astro";
-import { atividadesListadas, dias, type TipoAtividade } from "../data/evento";
+import { atividadesListadas, dias, sessoesDoDia, tagsTipo, type TipoAtividade } from "../data/evento";
 
 /* Página única de atividades (RN-04): filtro por tipo e atividade selecionada via ?atividade=slug ou #slug (RN-06). */
 const conta = (tipos: TipoAtividade[]) => atividadesListadas.filter((a) => tipos.includes(a.tipo)).length;
@@ -55,9 +55,9 @@ const dataCurta = (id: string) => id.replace("-", "/");
           dias.map((dia) => (
             <section data-dia class="flex flex-col gap-2.5">
               <h2 class="text-lg leading-[1.4] font-semibold text-verde-escuro">{dia.data}</h2>
-              {atividadesListadas
-                .filter((a) => a.dia === dia.id)
-                .map((a) => (
+              {sessoesDoDia(dia.id)
+                .filter(({ atividade }) => tagsTipo[atividade.tipo] !== null)
+                .map(({ atividade: a, sessao }) => (
                   <div data-item={a.slug} data-tipo={filtroDe(a.tipo)} class="flex flex-col gap-2.5">
                     <button
                       type="button"
@@ -66,15 +66,17 @@ const dataCurta = (id: string) => id.replace("-", "/");
                     >
                       <span class="flex w-16 shrink-0 flex-col">
                         <span class="text-sm leading-[1.4] font-semibold text-verde-escuro">{dataCurta(dia.id)}</span>
-                        <span class="text-[13px] leading-normal text-texto-suave">{a.hora}</span>
+                        <span class="text-[13px] leading-normal text-texto-suave">{sessao.hora}</span>
                       </span>
                       <span class="flex min-w-0 flex-1 flex-col gap-1">
                         <TagTipo tipo={a.tipo} />
                         <span class="text-sm leading-[1.4] font-semibold text-verde-escuro">{a.titulo}</span>
-                        <span class="flex items-center gap-1.5 text-[13px] leading-normal text-texto-suave">
-                          <MapPin class="size-3.5 shrink-0" aria-hidden="true" />
-                          {a.local}
-                        </span>
+                        {a.local && (
+                          <span class="flex items-center gap-1.5 text-[13px] leading-normal text-texto-suave">
+                            <MapPin class="size-3.5 shrink-0" aria-hidden="true" />
+                            {a.local}
+                          </span>
+                        )}
                       </span>
                       <span data-selecionada hidden class="shrink-0 text-xs leading-[1.3] font-bold tracking-[0.4px] text-verde-escuro uppercase">Selecionada</span>
                     </button>
