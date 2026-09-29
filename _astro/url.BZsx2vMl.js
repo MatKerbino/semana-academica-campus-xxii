@@ -1,0 +1,1 @@
+var e=e=>/^(https?:|mailto:|#)/.test(e)?e:`/semana-academica-campus-xxii/${e}`.replace(/\/{2,}/g,`/`);export{e as t};

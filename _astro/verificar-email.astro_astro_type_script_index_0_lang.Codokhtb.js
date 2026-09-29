@@ -1,0 +1,1 @@
+import{n as e}from"./api.Ctn0ZKft.js";var t=new URLSearchParams(location.search).get(`token`)??``,n=e=>{document.getElementById(`verificando`).hidden=!0,document.getElementById(e).hidden=!1};e(`/verificar-email`,{metodo:`POST`,corpo:{token:t},auth:!1}).then(e=>{document.querySelector(`[data-email]`).textContent=e.email,n(`ok`)}).catch(()=>n(`falha`));
