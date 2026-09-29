@@ -11,7 +11,7 @@ const botao = "flex w-full cursor-pointer items-center justify-center gap-2 roun
   <ShieldCheck slot="icone" class="size-8" aria-hidden="true" />
   <form id="form" novalidate class="flex w-full flex-col gap-4">
     <Alerta tipo="erro" titulo="Não foi possível entrar" geral />
-    <Campo nome="login" rotulo="Login" icone="usuario" placeholder="Digite seu login" autocomplete="username" />
+    <Campo nome="login" rotulo="E-mail" tipo="email" icone="email" placeholder="nome@exemplo.com" autocomplete="username" inputmode="email" maxlength={120} />
     <Campo nome="senha" rotulo="Senha" tipo="password" icone="cadeado" placeholder="Digite sua senha" autocomplete="current-password" ajuda="A senha não é exibida enquanto você digita." />
     <button type="submit" class={botao}>
       <LogIn class="size-[18px]" aria-hidden="true" />
@@ -21,7 +21,7 @@ const botao = "flex w-full cursor-pointer items-center justify-center gap-2 roun
 </CartaoAcesso>
 
 <script>
-  import { api, destinoSeguro, limparErro, mostrarErro, salvarSessao, type Sessao } from "../../lib/api";
+  import { api, destinoSeguro, erroCampos, limparErro, mostrarErro, salvarSessao, type Sessao } from "../../lib/api";
   import { caminho } from "../../lib/admin-api";
 
   const form = document.querySelector<HTMLFormElement>("#form")!;
@@ -29,6 +29,10 @@ const botao = "flex w-full cursor-pointer items-center justify-center gap-2 roun
     e.preventDefault();
     limparErro(form);
     const d = Object.fromEntries(new FormData(form)) as Record<string, string>;
+    const campos: Record<string, string> = {};
+    if (!d.login?.trim()) campos.login = "Informe o seu e-mail.";
+    if (!d.senha) campos.senha = "Informe a sua senha.";
+    if (Object.keys(campos).length) return mostrarErro(form, erroCampos(campos));
     const botao = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
     botao.disabled = true;
     try {

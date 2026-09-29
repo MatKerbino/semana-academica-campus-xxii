@@ -40,7 +40,20 @@ const linhas = [
   </dl>
   <h3 class="text-sm leading-[1.4] font-semibold text-chumbo">Descrição</h3>
   <div class="space-y-4 text-[15px] leading-normal text-chumbo">
-    {a.descricao.map((p) => <p>{p}</p>)}
+    {
+      a.descricao.map((p) => {
+        const [antes, depois] = p.split("{{forma}}");
+        return depois === undefined ? (
+          <p>{p}</p>
+        ) : (
+          <p>
+            {antes}
+            <span data-forma-part="frase">1 kg de alimento não perecível</span>
+            {depois}
+          </p>
+        );
+      })
+    }
   </div>
   {
     a.topicos && (
@@ -54,7 +67,8 @@ const linhas = [
   }
   <div class="flex flex-wrap items-center gap-3">
     <a
-      href={url("/inscricao")}
+      href={url("/cadastro")}
+      data-inscreva
       class="flex items-center gap-2 rounded-full bg-verde-cta px-[22px] py-3 text-[15px] leading-[1.3] font-bold text-verde-noite hover:brightness-95"
     >
       <UserPlus class="size-[18px]" aria-hidden="true" />
@@ -71,6 +85,6 @@ const linhas = [
   </div>
   <p class="flex items-center gap-2 text-[13px] leading-normal text-texto-suave">
     <Info class="size-4 shrink-0" aria-hidden="true" />
-    A consulta das atividades não exige cadastro, login ou inscrição.
+    A consulta das atividades não exige cadastro, entrada no sistema ou inscrição.
   </p>
 </article>

@@ -57,8 +57,8 @@ export const atividades: Atividade[] = [
     horario: "08h00 às 09h00",
     local: "Hall do Bloco A",
     descricao: [
-      "Momento de recepção dos participantes inscritos pelo site. Na chegada, o participante entrega 1 kg de alimento não perecível e retira o crachá de identificação, necessário para o acesso às atividades com número limitado de vagas.",
-      "A entrega do alimento é o único custo de participação no evento e a arrecadação é destinada a instituições parceiras da universidade.",
+      "Momento de recepção dos participantes inscritos pelo site. Na chegada, o participante cumpre a forma de participação definida pela organização ({{forma}}) e retira o crachá de identificação, necessário para o acesso às atividades com número limitado de vagas.",
+      "A forma de participação é definida pela organização e é a mesma para todos os participantes.",
     ],
   },
   {

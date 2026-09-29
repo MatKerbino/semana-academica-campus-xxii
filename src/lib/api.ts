@@ -9,6 +9,7 @@ export type Pagamento = {
   modalidade: "monetaria" | "nao_monetaria";
   valor: number | null;
   descricao: string | null;
+  orientacoes?: string | null;
   prazoCancelamento: string | null;
   prazoAlteracao: string | null;
   atualizadoEm: string | null;

@@ -1,6 +1,7 @@
 ---
 import { TriangleAlert } from "@lucide/astro";
 import IconesCliente from "../components/IconesCliente.astro";
+import PaginaCabecalho from "../components/PaginaCabecalho.astro";
 import Base from "../layouts/Base.astro";
 import { catalogoSelecionavel } from "../data/evento";
 import { url } from "../lib/url";
@@ -10,15 +11,9 @@ import { url } from "../lib/url";
   <script type="application/json" id="catalogo" set:html={JSON.stringify(catalogoSelecionavel)} />
 
   <div id="conteudo" hidden class="mx-auto flex w-full max-w-[1120px] flex-col gap-5">
-    <div class="flex flex-col gap-3">
-      <nav aria-label="Trilha de navegação" class="flex gap-2 text-[13px] leading-normal">
-        <a href={url("/minha-area")} class="text-verde-medio hover:underline">Minha área</a>
-        <span class="text-texto-suave">/</span>
-        <span class="text-texto-suave">Minha inscrição</span>
-      </nav>
-      <h1 class="text-[32px] leading-[1.3] font-bold text-verde-escuro">Minha inscrição</h1>
-      <p id="resumo" class="flex flex-wrap items-center gap-x-3 gap-y-2 text-[13px] leading-normal text-texto-suave"></p>
-    </div>
+    <PaginaCabecalho titulo="Minha inscrição" trilha={[{ href: "/", rotulo: "Início" }, { href: "/minha-area", rotulo: "Minha área" }]}>
+      <p id="resumo" class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-[13px] leading-normal text-chumbo"></p>
+    </PaginaCabecalho>
 
     <div id="aviso-topo"></div>
 
@@ -196,7 +191,7 @@ import { url } from "../lib/url";
     const status = $("#reenvio-status");
     try {
       await api("/inscricao/reenviar-verificacao", { metodo: "POST" });
-      status.textContent = "E-mail de verificação reenviado.";
+      status.textContent = "Solicitamos o reenvio do e-mail de verificação.";
     } catch (e) {
       status.textContent = e instanceof Error ? e.message : "Não foi possível reenviar.";
     }

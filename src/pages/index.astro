@@ -21,14 +21,14 @@ const botaoSecundario =
 const info = [
   { icone: Calendar, texto: evento.periodo },
   { icone: MapPin, texto: "Campus XXII — Ananindeua/PA" },
-  { icone: Apple, texto: "Forma de participação: 1 kg de alimento não perecível" },
+  { icone: Apple, texto: "Forma de participação: 1 kg de alimento não perecível", forma: "hero" },
   { icone: Users, texto: "Aberto à comunidade interna e externa" },
 ];
 
 const passos = [
-  { titulo: "Crie sua conta", texto: "Informe apenas um login e uma senha. Criar a conta não faz a sua inscrição." },
-  { titulo: "Faça sua inscrição", texto: "Entre com seu login, informe nome, CPF, e-mail, telefone, perfil e data de nascimento, aceite a Política de Privacidade e escolha as atividades." },
-  { titulo: "Confirme e cumpra a forma de participação", texto: "Revise e confirme a inscrição. A forma de participação é definida pela organização; nesta edição, 1 kg de alimento não perecível. A situação aparece em \"Minha inscrição\"." },
+  { titulo: "Crie sua conta", texto: "Informe apenas um e-mail e uma senha. Criar a conta não faz a sua inscrição." },
+  { titulo: "Faça sua inscrição", texto: "Entre com seu e-mail e senha, informe nome, CPF, telefone, perfil e data de nascimento, aceite a Política de Privacidade e escolha as atividades." },
+  { titulo: "Confirme e cumpra a forma de participação", forma: "passo", texto: "Revise e confirme a inscrição. A forma de participação é definida pela organização; nesta edição, 1 kg de alimento não perecível. A situação aparece em \"Minha inscrição\"." },
 ];
 
 const conta = (...tipos: string[]) => atividadesListadas.filter((a) => tipos.includes(a.tipo)).length;
@@ -50,7 +50,7 @@ const grupos = [
             info.map((i) => (
               <li class="flex items-center gap-2 text-sm leading-[1.4] font-semibold text-verde-escuro">
                 <i.icone class="size-[18px] shrink-0 text-verde-medio" aria-hidden="true" />
-                {i.texto}
+                <span data-forma-part={i.forma}>{i.texto}</span>
               </li>
             ))
           }
@@ -61,7 +61,7 @@ const grupos = [
           com o tema "{evento.lema}".
         </p>
         <div class="flex flex-col gap-3 sm:flex-row">
-          <a href={url("/inscricao")} class={botaoPrimario}>
+          <a href={url("/cadastro")} data-inscreva class={botaoPrimario}>
             <UserPlus class="size-[18px]" aria-hidden="true" />
             Inscreva-se
           </a>
@@ -107,12 +107,12 @@ const grupos = [
           <article class={cartao}>
             <Apple class="size-[26px] text-verde-escuro" aria-hidden="true" />
             <h2 class={titulo}>Forma de participação</h2>
-            <p class={texto}>Definida pela organização para todos os participantes. Nesta edição: doação de 1 kg de alimento não perecível, entregue no credenciamento.</p>
+            <p class={texto} data-forma-part="card">Definida pela organização para todos os participantes. Nesta edição: doação de 1 kg de alimento não perecível, entregue no credenciamento.</p>
           </article>
           <article class={cartao}>
             <KeyRound class="size-[26px] text-verde-escuro" aria-hidden="true" />
             <h2 class={titulo}>Conta e inscrição</h2>
-            <p class={texto}>Crie uma conta de acesso (login e senha) e depois faça sua inscrição, escolhendo as atividades de que deseja participar.</p>
+            <p class={texto}>Crie uma conta de acesso (e-mail e senha) e depois faça sua inscrição, escolhendo as atividades de que deseja participar.</p>
           </article>
           <article class="flex flex-col gap-3.5 rounded-cartao border border-verde-escuro bg-verde-escuro p-[22px] text-white shadow-[0_1px_3px_rgba(15,41,8,0.08)]">
             <h2 class={titulo + " !text-white"}>Tema da Semana Acadêmica</h2>
@@ -130,15 +130,15 @@ const grupos = [
               <article class={cartao}>
                 <span class="flex size-8 items-center justify-center rounded-full bg-verde-escuro text-sm font-bold text-white">{i + 1}</span>
                 <h2 class={titulo}>{passo.titulo}</h2>
-                <p class={texto}>{passo.texto}</p>
+                <p class={texto} data-forma-part={passo.forma}>{passo.texto}</p>
               </article>
             ))
           }
         </div>
         <div class="flex flex-col gap-3 pt-2 sm:flex-row">
-          <a href={url("/cadastro")} class={botaoPrimario}>
+          <a href={url("/cadastro")} data-inscreva data-inscreva-rotulo="Fazer minha inscrição" class={botaoPrimario}>
             <UserPlus class="size-[18px]" aria-hidden="true" />
-            Criar conta
+            <span data-rotulo>Criar conta</span>
           </a>
           <a href={url("/entrar")} class={botaoSecundario}>
             <LogIn class="size-[18px]" aria-hidden="true" />

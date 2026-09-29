@@ -9,3 +9,7 @@ export function cpfValido(valor: string): boolean {
   };
   return digito(cpf.slice(0, 9)) === Number(cpf[9]) && digito(cpf.slice(0, 10)) === Number(cpf[10]);
 }
+
+/** Login = e-mail (mesma regra da API). */
+export const normalizarEmail = (v: unknown) => String(v ?? "").trim().toLowerCase();
+export const emailValido = (v: string) => v.length <= 120 && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);

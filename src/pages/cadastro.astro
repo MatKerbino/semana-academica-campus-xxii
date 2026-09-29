@@ -8,11 +8,11 @@ import CartaoAcesso from "../components/CartaoAcesso.astro";
 const botao = "flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-verde-cta px-[22px] py-3 text-[15px] leading-[1.3] font-bold text-verde-noite hover:brightness-95 disabled:opacity-60";
 ---
 
-<CartaoAcesso titulo="Criar conta" descricao="Crie seu acesso com login e senha. Seus dados pessoais serão pedidos depois, na inscrição." ativo="/entrar">
+<CartaoAcesso titulo="Criar conta" descricao="Crie seu acesso com e-mail e senha. Seus dados pessoais serão pedidos depois, na inscrição." ativo="/entrar">
   <UserPlus slot="icone" class="size-8" aria-hidden="true" />
   <form id="form" novalidate class="flex w-full flex-col gap-4">
     <Alerta tipo="erro" titulo="Não foi possível criar a conta" geral />
-    <Campo nome="login" rotulo="Login" icone="usuario" placeholder="Digite seu login" autocomplete="username" minlength={3} maxlength={32} ajuda="Nome de usuário que você usará para entrar." />
+    <Campo nome="login" rotulo="E-mail" tipo="email" icone="email" placeholder="nome@exemplo.com" autocomplete="username" inputmode="email" maxlength={120} ajuda="Este e-mail será o seu login de acesso." />
     <Campo nome="senha" rotulo="Senha" tipo="password" icone="cadeado" placeholder="Digite sua senha" autocomplete="new-password" minlength={8} ajuda="A senha não é exibida enquanto você digita." />
     <Campo nome="confirmacaoSenha" rotulo="Confirmar senha" tipo="password" icone="cadeado" placeholder="Digite sua senha" autocomplete="new-password" ajuda="Digite a mesma senha novamente." />
     <Alerta tipo="info">Criar a conta não faz a sua inscrição na Semana Acadêmica.</Alerta>
@@ -20,13 +20,10 @@ const botao = "flex w-full cursor-pointer items-center justify-center gap-2 roun
       <UserPlus class="size-[18px]" aria-hidden="true" />
       Criar conta
     </button>
-    <p class="flex items-center justify-center gap-1 text-[15px] text-chumbo">
-      Já tem conta?
-      <a href={url("/entrar")} class="flex items-center gap-2 rounded-full px-2 py-3 font-bold text-verde-medio hover:underline">
-        <LogIn class="size-[18px]" aria-hidden="true" />
-        Entrar
-      </a>
-    </p>
+    <a href={url("/entrar")} class="flex w-full items-center justify-center gap-2 rounded-full border-2 border-verde-escuro bg-white px-[22px] py-2.5 text-[15px] leading-[1.3] font-bold text-verde-escuro hover:bg-palha">
+      <LogIn class="size-[18px]" aria-hidden="true" />
+      Já tenho conta — Entrar
+    </a>
   </form>
 
   <div id="sucesso" hidden class="flex w-full flex-col items-center gap-4 text-center">
@@ -37,7 +34,7 @@ const botao = "flex w-full cursor-pointer items-center justify-center gap-2 roun
     <p class="text-[15px] leading-normal text-chumbo">
       Sua conta <span data-login></span> foi criada. Você ainda não está inscrito(a) na Semana Acadêmica.
     </p>
-    <Alerta tipo="info" titulo="Próximo passo" class="w-full text-left">Entre com seu login e senha para iniciar a sua inscrição.</Alerta>
+    <Alerta tipo="info" titulo="Próximo passo" class="w-full text-left">Entre com seu e-mail e senha para iniciar a sua inscrição.</Alerta>
     <a href={url("/entrar?voltar=" + encodeURIComponent(url("/inscricao")))} class={botao}>
       <LogIn class="size-[18px]" aria-hidden="true" />
       Entrar e fazer inscrição
@@ -47,14 +44,15 @@ const botao = "flex w-full cursor-pointer items-center justify-center gap-2 roun
 
 <script>
   import { api, ApiError, erroCampos, limparErro, mostrarErro } from "../lib/api";
+  import { emailValido, normalizarEmail } from "../lib/validacao";
   const form = document.querySelector<HTMLFormElement>("#form")!;
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     limparErro(form);
     const d = Object.fromEntries(new FormData(form)) as Record<string, string>;
-    d.login = (d.login ?? "").trim().toLowerCase();
+    d.login = normalizarEmail(d.login);
     const campos: Record<string, string> = {};
-    if (!/^[a-z0-9._-]{3,32}$/.test(d.login)) campos.login = "Use de 3 a 32 caracteres: letras minúsculas, números, ponto, hífen ou sublinhado.";
+    if (!emailValido(d.login)) campos.login = "Informe um e-mail válido.";
     if ((d.senha ?? "").length < 8) campos.senha = "A senha deve ter no mínimo 8 caracteres.";
     if (d.senha !== d.confirmacaoSenha) campos.confirmacaoSenha = "As senhas não conferem.";
     if (Object.keys(campos).length) {
@@ -71,7 +69,7 @@ const botao = "flex w-full cursor-pointer items-center justify-center gap-2 roun
       document.querySelector<HTMLElement>("[data-cabecalho]")!.hidden = true;
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
-        mostrarErro(form, erroCampos({ login: "Este login já está em uso. Escolha outro." }, "Já existe uma conta com este login."));
+        mostrarErro(form, erroCampos({ login: "Este e-mail já possui uma conta. Entre ou recupere o acesso." }, "Já existe uma conta com este e-mail."));
       } else mostrarErro(form, err);
     } finally {
       botao.disabled = false;

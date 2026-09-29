@@ -2,6 +2,7 @@
 import { ArrowLeft, Check, Undo2 } from "@lucide/astro";
 import Alerta from "../components/Alerta.astro";
 import IconesCliente from "../components/IconesCliente.astro";
+import PaginaCabecalho from "../components/PaginaCabecalho.astro";
 import Base from "../layouts/Base.astro";
 import { catalogoSelecionavel } from "../data/evento";
 import { url } from "../lib/url";
@@ -13,15 +14,12 @@ const btnContorno = "inline-flex cursor-pointer items-center justify-center gap-
 <Base titulo="Editar atividades" espaco="acesso">
   <script type="application/json" id="catalogo" set:html={JSON.stringify(catalogoSelecionavel)} />
   <div id="conteudo" hidden class="mx-auto flex w-full max-w-[1120px] flex-col gap-5">
-    <div class="flex flex-col gap-2">
-      <nav aria-label="Trilha de navegação" class="flex flex-wrap gap-2 text-[13px] leading-normal">
-        <a href={url("/minha-area")} class="text-verde-medio hover:underline">Minha área</a><span class="text-texto-suave">/</span>
-        <a href={url("/minha-inscricao")} class="text-verde-medio hover:underline">Minha inscrição</a><span class="text-texto-suave">/</span>
-        <span class="text-texto-suave">Editar atividades</span>
-      </nav>
-      <h1 class="text-[32px] leading-[1.3] font-bold text-verde-escuro">Editar atividades</h1>
-      <p id="subtitulo" class="text-[15px] leading-normal text-chumbo"></p>
-    </div>
+    <PaginaCabecalho
+      titulo="Editar atividades"
+      trilha={[{ href: "/", rotulo: "Início" }, { href: "/minha-area", rotulo: "Minha área" }, { href: "/minha-inscricao", rotulo: "Minha inscrição" }]}
+    >
+      <p id="subtitulo" class="mt-1.5 text-sm text-chumbo"></p>
+    </PaginaCabecalho>
 
     <Alerta tipo="erro" titulo="Não foi possível salvar as alterações" geral id="erro-geral" />
     <div id="seletor" class="flex flex-col gap-5"></div>
