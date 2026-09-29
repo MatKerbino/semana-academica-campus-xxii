@@ -1,0 +1,1 @@
+import{_ as e,r as t}from"./api.Ctn0ZKft.js";import"./admin-api.Q7RQDsMK.js";var n=e();n?n.usuario.papel===`admin`?location.replace(t(`/admin`)):document.getElementById(`login`).textContent=n.usuario.login:location.replace(t(`/admin/entrar`));
