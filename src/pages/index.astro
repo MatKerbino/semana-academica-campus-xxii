@@ -27,7 +27,7 @@ const info = [
 
 const passos = [
   { titulo: "Crie sua conta", texto: "Informe apenas um e-mail e uma senha. Criar a conta não faz a sua inscrição." },
-  { titulo: "Faça sua inscrição", texto: "Entre com seu e-mail e senha, informe nome, CPF, telefone, perfil e data de nascimento, aceite a Política de Privacidade e escolha as atividades." },
+  { titulo: "Faça sua inscrição", texto: "Entre, preencha seus dados, aceite a Política de Privacidade e escolha as atividades." },
   { titulo: "Confirme e cumpra a forma de participação", forma: "passo", texto: "Revise e confirme a inscrição. A forma de participação é definida pela organização; nesta edição, 1 kg de alimento não perecível. A situação aparece em \"Minha inscrição\"." },
 ];
 
@@ -56,10 +56,7 @@ const grupos = [
           }
         </ul>
         <h1 class="text-[32px] leading-[1.3] font-bold text-verde-escuro">{evento.nome}</h1>
-        <p class={texto}>
-          Quatro dias de palestras, minicursos, cursos, exposição de banners e apresentação de artigos promovidos pela UEPA,
-          com o tema "{evento.lema}".
-        </p>
+        <p class={texto}>Quatro dias de palestras, minicursos, cursos, exposição de banners e apresentação de artigos.</p>
         <div class="flex flex-col gap-3 sm:flex-row">
           <a href={url("/cadastro")} data-inscreva class={botaoPrimario}>
             <UserPlus class="size-[18px]" aria-hidden="true" />
@@ -93,11 +90,6 @@ const grupos = [
       ]}
     >
       <div data-painel="sobre" class="flex flex-col gap-4">
-        <p class={texto}>
-          A 1ª Semana Acadêmica do Campus XXII reúne estudantes, docentes, pesquisadores e profissionais em torno de soluções
-          inteligentes para um mundo sustentável, com atividades das áreas de Educação, Saúde, Tecnologia e Meio Ambiente
-          realizadas no campus de Ananindeua.
-        </p>
         <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <article class={cartao}>
             <Users class="size-[26px] text-verde-escuro" aria-hidden="true" />
@@ -123,7 +115,6 @@ const grupos = [
       </div>
 
       <div data-painel="inscricao" class="flex flex-col gap-4">
-        <p class={texto}>Cadastro e inscrição são etapas diferentes: a conta dá acesso ao sistema; a inscrição registra sua participação no evento.</p>
         <div class="grid gap-4 md:grid-cols-3">
           {
             passos.map((passo, i) => (
@@ -148,7 +139,6 @@ const grupos = [
       </div>
 
       <div data-painel="atividades" class="flex flex-col gap-4">
-        <p class={texto}>Todas as atividades estão reunidas em uma única página. A consulta é livre e não exige cadastro.</p>
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {
             grupos.map((g) => (
@@ -172,17 +162,21 @@ const grupos = [
         </div>
       </div>
 
-      <div data-painel="local" class="flex flex-col items-start gap-4">
-        <p class={texto}>{evento.local.nome}, {evento.local.endereco} · {evento.local.cidade}</p>
-        <a
-          href={evento.local.mapsUrl}
-          target="_blank"
-          rel="noopener"
-          class="flex items-center gap-2 rounded-full bg-azul px-[22px] py-3 text-[15px] leading-[1.3] font-bold text-white hover:opacity-90"
-        >
-          <MapPin class="size-[18px]" aria-hidden="true" />
-          Abrir no Google Maps
-        </a>
+      <div data-painel="local">
+        <article class={cartao + " max-w-xl items-start"}>
+          <MapPin class="size-[26px] text-verde-escuro" aria-hidden="true" />
+          <h2 class={titulo}>{evento.local.nome}</h2>
+          <p class={texto}>{evento.local.endereco} · {evento.local.cidade}</p>
+          <a
+            href={evento.local.mapsUrl}
+            target="_blank"
+            rel="noopener"
+            class="flex items-center gap-2 rounded-full bg-azul px-[22px] py-3 text-[15px] leading-[1.3] font-bold text-white hover:opacity-90"
+          >
+            <MapPin class="size-[18px]" aria-hidden="true" />
+            Abrir no Google Maps
+          </a>
+        </article>
       </div>
     </Abas>
   </div>
