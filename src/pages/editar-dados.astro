@@ -48,13 +48,14 @@ const btnContorno = "inline-flex cursor-pointer items-center justify-center gap-
 
 <script>
   import { api, erroCampos, exigirLogin, limparErro, mostrarErro, type Inscricao } from "../lib/api";
-  import { ativarMascaras, lerDados, preencherDados, validarDados } from "../lib/dados-form";
+  import { ativarMascaras, lerDados, preencherDados, prepararEmail, validarDados } from "../lib/dados-form";
   import { url } from "../lib/url";
 
   const form = document.querySelector<HTMLFormElement>("#form")!;
   let insc: Inscricao;
   if (exigirLogin()) {
     ativarMascaras(form);
+    prepararEmail(form);
     api<{ inscricao: Inscricao }>("/inscricao")
       .then((r) => {
         insc = r.inscricao;

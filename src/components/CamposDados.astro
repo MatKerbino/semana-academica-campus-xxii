@@ -19,7 +19,22 @@ const perfis = [
         <div class="grid gap-4 md:grid-cols-2">
           <Campo nome="nome" rotulo="Nome completo *" icone="usuario" placeholder="Seu nome completo" autocomplete="name" />
           <Campo nome="cpf" rotulo="CPF *" icone="cpf" placeholder="000.000.000-00" inputmode="numeric" maxlength={14} />
-          <Campo nome="email" rotulo="E-mail *" icone="email" placeholder="nome@exemplo.com" tipo="email" autocomplete="email" />
+          <div data-email-bloco class="flex flex-col gap-3">
+            <fieldset data-email-opcoes hidden class="flex flex-col gap-2">
+              <legend class="mb-1.5 text-sm leading-[1.4] font-semibold text-chumbo">E-mail para contato *</legend>
+              <label class="flex cursor-pointer items-center gap-3 text-[15px] leading-normal text-chumbo">
+                <input type="radio" name="emailOrigem" value="conta" class="size-[18px] shrink-0 cursor-pointer appearance-none rounded-full border-[1.5px] border-chumbo/60 bg-white checked:border-[5px] checked:border-verde-medio" />
+                <span>Usar o e-mail da minha conta (<strong data-email-conta class="break-all font-semibold"></strong>)</span>
+              </label>
+              <label class="flex cursor-pointer items-center gap-3 text-[15px] leading-normal text-chumbo">
+                <input type="radio" name="emailOrigem" value="outro" class="size-[18px] shrink-0 cursor-pointer appearance-none rounded-full border-[1.5px] border-chumbo/60 bg-white checked:border-[5px] checked:border-verde-medio" />
+                <span>Usar outro e-mail</span>
+              </label>
+            </fieldset>
+            <div data-email-campo>
+              <Campo nome="email" rotulo="E-mail *" icone="email" placeholder="nome@exemplo.com" tipo="email" autocomplete="email" />
+            </div>
+          </div>
           <Campo nome="telefone" rotulo="Telefone *" icone="telefone" placeholder="(00) 00000-0000" inputmode="tel" maxlength={15} autocomplete="tel" />
           <Campo nome="dataNascimento" rotulo="Data de nascimento *" icone="data" placeholder="dd/mm/aaaa" inputmode="numeric" maxlength={10} autocomplete="bday" />
         </div>

@@ -38,6 +38,10 @@ const btnTexto = "inline-flex cursor-pointer items-center gap-2 py-2 text-[15px]
 
       <Alerta tipo="erro" titulo="Corrija os campos destacados" geral />
 
+      <div id="aviso-perfil" hidden>
+        <Alerta tipo="info">Preenchemos com os dados salvos na sua conta. Confira antes de continuar.</Alerta>
+      </div>
+
       <section class={`${cartao} flex flex-col gap-4`}>
         <div>
           <h2 class="text-[18px] leading-[1.4] font-semibold text-verde-escuro">Dados pessoais</h2>
@@ -171,7 +175,7 @@ const btnTexto = "inline-flex cursor-pointer items-center gap-2 py-2 text-[15px]
 
 <script>
   import { api, ApiError, erroCampos, exigirLogin, formatarDataHora, limparErro, mostrarErro, type Inscricao, type Pagamento, type Vagas } from "../lib/api";
-  import { ativarMascaras, lerDados, preencherDados, validarDados } from "../lib/dados-form";
+  import { ativarMascaras, lerDados, preencherDados, prepararEmail, validarDados } from "../lib/dados-form";
   import { montarSeletor } from "../lib/seletor";
   import { formaParticipacao, gradeDados, ico, linhaAtividade, passos, separarDescricao, type ItemCatalogo } from "../lib/visao";
   import { url } from "../lib/url";
@@ -195,6 +199,7 @@ const btnTexto = "inline-flex cursor-pointer items-center gap-2 py-2 text-[15px]
   });
 
   ativarMascaras(form);
+  prepararEmail(form);
 
   // ---- carga ----
   async function iniciar() {
@@ -236,6 +241,8 @@ const btnTexto = "inline-flex cursor-pointer items-center gap-2 py-2 text-[15px]
     $("#confirmada").hidden = true;
     $("#cabecalho").hidden = false;
     $("#passos").innerHTML = passos(n);
+    // Aviso só enquanto a etapa 1 ainda não foi salva (aceite da política ainda não registrado).
+    $("#aviso-perfil").hidden = !(n === 1 && insc.dadosDoPerfil && !insc.aceitePrivacidade);
     if (n === 2) desenharSeletor();
     if (n === 3) desenharRevisao();
     scrollTo({ top: 0 });

@@ -30,6 +30,8 @@ export type Inscricao = {
   status: "rascunho" | "confirmada" | "cancelada";
   dados: Dados;
   emailVerificado: boolean;
+  /** O rascunho foi criado já preenchido com os dados salvos na conta. */
+  dadosDoPerfil?: boolean;
   versaoPolitica: string | null;
   historico: { evento: string; em: string }[];
   atividades: string[];
