@@ -1,0 +1,43 @@
+---
+import { ArrowLeft } from "@lucide/astro";
+import { btnContorno, btnPrimario, btnTexto, cartao, tituloSecao } from "../../lib/inscricao/estilos";
+import BotaoSalvarDepois from "./BotaoSalvarDepois.astro";
+---
+
+<!-- Etapa 3 · Revisão e confirmação -->
+<div id="etapa-3" hidden class="flex flex-col gap-5">
+  <div id="alerta-revisao"></div>
+  <section class={cartao}>
+    <div class="flex items-center justify-between gap-3">
+      <h2 class={tituloSecao}>Dados da inscrição</h2>
+      <button type="button" data-ir="1" class={btnTexto}><span data-ico="lapis"></span>Editar</button>
+    </div>
+    <div id="revisao-dados" class="mt-4"></div>
+  </section>
+  <section class={cartao}>
+    <div class="flex items-center justify-between gap-3">
+      <h2 class={tituloSecao}>Atividades selecionadas (<span data-total></span>)</h2>
+      <button type="button" data-ir="2" class={btnTexto}><span data-ico="lapis"></span>Alterar atividades</button>
+    </div>
+    <ul id="revisao-atividades" class="mt-4 space-y-2.5"></ul>
+  </section>
+  <section class={cartao}>
+    <h2 class={tituloSecao}>Forma de participação</h2>
+    <div data-forma class="mt-4"></div>
+    <p class="mt-4 text-[13px] leading-normal text-texto-suave">Definida pela organização e igual para todos os participantes. Não é possível escolher outra modalidade.</p>
+  </section>
+  <section class={cartao}>
+    <h2 class={tituloSecao}>Política de Privacidade</h2>
+    <p id="revisao-aceite" class="mt-3 flex items-center gap-2 text-[15px] text-chumbo"></p>
+  </section>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <BotaoSalvarDepois ordem="order-3 w-full justify-center sm:order-1 sm:w-auto" />
+    <div class="order-1 flex w-full flex-col gap-3 sm:order-2 sm:w-auto sm:flex-row">
+      <button type="button" data-ir="2" class={btnContorno}>
+        <ArrowLeft class="size-[18px]" aria-hidden="true" />
+        Voltar para atividades
+      </button>
+      <button type="button" id="confirmar" class={btnPrimario}></button>
+    </div>
+  </div>
+</div>

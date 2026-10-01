@@ -1,0 +1,15 @@
+---
+import { Clock } from "@lucide/astro";
+import { btnTexto } from "../../lib/inscricao/estilos";
+
+interface Props {
+  /** Classes de ordem/largura (variam conforme o rodapé de cada etapa). */
+  ordem: string;
+}
+const { ordem } = Astro.props;
+---
+
+<button type="button" data-salvar-depois class={`${btnTexto} ${ordem}`}>
+  <Clock class="size-[18px]" aria-hidden="true" />
+  Salvar e continuar depois
+</button>

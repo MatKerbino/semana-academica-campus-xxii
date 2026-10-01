@@ -1,0 +1,14 @@
+---
+import { UserRound } from "@lucide/astro";
+import PaginaCabecalho from "../PaginaCabecalho.astro";
+---
+
+<div id="cabecalho">
+  <PaginaCabecalho titulo="Inscrição na 1ª Semana Acadêmica" trilha={[{ href: "/", rotulo: "Início" }, { href: "/minha-area", rotulo: "Minha área" }]}>
+    <p class="mt-1.5 flex items-center gap-2 text-[13px] leading-normal text-chumbo">
+      <UserRound class="size-4 text-verde-medio" aria-hidden="true" />
+      <span>Inscrição vinculada à conta <span data-login></span></span>
+    </p>
+    <div id="passos" class="mt-3"></div>
+  </PaginaCabecalho>
+</div>

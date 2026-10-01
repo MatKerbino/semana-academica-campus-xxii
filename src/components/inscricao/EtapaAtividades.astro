@@ -1,0 +1,25 @@
+---
+import { ArrowLeft } from "@lucide/astro";
+import { btnContorno, btnPrimario } from "../../lib/inscricao/estilos";
+import Alerta from "../Alerta.astro";
+import BotaoSalvarDepois from "./BotaoSalvarDepois.astro";
+---
+
+<!-- Etapa 2 · Atividades -->
+<div id="etapa-2" hidden class="flex flex-col gap-5">
+  <Alerta tipo="info" titulo="Escolha suas atividades">
+    Selecione as atividades de que deseja participar. Atividades sem vagas não podem ser selecionadas. Credenciamento, abertura, encerramento e demais itens da programação geral não precisam de seleção.
+  </Alerta>
+  <Alerta tipo="erro" titulo="Não foi possível continuar" geral id="erro-etapa-2" />
+  <div id="seletor" class="flex flex-col gap-5"></div>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <BotaoSalvarDepois ordem="order-3 w-full justify-center sm:order-1 sm:w-auto" />
+    <div class="order-1 flex w-full flex-col gap-3 sm:order-2 sm:w-auto sm:flex-row">
+      <button type="button" data-ir="1" class={btnContorno}>
+        <ArrowLeft class="size-[18px]" aria-hidden="true" />
+        Voltar para dados
+      </button>
+      <button type="button" data-ir="3" class={btnPrimario}>Continuar para revisão</button>
+    </div>
+  </div>
+</div>
