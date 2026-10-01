@@ -104,6 +104,7 @@ export const linhaAtividade = (a: ItemCatalogo, extra = "") => `
   </li>`;
 
 const EVENTOS: Record<string, (i: Inscricao) => string | null> = {
+  nova_inscricao_iniciada: () => "Nova inscrição iniciada",
   aceite_politica: () => "Aceite da Política de Privacidade registrado",
   inscricao_confirmada: () => "Inscrição confirmada",
   inscricao_editada: () => "Dados ou atividades da inscrição atualizados",

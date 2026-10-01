@@ -25,6 +25,20 @@ export type Dados = {
   perfil?: "estudante" | "professor" | "profissional" | "outro";
 };
 
+/** Inscrição cancelada que a conta teve antes da atual (a API guarda a cópia completa em `anteriores`). */
+export type InscricaoAnterior = {
+  numero: string | null;
+  status: "cancelada";
+  criadaEm: string;
+  confirmadaEm: string | null;
+  canceladaEm: string | null;
+  atividades: string[];
+  historico: { evento: string; em: string }[];
+  pagamento: Inscricao["pagamento"];
+  situacaoPagamento: Inscricao["situacaoPagamento"];
+  devolucao: Inscricao["devolucao"];
+};
+
 export type Inscricao = {
   numero: string | null;
   status: "rascunho" | "confirmada" | "cancelada";
@@ -32,6 +46,8 @@ export type Inscricao = {
   emailVerificado: boolean;
   /** O rascunho foi criado já preenchido com os dados salvos na conta. */
   dadosDoPerfil?: boolean;
+  /** Inscrições canceladas anteriores desta conta (da mais antiga para a mais recente). */
+  anteriores?: InscricaoAnterior[];
   versaoPolitica: string | null;
   historico: { evento: string; em: string }[];
   atividades: string[];

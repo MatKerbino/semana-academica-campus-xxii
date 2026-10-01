@@ -5,6 +5,8 @@ import { url } from "../url";
 import { $ } from "./dom";
 import type { Estado } from "./estado";
 import { irPara } from "./etapas";
+import { mostrarNovaInscricao } from "./nova";
+import { devolucaoPendente } from "../nova-inscricao";
 
 export const buscarVagas = () => api<{ atividades: Vagas }>("/atividades/vagas", { auth: false }).then((r) => r.atividades);
 
@@ -30,6 +32,7 @@ export async function carregar(e: Estado) {
   try {
     [e.pagamento, e.vagas] = await Promise.all([api<Pagamento>("/pagamento", { auth: false }), buscarVagas()]);
     e.insc = await rascunho();
+    if (e.insc.status === "cancelada" && !devolucaoPendente(e.insc)) return mostrarNovaInscricao(e, () => carregar(e));
     if (e.insc.status !== "rascunho") return void (location.href = url("/minha-inscricao"));
     preencher(e);
     const d = e.insc.dados;

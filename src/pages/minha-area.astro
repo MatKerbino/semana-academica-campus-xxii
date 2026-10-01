@@ -29,12 +29,14 @@ import IconesCliente from "../components/IconesCliente.astro";
 
 <script>
   import { api, ApiError, exigirLogin, formatarData, formatarDataHora, type Inscricao, type Pagamento } from "../lib/api";
-  import { btnPrimario, formaParticipacao, ico, passos, selo, seloInscricao } from "../lib/visao";
+  import { blocoNovaInscricao, ligarNovaInscricao } from "../lib/nova-inscricao";
+  import { btnContorno, btnPrimario, formaParticipacao, ico, passos, selo, seloInscricao } from "../lib/visao";
   import { url } from "../lib/url";
 
   const sessao = exigirLogin();
   if (sessao) {
     document.querySelectorAll("[data-login]").forEach((el) => (el.textContent = sessao.usuario.login));
+    ligarNovaInscricao(document.getElementById("estado")!);
     carregar();
   }
 
@@ -70,7 +72,7 @@ import IconesCliente from "../components/IconesCliente.astro";
       ${seloInscricao(i.status)}
       <h2 class="mt-1 text-[18px] leading-[1.4] font-semibold text-verde-escuro">${cancelada ? "Sua inscrição foi cancelada" : "Sua inscrição está confirmada"}</h2>
       <p class="mt-1 text-[15px] leading-normal text-chumbo">Inscrição nº ${i.numero ?? "—"} · ${cancelada ? `cancelada em ${formatarData(i.canceladaEm)}` : `confirmada em ${formatarData(i.confirmadaEm)}`}.</p>
-      <a href="${url("/minha-inscricao")}" class="${btnPrimario} mt-4">${ico("lista", "size-4")}Ver minha inscrição</a></div></div>`;
+      <a href="${url("/minha-inscricao")}" class="${cancelada ? btnContorno : btnPrimario} mt-4">${ico("lista", "size-4")}Ver minha inscrição</a>${cancelada ? blocoNovaInscricao(i, "mt-3") : ""}</div></div>`;
   }
 
   async function carregar() {
