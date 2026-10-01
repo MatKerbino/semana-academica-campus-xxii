@@ -3,153 +3,236 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
 ---
 
 <AdminLayout titulo="Forma de pagamento" ativo="pagamento">
-  <div id="conteudo" class="flex flex-col gap-6" aria-live="polite"></div>
+  <div id="conteudo" class="flex flex-col gap-6" aria-live="polite"><p class="text-sm text-texto-suave">Carregando…</p></div>
 </AdminLayout>
 
 <script>
   import {
-    abrirModal, CLASSES, cabecalhoPagina, dataHora, erroCarregar, esc, eStatusErro, formaPagamento, formaParticipacaoCartao, formaTexto,
-    formatarMoeda, icone, iniciarPainel, salvarFormaPagamento, toast, type FormaPagamento, type Modalidade,
+    abrirModal, CLASSES, cabecalhoPagina, criarForma, dataHora, editarForma, erroCarregar, esc, eStatusErro, excluirForma,
+    formaParticipacaoCartao, formaTexto, icone, iniciarPainel, listarFormas, selo, toast, tornarFormaVigente, type Catalogo,
+    type FormaCatalogo, type FormaPagamento, type Modalidade,
   } from "../../lib/admin-api";
 
   if (iniciarPainel()) {
     const raiz = document.getElementById("conteudo")!;
-    let vigente: FormaPagamento;
+    let catalogo: Catalogo;
+    let modo: { tipo: "lista" } | { tipo: "criar" } | { tipo: "editar"; id: string } = { tipo: "lista" };
     const f = { modalidade: "nao_monetaria" as Modalidade, descricao: "", orientacoes: "", valor: "", orientPag: "" };
+    let tornarVigente = false;
     let erros: Record<string, string> = {};
+    let erroGeral = "";
 
-    const carregarForm = (v: FormaPagamento) => {
-      f.modalidade = v.modalidade;
-      f.descricao = v.modalidade === "nao_monetaria" ? (v.descricao ?? "") : "";
-      f.orientacoes = v.modalidade === "nao_monetaria" ? (v.orientacoes ?? "") : "";
-      f.valor = v.modalidade === "monetaria" && v.valor != null ? v.valor.toFixed(2).replace(".", ",") : "";
-      f.orientPag = v.modalidade === "monetaria" ? (v.descricao ?? "") : "";
+    const AVISO = "Inscrições já confirmadas mantêm a forma da época da confirmação.";
+    const btn = `${CLASSES.botaoContorno} !gap-1.5 !px-4 !py-2 !text-sm`;
+    const btnPerigo = `${btn} !border-erro-borda !text-erro hover:!bg-erro-fundo disabled:cursor-not-allowed disabled:opacity-60`;
+
+    const carregarForm = (v?: FormaPagamento) => {
+      const nao = !v || v.modalidade === "nao_monetaria";
+      // Descrição em duas linhas (forma padrão): a primeira é a descrição; a segunda vira orientação se esta estiver vazia.
+      const [primeira = "", ...resto] = (v?.descricao ?? "").split("\n").map((l) => l.trim()).filter(Boolean);
+      f.modalidade = v?.modalidade ?? "nao_monetaria";
+      f.descricao = nao ? primeira : "";
+      f.orientacoes = nao ? (v?.orientacoes || resto.join(" ")) : "";
+      f.valor = v && v.modalidade === "monetaria" && v.valor != null ? v.valor.toFixed(2).replace(".", ",") : "";
+      f.orientPag = v && v.modalidade === "monetaria" ? (v.descricao ?? v.orientacoes ?? "") : "";
     };
     const numero = () => Number(f.valor.replace(/\./g, "").replace(",", "."));
     const comoForma = (): FormaPagamento =>
       f.modalidade === "monetaria"
         ? { modalidade: "monetaria", valor: Number.isFinite(numero()) && numero() > 0 ? numero() : null, descricao: f.orientPag || null }
         : { modalidade: "nao_monetaria", valor: null, descricao: f.descricao || null, orientacoes: f.orientacoes || null };
+    const corpo = () => {
+      const x = comoForma();
+      return x.modalidade === "monetaria"
+        ? { modalidade: x.modalidade, valor: x.valor, descricao: x.descricao ?? "" }
+        : { modalidade: x.modalidade, descricao: x.descricao ?? "", orientacoes: x.orientacoes ?? "" };
+    };
 
-    const entrada = (nome: keyof typeof f, rotulo: string, opcoes: { obrigatorio?: boolean; ajuda?: string; placeholder?: string; inputmode?: string }) => {
-      const erro = erros[nome];
-      return `<div class="flex flex-col gap-1.5"><label for="c-${nome}" class="text-sm leading-[1.4] font-semibold text-chumbo">${rotulo}${opcoes.obrigatorio ? " *" : ""}</label>
+    const entrada = (nome: keyof typeof f, rotulo: string, o: { obrigatorio?: boolean; ajuda?: string; placeholder?: string; inputmode?: string }) => {
+      const erro = erros[nome === "orientPag" ? "descricao" : nome];
+      return `<div class="flex flex-col gap-1.5"><label for="c-${nome}" class="text-sm leading-[1.4] font-semibold text-chumbo">${rotulo}${o.obrigatorio ? " *" : ""}</label>
         <div class="${CLASSES.campo} ${erro ? "!border-2 !border-erro" : ""}">${icone("user", `size-5 ${erro ? "text-erro" : "text-chumbo"}`)}
-          <input id="c-${nome}" data-campo="${nome}" value="${esc(f[nome])}" placeholder="${esc(opcoes.placeholder ?? "")}" ${opcoes.inputmode ? `inputmode="${opcoes.inputmode}"` : ""} ${erro ? 'aria-invalid="true"' : ""} aria-describedby="e-${nome}" class="${CLASSES.entrada}" />
+          <input id="c-${nome}" data-campo="${nome}" value="${esc(f[nome])}" placeholder="${esc(o.placeholder ?? "")}" ${o.inputmode ? `inputmode="${o.inputmode}"` : ""} ${erro ? `aria-invalid="true" aria-describedby="e-${nome}"` : ""} class="${CLASSES.entrada}" />
           ${erro ? icone("triangle-alert", "size-[18px] text-erro") : ""}</div>
-        ${erro ? `<p id="e-${nome}" class="text-[13px] text-erro">${esc(erro)}</p>` : opcoes.ajuda ? `<p id="e-${nome}" class="text-[13px] text-texto-suave">${esc(opcoes.ajuda)}</p>` : ""}</div>`;
+        ${erro ? `<p id="e-${nome}" class="text-[13px] text-erro">${esc(erro)}</p>` : o.ajuda ? `<p id="e-${nome}" class="text-[13px] text-texto-suave">${esc(o.ajuda)}</p>` : ""}</div>`;
+    };
+    const previa = () => formaParticipacaoCartao(f.modalidade === "monetaria" || f.descricao ? comoForma() : { ...comoForma(), descricao: "—" });
+    const rotuloForma = (x: FormaPagamento) => { const t = formaTexto(x); return `${t.rotulo} · ${t.titulo}`; };
+    const forma = (id: string) => catalogo.formas.find((x) => x.id === id)!;
+
+    // ---------- lista ----------
+    const cartao = (x: FormaCatalogo) => {
+      const t = formaTexto(x);
+      const nome = `${t.rotulo}: ${t.titulo}`;
+      return `<article class="${CLASSES.cartao} flex flex-col gap-3 !p-5 ${x.vigente ? "!border-2 !border-verde-medio" : ""}" aria-label="${esc(nome)}">
+        <div class="flex items-start justify-between gap-3"><p class="flex items-center gap-2 text-[13px] font-semibold text-texto-suave">${icone(x.modalidade === "monetaria" ? "banknote" : "apple", "size-4 text-verde-medio")}${t.rotulo}</p>${x.vigente ? selo("Vigente", "ok", "circle-check") : ""}</div>
+        <p class="text-lg leading-[1.4] font-semibold text-chumbo">${esc(t.titulo)}</p>${t.apoio ? `<p class="text-[13px] leading-normal text-chumbo">${esc(t.apoio)}</p>` : ""}
+        ${x.atualizadoEm ? `<p class="flex items-start gap-2 text-[13px] leading-normal text-texto-suave">${icone("history", "mt-0.5 size-4 text-verde-medio")}<span>Atualizada em ${dataHora(x.atualizadoEm, " às ")}${x.atualizadoPor ? ` por ${esc(x.atualizadoPor)}` : ""}</span></p>` : ""}
+        <div class="mt-1 flex flex-wrap gap-2">
+          <button type="button" data-editar="${esc(x.id)}" aria-label="Editar a forma ${esc(nome)}" class="${btn}">${icone("pencil", "size-4")}Editar</button>
+          ${x.vigente ? "" : `<button type="button" data-vigente="${esc(x.id)}" aria-label="Tornar vigente a forma ${esc(nome)}" class="${btn}">${icone("circle-check", "size-4")}Tornar vigente</button>`}
+          <button type="button" data-excluir="${esc(x.id)}" aria-label="Excluir a forma ${esc(nome)}" ${x.vigente ? `disabled aria-describedby="ajuda-${esc(x.id)}"` : ""} class="${btnPerigo}">${icone("trash", "size-4")}Excluir</button>
+        </div>
+        ${x.vigente ? `<p id="ajuda-${esc(x.id)}" class="text-[13px] leading-normal text-texto-suave">Defina outra forma como vigente para poder excluir.</p>` : ""}</article>`;
     };
 
-    const previa = () => formaParticipacaoCartao(comoForma().modalidade === "monetaria" || comoForma().descricao ? comoForma() : { ...comoForma(), descricao: "—" });
-
-    const cartaoVigente = () => {
-      const t = formaTexto(vigente);
-      return `<section class="${CLASSES.cartao} flex flex-col gap-3 !p-5" aria-labelledby="t-vig"><h2 id="t-vig" class="${CLASSES.titulo}">Forma vigente atual</h2>
-        <p class="flex items-start gap-2 text-[13px] leading-normal text-chumbo">${icone("sprout", "mt-0.5 size-4 text-verde-medio")}<span>${t.rotulo} · ${esc(t.titulo)}</span></p>
-        ${vigente.atualizadoEm ? `<p class="flex items-start gap-2 text-[13px] leading-normal text-chumbo">${icone("history", "mt-0.5 size-4 text-verde-medio")}<span>Última alteração: ${dataHora(vigente.atualizadoEm).replace(" ", " às ")}${vigente.atualizadoPor ? ` por ${esc(vigente.atualizadoPor)}` : ""}</span></p>` : ""}</section>`;
-    };
-
-    const desenhar = () => {
-      const nao = f.modalidade === "nao_monetaria";
+    const desenharLista = () => {
       raiz.innerHTML = `
-        ${cabecalhoPagina("Forma de pagamento ou compensação", "Defina a forma de participação desta edição. Ela é única e vale para todos os participantes na inscrição e em Minha inscrição.")}
+        ${cabecalhoPagina("Formas de pagamento ou compensação", "Cadastre as formas desta edição e escolha qual é a vigente. Só uma vale para todos os participantes, na inscrição e em Minha inscrição.")}
+        <div class="flex flex-wrap items-center justify-between gap-3"><h2 class="${CLASSES.titulo}">Formas cadastradas (${catalogo.formas.length})</h2>
+          <button type="button" data-nova class="${CLASSES.botaoPrimario}">${icone("plus")}Nova forma</button></div>
+        <div class="grid items-start gap-4 lg:grid-cols-2">${catalogo.formas.map(cartao).join("")}</div>`;
+    };
+
+    // ---------- formulário (criar / editar) ----------
+    const desenharForm = () => {
+      const nao = f.modalidade === "nao_monetaria";
+      const criar = modo.tipo === "criar";
+      const editandoVigente = modo.tipo === "editar" && modo.id === catalogo.vigenteId;
+      raiz.innerHTML = `
+        ${cabecalhoPagina(criar ? "Nova forma" : "Editar forma", "Defina a modalidade e os dados. Os participantes não escolhem a modalidade: veem somente a forma vigente.")}
         <div class="grid items-start gap-6 lg:grid-cols-[1fr_350px]">
-          <form id="form" novalidate class="${CLASSES.cartao} flex flex-col gap-4"><h2 class="${CLASSES.titulo}">Configuração da forma vigente</h2>
+          <form id="form" novalidate class="${CLASSES.cartao} flex flex-col gap-4"><h2 class="${CLASSES.titulo}">${criar ? "Nova forma" : "Editar forma"}</h2>
             <fieldset class="flex flex-col gap-2"><legend class="mb-1 text-sm font-semibold text-chumbo">Modalidade</legend>
-              <div class="flex flex-wrap gap-6">${(
-                [["nao_monetaria", "Não monetária"], ["monetaria", "Monetária"]] as const
-              )
-                .map(([v, t]) => `<label class="flex cursor-pointer items-center gap-2 text-[15px] text-chumbo"><input type="radio" name="modalidade" value="${v}" ${f.modalidade === v ? "checked" : ""} class="size-[18px] accent-verde-medio" />${t}</label>`)
+              <div class="flex flex-wrap gap-6">${([["nao_monetaria", "Não monetária"], ["monetaria", "Monetária"]] as const)
+                .map(([v, t]) => `<label class="flex cursor-pointer items-center gap-2 text-[15px] text-chumbo"><input type="radio" name="modalidade" value="${v}" ${f.modalidade === v ? "checked" : ""} class="size-[18px] cursor-pointer accent-verde-medio" />${t}</label>`)
                 .join("")}</div></fieldset>
-            ${
-              nao
-                ? entrada("descricao", "Descrição da compensação exigida", { obrigatorio: true, placeholder: "Descreva a compensação exigida", ajuda: "Texto livre, sem lista fixa. Ex.: alimento não perecível, brinquedo, material escolar, livro." }) +
-                  entrada("orientacoes", "Orientações de entrega", { placeholder: "Ex.: Entregue no credenciamento do evento." })
-                : entrada("valor", "Valor por participante (R$)", { obrigatorio: true, inputmode: "decimal", placeholder: "0,00", ajuda: "Informe o valor cobrado de cada participante." }) +
-                  entrada("orientPag", "Orientações de pagamento", { placeholder: "Ex.: PIX informado por e-mail após a confirmação da inscrição." })
-            }
-            <div class="flex items-start gap-3 rounded-campo border border-info-borda bg-info-fundo p-4">${icone("info", "mt-0.5 size-5 text-info-texto")}<p class="text-[15px] leading-normal text-chumbo">Os participantes não escolhem a modalidade: todos verão somente a forma salva aqui.</p></div>
-            <div data-erro-geral role="alert" hidden class="rounded-campo border border-erro-borda bg-erro-fundo p-4 text-sm font-semibold text-erro"></div>
-            <div class="flex flex-wrap justify-end gap-3"><button type="button" data-descartar class="${CLASSES.botaoContorno}">Descartar</button>
+            ${nao
+              ? entrada("descricao", "Descrição da compensação exigida", { obrigatorio: true, placeholder: "Descreva a compensação exigida", ajuda: "Texto livre, sem lista fixa. Ex.: alimento não perecível, brinquedo, material escolar, livro." }) +
+                entrada("orientacoes", "Orientações de entrega", { placeholder: "Ex.: Entregue no credenciamento do evento." })
+              : entrada("valor", "Valor por participante (R$)", { obrigatorio: true, inputmode: "decimal", placeholder: "0,00", ajuda: "Informe o valor cobrado de cada participante." }) +
+                entrada("orientPag", "Orientações de pagamento", { placeholder: "Ex.: PIX informado por e-mail após a confirmação da inscrição." })}
+            ${criar ? `<label class="flex cursor-pointer items-start gap-2.5 text-[15px] text-chumbo"><input type="checkbox" data-vigente-novo ${tornarVigente ? "checked" : ""} class="mt-0.5 size-[18px] cursor-pointer accent-verde-medio" /><span>Aplicar como forma vigente para todos os participantes</span></label>` : ""}
+            <div class="flex items-start gap-3 rounded-campo border border-info-borda bg-info-fundo p-4">${icone("info", "mt-0.5 size-5 text-info-texto")}<p class="text-[15px] leading-normal text-chumbo">${editandoVigente ? "Esta é a forma vigente: ao salvar, todos passam a ver as alterações. " : ""}${AVISO}</p></div>
+            <div data-erro-geral role="alert" ${erroGeral ? "" : "hidden"} class="rounded-campo border border-erro-borda bg-erro-fundo p-4 text-sm font-semibold text-erro">${esc(erroGeral)}</div>
+            <div class="flex flex-wrap justify-end gap-3"><button type="button" data-cancelar class="${CLASSES.botaoContorno}">Cancelar</button>
               <button type="submit" class="${CLASSES.botaoPrimario}">${icone("check")}Salvar forma de pagamento</button></div></form>
-          <div class="flex flex-col gap-4"><div class="flex flex-col gap-3"><h2 class="text-sm leading-[1.4] font-semibold text-chumbo">Como os participantes verão</h2><div id="previa">${previa()}</div></div>
-            <div id="vigente">${cartaoVigente()}</div></div>
+          <div class="flex flex-col gap-3"><h2 class="text-sm leading-[1.4] font-semibold text-chumbo">Como os participantes verão</h2><div id="previa">${previa()}</div></div>
         </div>`;
     };
 
-    function confirmar() {
-      const forma = comoForma();
-      const t = formaTexto(forma);
+    const desenhar = () => (modo.tipo === "lista" ? desenharLista() : desenharForm());
+    const abrirForm = (m: typeof modo, v?: FormaPagamento) => {
+      modo = m; erros = {}; erroGeral = ""; tornarVigente = false;
+      carregarForm(v);
+      desenhar();
+      raiz.querySelector<HTMLElement>("[data-campo]")?.focus();
+    };
+    const voltarLista = (c: Catalogo) => { catalogo = c; modo = { tipo: "lista" }; desenhar(); raiz.querySelector<HTMLElement>("h1")?.setAttribute("tabindex", "-1"); };
+
+    // ---------- confirmações ----------
+    /** Executa `acao` dentro de um modal de confirmação; erros de campo voltam ao formulário, os demais aparecem no modal. */
+    function confirmar(o: { titulo: string; texto: string; rotuloOk: string; perigo?: boolean; acao: () => Promise<void> }) {
       const { dialogo, fechar } = abrirModal(`
-        <div class="flex items-center gap-3"><span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-info-fundo text-info-texto">${icone("info", "size-5")}</span>
-          <h2 class="${CLASSES.titulo} !text-[20px]">Aplicar nova forma a todos?</h2></div>
-        <p class="mt-4 text-[15px] leading-normal text-chumbo">A forma “${t.rotulo} · ${esc(t.titulo)}” passará a ser exibida para todos na inscrição e em Minha inscrição. Participantes não poderão escolher outra modalidade.</p>
+        <div class="flex items-center gap-3"><span class="flex size-10 shrink-0 items-center justify-center rounded-full ${o.perigo ? "bg-erro-fundo text-erro" : "bg-info-fundo text-info-texto"}">${icone(o.perigo ? "triangle-alert" : "info", "size-5")}</span>
+          <h2 class="${CLASSES.titulo} !text-[20px]">${esc(o.titulo)}</h2></div>
+        <p class="mt-4 text-[15px] leading-normal text-chumbo">${o.texto}</p>
         <div data-erro-modal hidden role="alert" class="mt-4 rounded-campo border border-erro-borda bg-erro-fundo p-4 text-sm font-semibold text-erro"></div>
         <div class="mt-6 flex flex-wrap justify-end gap-3"><button type="button" data-voltar class="${CLASSES.botaoContorno}">Voltar</button>
-          <button type="button" data-aplicar class="${CLASSES.botaoPrimario}">Salvar e aplicar</button></div>`);
+          <button type="button" data-ok class="${o.perigo ? `${CLASSES.botaoPrimario} !bg-erro !text-white` : CLASSES.botaoPrimario}">${esc(o.rotuloOk)}</button></div>`);
       dialogo.querySelector("[data-voltar]")!.addEventListener("click", fechar);
-      dialogo.querySelector<HTMLButtonElement>("[data-aplicar]")!.addEventListener("click", async (e) => {
+      dialogo.querySelector<HTMLButtonElement>("[data-ok]")!.addEventListener("click", async (e) => {
         const botao = e.currentTarget as HTMLButtonElement;
         botao.disabled = true;
         try {
-          const corpo =
-            forma.modalidade === "monetaria"
-              ? { modalidade: forma.modalidade, valor: forma.valor, descricao: forma.descricao ?? "" }
-              : { modalidade: forma.modalidade, descricao: forma.descricao, orientacoes: forma.orientacoes ?? "" };
-          vigente = await salvarFormaPagamento(corpo);
+          await o.acao();
           fechar();
-          document.getElementById("vigente")!.innerHTML = cartaoVigente();
-          toast("Forma de pagamento salva. Já aparece para todos os participantes.");
         } catch (err) {
+          const erro = eStatusErro(err);
+          if (modo.tipo !== "lista" && erro.campos) {
+            fechar();
+            erros = Object.fromEntries(Object.entries(erro.campos).map(([k, v]) => [k.replace(/^dados\./, ""), String(v)]));
+            desenhar();
+            raiz.querySelector<HTMLElement>("[aria-invalid=true]")?.focus();
+            return;
+          }
           const caixa = dialogo.querySelector<HTMLElement>("[data-erro-modal]")!;
-          caixa.textContent = eStatusErro(err).message;
+          caixa.textContent = erro.message;
           caixa.hidden = false;
           botao.disabled = false;
         }
       });
     }
 
-    formaPagamento()
-      .then((v) => {
-        vigente = v;
-        carregarForm(v);
+    const aplicarTexto = (x: FormaPagamento) =>
+      `A forma “${esc(rotuloForma(x))}” passará a ser exibida para todos na inscrição e em Minha inscrição. Participantes não poderão escolher outra modalidade. ${AVISO}`;
+
+    async function gravar() {
+      const r = modo.tipo === "editar" ? await editarForma(modo.id, corpo()) : await criarForma({ ...corpo(), tornarVigente });
+      const foiVigente = r.forma.vigente;
+      voltarLista(r);
+      toast(foiVigente ? "Forma salva. Já aparece para todos os participantes." : "Forma salva no catálogo.");
+    }
+
+    function salvar() {
+      const aplicar = (modo.tipo === "criar" && tornarVigente) || (modo.tipo === "editar" && modo.id === catalogo.vigenteId);
+      if (!aplicar) {
+        gravar().catch((err) => {
+          const e = eStatusErro(err);
+          if (e.campos) erros = Object.fromEntries(Object.entries(e.campos).map(([k, v]) => [k, String(v)]));
+          else erroGeral = e.message;
+          desenhar();
+        });
+        return;
+      }
+      confirmar({ titulo: "Aplicar nova forma a todos?", texto: aplicarTexto(comoForma()), rotuloOk: "Salvar e aplicar", acao: gravar });
+    }
+
+    // ---------- eventos ----------
+    raiz.addEventListener("change", (e) => {
+      const el = e.target as HTMLInputElement;
+      if (el.name === "modalidade") {
+        f.modalidade = el.value as Modalidade;
+        erros = {};
         desenhar();
-        raiz.addEventListener("change", (e) => {
-          const el = e.target as HTMLInputElement;
-          if (el.name === "modalidade") {
-            f.modalidade = el.value as Modalidade;
-            erros = {};
-            desenhar();
-          }
+        raiz.querySelector<HTMLElement>("input[name=modalidade]:checked")?.focus();
+      } else if (el.hasAttribute("data-vigente-novo")) tornarVigente = el.checked;
+    });
+    raiz.addEventListener("input", (e) => {
+      const el = e.target as HTMLInputElement;
+      const nome = el.dataset.campo as keyof typeof f | undefined;
+      if (!nome) return;
+      f[nome] = el.value as never;
+      document.getElementById("previa")!.innerHTML = previa();
+    });
+    raiz.addEventListener("click", (e) => {
+      const alvo = (e.target as HTMLElement).closest<HTMLElement>("[data-nova],[data-editar],[data-vigente],[data-excluir],[data-cancelar]");
+      if (!alvo || (alvo as HTMLButtonElement).disabled) return;
+      if (alvo.dataset.nova !== undefined) abrirForm({ tipo: "criar" });
+      else if (alvo.dataset.editar) abrirForm({ tipo: "editar", id: alvo.dataset.editar }, forma(alvo.dataset.editar));
+      else if (alvo.dataset.cancelar !== undefined) voltarLista(catalogo);
+      else if (alvo.dataset.vigente) {
+        const x = forma(alvo.dataset.vigente);
+        confirmar({
+          titulo: "Aplicar esta forma a todos?", texto: aplicarTexto(x), rotuloOk: "Salvar e aplicar",
+          acao: async () => { voltarLista(await tornarFormaVigente(x.id)); toast("Forma vigente alterada. Já aparece para todos os participantes."); },
         });
-        raiz.addEventListener("input", (e) => {
-          const el = e.target as HTMLInputElement;
-          const nome = el.dataset.campo as keyof typeof f | undefined;
-          if (!nome) return;
-          f[nome] = el.value as never;
-          document.getElementById("previa")!.innerHTML = previa();
+      } else if (alvo.dataset.excluir) {
+        const x = forma(alvo.dataset.excluir);
+        confirmar({
+          titulo: "Excluir esta forma?", perigo: true, rotuloOk: "Excluir forma",
+          texto: `A forma “${esc(rotuloForma(x))}” será removida do catálogo. Esta ação não pode ser desfeita.`,
+          acao: async () => { voltarLista(await excluirForma(x.id)); toast("Forma excluída."); },
         });
-        raiz.addEventListener("click", (e) => {
-          if ((e.target as HTMLElement).closest("[data-descartar]")) {
-            carregarForm(vigente);
-            erros = {};
-            desenhar();
-          }
-        });
-        raiz.addEventListener("submit", (e) => {
-          e.preventDefault();
-          erros = {};
-          if (f.modalidade === "nao_monetaria" && !f.descricao.trim()) erros.descricao = "A descrição da compensação é obrigatória.";
-          if (f.modalidade === "monetaria" && !(numero() > 0)) erros.valor = "Informe um valor maior que zero.";
-          if (Object.keys(erros).length) {
-            desenhar();
-            raiz.querySelector<HTMLElement>("[aria-invalid=true]")?.focus();
-            return;
-          }
-          f.descricao = f.descricao.trim();
-          confirmar();
-        });
-      })
+      }
+    });
+    raiz.addEventListener("submit", (e) => {
+      e.preventDefault();
+      erros = {};
+      erroGeral = "";
+      if (f.modalidade === "nao_monetaria" && !f.descricao.trim()) erros.descricao = "A descrição da compensação é obrigatória.";
+      if (f.modalidade === "monetaria" && !(numero() > 0)) erros.valor = "Informe um valor maior que zero.";
+      if (Object.keys(erros).length) {
+        desenhar();
+        raiz.querySelector<HTMLElement>("[aria-invalid=true]")?.focus();
+        return;
+      }
+      f.descricao = f.descricao.trim();
+      salvar();
+    });
+
+    listarFormas()
+      .then((c) => { catalogo = c; desenharLista(); })
       .catch((e) => (raiz.innerHTML = erroCarregar(e)));
   }
 </script>

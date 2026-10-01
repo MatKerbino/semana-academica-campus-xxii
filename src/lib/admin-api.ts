@@ -33,6 +33,7 @@ export type Modalidade = "monetaria" | "nao_monetaria";
 export type Perfil = "estudante" | "professor" | "profissional" | "outro";
 
 export type FormaPagamento = {
+  id?: string;
   modalidade: Modalidade;
   valor: number | null;
   descricao: string | null;
@@ -134,6 +135,16 @@ export const inscricoes = () => api<{ inscricoes: InscricaoAdmin[] }>("/admin/in
 export const inscricao = (login: string) =>
   api<{ inscricao: InscricaoAdmin }>(`/admin/inscricoes/${encodeURIComponent(login)}`).then((r) => r.inscricao);
 export const formaPagamento = () => api<FormaPagamento>("/admin/pagamento");
+export type FormaCatalogo = FormaPagamento & { id: string; vigente: boolean };
+export type Catalogo = { vigenteId: string; formas: FormaCatalogo[] };
+export const listarFormas = () => api<Catalogo>("/admin/formas-pagamento");
+export const criarForma = (corpo: Record<string, unknown>) =>
+  api<Catalogo & { forma: FormaCatalogo }>("/admin/formas-pagamento", { metodo: "POST", corpo });
+export const editarForma = (id: string, corpo: Record<string, unknown>) =>
+  api<Catalogo & { forma: FormaCatalogo }>(`/admin/formas-pagamento/${encodeURIComponent(id)}`, { metodo: "PUT", corpo });
+export const tornarFormaVigente = (id: string) =>
+  api<Catalogo & { forma: FormaCatalogo }>(`/admin/formas-pagamento/${encodeURIComponent(id)}/vigente`, { metodo: "POST" });
+export const excluirForma = (id: string) => api<Catalogo>(`/admin/formas-pagamento/${encodeURIComponent(id)}`, { metodo: "DELETE" });
 export const salvarFormaPagamento = (corpo: Record<string, unknown>) =>
   api<FormaPagamento>("/admin/pagamento", { metodo: "PUT", corpo });
 export const atualizarPagamento = (login: string, corpo: { situacao: string; observacao?: string }) =>
@@ -162,10 +173,14 @@ export const dataCurta = (iso?: string | null) => {
 };
 export const contar = (n: number, singular: string, plural: string) => `${n} ${n === 1 ? singular : plural}`;
 
-export const formaTexto = (f: FormaPagamento) =>
-  f.modalidade === "monetaria"
-    ? { titulo: f.valor == null ? "—" : `${formatarMoeda(f.valor)} por participante`, apoio: f.descricao ?? "", rotulo: "Monetária" }
-    : { titulo: f.descricao ?? "—", apoio: f.orientacoes ?? "", rotulo: "Não monetária" };
+export const formaTexto = (f: FormaPagamento) => {
+  if (f.modalidade === "monetaria") {
+    return { titulo: f.valor == null ? "—" : `${formatarMoeda(f.valor)} por participante`, apoio: f.descricao ?? "", rotulo: "Monetária" };
+  }
+  // A descrição pode vir em duas linhas (destaque + detalhe), como na forma padrão do evento.
+  const [primeira = "", ...resto] = (f.descricao ?? "").split("\n").map((l) => l.trim()).filter(Boolean);
+  return { titulo: primeira || "—", apoio: [resto.join(" "), f.orientacoes ?? ""].filter(Boolean).join(" "), rotulo: "Não monetária" };
+};
 
 // ---------- ícones (renderizados no servidor pelo AdminLayout e clonados aqui) ----------
 
