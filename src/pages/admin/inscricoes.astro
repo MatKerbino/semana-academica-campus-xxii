@@ -8,7 +8,7 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
 
 <script>
   import {
-    buscaHtml, botaoOlho, cabecalhoColuna, cabecalhoPagina, contar, erroCarregar, esc, filtroHtml, formatarCPF, icone, iniciarPainel, inscricoes,
+    atualizarPagamento, buscaHtml, botaoConfirmarPagamento, botaoOlho, eStatusErro, toast, cabecalhoColuna, cabecalhoPagina, contar, erroCarregar, esc, filtroHtml, formatarCPF, icone, iniciarPainel, inscricoes,
     normalizar, paginar, rodapeTabela, rotuloPerfil, seloDevolucao, seloInscricao, seloPagamento, situacaoDevolucao, situacaoPagamento,
     type InscricaoAdmin,
     atividadesConhecidas,
@@ -35,11 +35,13 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
       devolucao: valido("devolucao", q.get("devolucao"), "todas"),
       perfil: valido("perfil", q.get("perfil"), "todos"),
     };
+    let erroAcao = "";
 
     inscricoes()
       .then((todas) => {
         const lista = todas.filter((i) => i.status !== "rascunho");
         const rotulo = (i: InscricaoAdmin) => i.dados.nome ?? i.login;
+        const pendente = (i: InscricaoAdmin) => i.status === "confirmada" && situacaoPagamento(i) === "pendente";
         const href = (i: InscricaoAdmin) => `${url("/admin/inscricao")}?login=${encodeURIComponent(i.login)}`;
 
         const desenhar = (foco = false) => {
@@ -62,7 +64,7 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
                 <td class="px-3 py-3 text-[13px] text-chumbo">${i.dados.perfil ? rotuloPerfil[i.dados.perfil] : "—"}</td>
                 <td class="px-3 py-3 text-[13px] whitespace-nowrap text-chumbo">${contar(atividadesConhecidas(i.atividades).length, "atividade", "atividades")}</td>
                 <td class="px-3 py-3">${seloInscricao(i.status)}</td><td class="px-3 py-3">${seloPagamento(i)}</td><td class="px-3 py-3">${seloDevolucao(i)}</td>
-                <td class="px-3 py-3">${botaoOlho(href(i), `Ver inscrição de ${rotulo(i)}`)}</td></tr>`,
+                <td class="px-3 py-3"><div class="flex items-center gap-2">${botaoOlho(href(i), `Ver inscrição de ${rotulo(i)}`)}${pendente(i) ? botaoConfirmarPagamento(i.login, rotulo(i)) : ""}</div></td></tr>`,
             )
             .join("");
           const cartoes = pg.itens
@@ -72,7 +74,7 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
                   <p class="text-[13px] leading-normal text-chumbo">CPF ${formatarCPF(i.dados.cpf)} · ${i.dados.perfil ? rotuloPerfil[i.dados.perfil] : "—"}</p>
                   <p class="text-[13px] leading-normal text-chumbo">${contar(atividadesConhecidas(i.atividades).length, "atividade selecionada", "atividades selecionadas")}</p></div>
                   <a href="${href(i)}" aria-label="Abrir inscrição de ${esc(rotulo(i))}" class="flex size-9 shrink-0 items-center justify-center rounded-campo border-[1.5px] border-borda text-verde-escuro">${icone("ellipsis-vertical")}</a></div>
-                <div class="flex flex-col items-start gap-2">${seloInscricao(i.status, true)}${seloPagamento(i, true, "Pagamento ")}</div></li>`,
+                <div class="flex flex-col items-start gap-2">${seloInscricao(i.status, true)}${seloPagamento(i, true, "Pagamento ")}</div>${pendente(i) ? botaoConfirmarPagamento(i.login, rotulo(i), true) : ""}</li>`,
             )
             .join("");
           const so = estado.pagamento === "pendente" && estado.inscricao === "todas" && estado.devolucao === "todas" && estado.perfil === "todos";
@@ -80,6 +82,7 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
 
           raiz.innerHTML = `
             ${cabecalhoPagina("Inscrições", "Inscrições realizadas na 1ª Semana Acadêmica. Use a busca e os filtros para localizar uma inscrição.")}
+            ${erroAcao ? `<div role="alert" class="rounded-campo border border-erro-borda bg-erro-fundo p-4 text-sm font-semibold text-erro">${esc(erroAcao)}</div>` : ""}
             <div class="flex flex-wrap items-center gap-3">${buscaHtml("busca", estado.busca)}
               ${filtroHtml("f-inscricao", "Inscrição", F.inscricao, estado.inscricao, "todas", "max-md:order-2")}${filtroHtml("f-pagamento", "Pagamento/compensação", F.pagamento, estado.pagamento, "todos", "max-md:order-1")}
               ${filtroHtml("f-devolucao", "Devolução", F.devolucao, estado.devolucao, "todas", "max-md:hidden")}${filtroHtml("f-perfil", "Perfil", F.perfil, estado.perfil, "todos", "max-md:hidden")}</div>
@@ -111,7 +114,24 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
             desenhar();
           }
         });
-        raiz.addEventListener("click", (e) => {
+        raiz.addEventListener("click", async (e) => {
+          const confirmar = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-confirmar-pagamento]");
+          if (confirmar) {
+            const login = confirmar.dataset.confirmarPagamento!;
+            const i = lista.find((x) => x.login === login);
+            if (!i) return;
+            confirmar.disabled = true;
+            erroAcao = "";
+            try {
+              const nova = await atualizarPagamento(login, { situacao: "regularizada", observacao: "Confirmado pela lista de inscrições" });
+              lista[lista.indexOf(i)] = nova;
+              toast(`Pagamento de ${rotulo(nova)} registrado como regularizado.`);
+            } catch (err) {
+              erroAcao = `Não foi possível confirmar o pagamento de ${rotulo(i)}. ${eStatusErro(err).message}`;
+            }
+            desenhar();
+            return;
+          }
           const b = (e.target as HTMLElement).closest<HTMLElement>("[data-pag]");
           if (b) {
             estado.pagina += Number(b.dataset.pag);

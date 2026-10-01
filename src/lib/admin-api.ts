@@ -362,6 +362,10 @@ export const buscaHtml = (id: string, valor = "") =>
 export const botaoOlho = (href: string, rotulo: string) =>
   `<a href="${href}" aria-label="${esc(rotulo)}" class="flex size-9 items-center justify-center rounded-campo border-[1.5px] border-borda bg-white text-verde-escuro hover:bg-palha">${icone("eye", "size-[18px]")}</a>`;
 
+/** Atalho para registrar o pagamento como regularizado sem abrir a inscrição (só para confirmadas com pagamento pendente). */
+export const botaoConfirmarPagamento = (login: string, rotulo: string, larguraTotal = false) =>
+  `<button type="button" data-confirmar-pagamento="${esc(login)}" aria-label="Confirmar pagamento de ${esc(rotulo)}" title="Marcar o pagamento como regularizado" class="flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-full bg-verde-cta px-3.5 text-[13px] leading-[1.3] font-bold whitespace-nowrap text-verde-noite hover:brightness-95 disabled:cursor-wait disabled:opacity-60 ${larguraTotal ? "w-full" : ""}">${icone("check", "size-4")}Confirmar pagamento</button>`;
+
 export const rodapeTabela = (texto: string, atual: number, paginas: number) =>
   `<div class="flex flex-wrap items-center justify-between gap-3"><p class="text-[13px] text-texto-suave">${esc(texto)}</p>
    <div class="flex gap-3"><button type="button" data-pag="-1" ${atual <= 1 ? "disabled" : ""} class="flex cursor-pointer items-center gap-2 rounded-full border-2 border-borda bg-white px-[22px] py-2.5 text-[15px] font-bold text-verde-escuro disabled:opacity-50">${icone("arrow-left", "size-[18px]")}Anterior</button>
