@@ -5,16 +5,22 @@ import type { Atividade, Conteudo, ItemCatalogo, Palestrante, TipoAtividade } fr
 
 /** Tipos que o participante pode escolher na inscrição (RN-05). */
 export const tiposSelecionaveis = opcoes.tipos.filter((t) => t.selecionavel).map((t) => t.id as TipoAtividade);
+/** Rótulo constante do tipo de atividade. */
 export const rotuloDoTipo = (tipo: TipoAtividade) => opcoes.tipos.find((t) => t.id === tipo)?.rotulo ?? tipo;
 
+/** Palestrante pelo slug. */
 export const palestrantePor = (c: Conteudo, slug: string) => c.palestrantes.find((p) => p.slug === slug);
+/** Palestrantes responsáveis por uma atividade. */
 export const palestrantesDe = (c: Conteudo, a: Atividade) =>
   a.responsaveis.map((s) => palestrantePor(c, s)).filter((p): p is Palestrante => !!p);
+/** Atividades em que a pessoa é responsável. */
 export const atividadesDe = (c: Conteudo, slugPalestrante: string) => c.atividades.filter((a) => a.responsaveis.includes(slugPalestrante));
+/** Atividades dos tipos dados. */
 export const porTipo = (c: Conteudo, ...tipos: TipoAtividade[]) => c.atividades.filter((a) => tipos.includes(a.tipo));
 
 /** Atividades que aparecem na página de Atividades (as demais são só programação geral do cronograma). */
 export const atividadesListadas = (c: Conteudo) => porTipo(c, ...tiposSelecionaveis);
+/** A atividade é de um tipo que o participante escolhe na inscrição? */
 export const eSelecionavel = (a: Pick<Atividade, "tipo">) => tiposSelecionaveis.includes(a.tipo);
 
 /** Sessões de um dia (data ISO), em ordem de horário. Uma atividade com mais de uma sessão aparece em cada dia. */

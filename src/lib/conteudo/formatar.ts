@@ -18,11 +18,13 @@ export function periodoTexto(e: Pick<Evento, "dataInicio" | "dataFim">): string 
   return `${i.d} de ${MESES[i.m]} de ${i.a} a ${f.d} de ${MESES[f.m]} de ${f.a}`;
 }
 
+/** Ano da data de início. */
 export const anoDoEvento = (e: Pick<Evento, "dataInicio">) => e.dataInicio.slice(0, 4);
 
 /** "2025-10-21" → "21/10". */
 export const dataCurta = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
 
+/** Dia do evento (id ISO, rótulos curtos e por extenso) a partir de uma data ISO. */
 export function dia(iso: string): Dia {
   const { d, m } = num(iso);
   const semana = SEMANA[dataUtc(iso).getUTCDay()];

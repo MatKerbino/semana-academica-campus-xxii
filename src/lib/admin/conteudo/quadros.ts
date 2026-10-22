@@ -1,10 +1,9 @@
 /** Editor dos quadros de informação: cartões e passos da página inicial e grupos de apoio (Patrocinadores). */
 import { obterConteudo, type Quadros } from "../../conteudo";
-import { acoesItem, botaoAdicionar, campo, secao, seletorIcone, type Erros } from "./form";
+import { acoesItem, botaoAdicionar, caixaItem as item, campo, secao, seletorIcone, type Erros } from "./form";
 import { montarEditor } from "./editor";
 
 export const AJUDA_MARCADORES = "Marcadores trocados no site: {{nome}}, {{periodo}}, {{local}}, {{forma}} (forma de participação), {{email}}, {{ano}}, {{lema}}, {{organizacao}}.";
-const item = (corpo: string, acoes: string) => `<div class="flex flex-col gap-3 rounded-campo border border-borda bg-palha p-4"><div class="flex flex-col gap-3">${corpo}</div><div class="flex justify-end">${acoes}</div></div>`;
 
 export async function iniciarQuadros(raiz: HTMLElement) {
   const c = await obterConteudo();
@@ -35,6 +34,7 @@ export async function iniciarQuadros(raiz: HTMLElement) {
   montarEditor<Quadros>({
     raiz, parte: "quadros", estado, desenhar, modelos,
     mensagem: "Quadros salvos. As mudanças já aparecem no site.",
+    aoRestaurar: (novo) => Object.assign(estado, structuredClone(novo.quadros)),
     validar: (q) => {
       const e: Erros = {};
       q.inicioSobre.forEach((s, i) => { if (!s.titulo.trim()) e[`inicioSobre.${i}.titulo`] = "Informe o título."; });

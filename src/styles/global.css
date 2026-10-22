@@ -61,3 +61,18 @@ body { color: var(--color-chumbo); background: var(--color-palha); }
 @layer base {
   :focus-visible { outline: 2px solid var(--color-azul); outline-offset: 2px; }
 }
+
+/* Tabela do painel que vira lista de cartões abaixo de xl (1280px; com a barra lateral do painel a tabela de 7 colunas não cabe antes disso): cada <td data-rotulo="Rótulo"> mostra "Rótulo: valor".
+   O <thead> continua no DOM (só some da tela) para leitores de tela. */
+@media (max-width: 1279.98px) {
+  .tabela-cartoes, .tabela-cartoes tbody, .tabela-cartoes tr, .tabela-cartoes td { display: block; }
+  .tabela-cartoes thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .tabela-cartoes tbody { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 0.75rem; padding: 0.75rem; background: var(--color-palha); }
+  .tabela-cartoes tr { border: 1px solid var(--color-borda); border-radius: var(--radius-cartao); background: #fff; padding: 0.5rem 0.875rem; }
+  .tabela-cartoes td { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.375rem 0 !important; text-align: right; }
+  .tabela-cartoes td:first-child { justify-content: flex-start; text-align: left; }
+  .tabela-cartoes td:last-child[data-rotulo=""] { justify-content: flex-end; padding-top: 0.5rem !important; }
+  .tabela-cartoes td::before { content: attr(data-rotulo); flex-shrink: 0; font-size: 12px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: var(--color-texto-suave); text-align: left; }
+  .tabela-cartoes td[data-rotulo=""]::before { display: none; }
+  .tabela-cartoes td[colspan] { justify-content: center; text-align: center; }
+}

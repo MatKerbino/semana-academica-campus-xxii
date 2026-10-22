@@ -35,11 +35,11 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
       const linhas = pg.itens
         .map(
           (i) => `<tr class="border-b border-borda last:border-0 ${i.login === estado.destaque ? "bg-info-fundo" : "hover:bg-palha"}">
-            <td class="px-3 py-3"><span class="block text-sm leading-[1.4] font-semibold text-chumbo">${esc(i.dados.nome ?? i.login)}</span><span class="block text-[13px] text-texto-suave">CPF ${formatarCPF(i.dados.cpf)}</span></td>
-            <td class="px-3 py-3 text-sm font-bold text-chumbo whitespace-nowrap">${formatarMoeda(i.devolucao?.valor ?? 0)}</td>
-            <td class="px-3 py-3 text-[13px] text-chumbo whitespace-nowrap">${dataCurta(i.canceladaEm)}</td>
-            <td class="px-3 py-3">${seloDevolucao(i)}</td><td class="px-3 py-3">${seloPagamento(i)}</td>
-            <td class="px-3 py-3"><button type="button" data-login="${esc(i.login)}" aria-label="Atualizar devolução de ${esc(i.dados.nome ?? i.login)}" class="flex size-9 cursor-pointer items-center justify-center rounded-campo border-[1.5px] border-borda bg-white text-verde-escuro hover:bg-palha">${icone("eye", "size-[18px]")}</button></td></tr>`,
+            <td data-rotulo="" class="px-3 py-3"><span class="block text-sm leading-[1.4] font-semibold text-chumbo">${esc(i.dados.nome ?? i.login)}</span><span class="block text-[13px] text-texto-suave">CPF ${formatarCPF(i.dados.cpf)}</span></td>
+            <td data-rotulo="Valor" class="px-3 py-3 text-sm font-bold text-chumbo whitespace-nowrap">${formatarMoeda(i.devolucao?.valor ?? 0)}</td>
+            <td data-rotulo="Cancelada em" class="px-3 py-3 text-[13px] text-chumbo whitespace-nowrap">${dataCurta(i.canceladaEm)}</td>
+            <td data-rotulo="Devolução" class="px-3 py-3">${seloDevolucao(i)}</td><td data-rotulo="Pagamento" class="px-3 py-3">${seloPagamento(i)}</td>
+            <td data-rotulo="" class="px-3 py-3"><button type="button" data-login="${esc(i.login)}" aria-label="Atualizar devolução de ${esc(i.dados.nome ?? i.login)}" class="flex size-9 max-md:size-11 cursor-pointer items-center justify-center rounded-campo border-[1.5px] border-borda bg-white text-verde-escuro hover:bg-palha">${icone("eye", "size-[18px]")}</button></td></tr>`,
         )
         .join("");
       raiz.innerHTML = `
@@ -47,7 +47,7 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
         <div role="note" class="flex items-center gap-3 rounded-campo border border-info-borda bg-info-fundo px-4 py-3.5">${icone("info", "size-5 text-info-texto")}
           <p class="text-[15px] leading-normal text-chumbo">Esta lista só recebe registros quando a forma vigente é monetária (ex.: R$ 20,00) e o participante cancela a inscrição.</p></div>
         <div class="flex flex-wrap items-center gap-3">${buscaHtml("busca", estado.busca)}${filtroHtml("filtro", "Devolução", OPCOES, estado.filtro, "todas")}</div>
-        <div class="overflow-x-auto rounded-cartao border border-borda bg-white"><table class="w-full min-w-[760px] border-collapse">
+        <div class="overflow-x-auto rounded-cartao border border-borda bg-white"><table class="tabela-cartoes w-full border-collapse xl:min-w-[760px]">
           <caption class="sr-only">Devoluções de pagamento</caption>
           <thead class="border-b border-borda bg-creme/60"><tr>${["Participante", "Valor", "Cancelada em", "Devolução", "Pagamento", "Ações"].map((t) => `<th scope="col" class="${cabecalhoColuna}">${t}</th>`).join("")}</tr></thead>
           <tbody>${linhas || `<tr><td colspan="6" class="px-3 py-8 text-center text-sm text-texto-suave">Nenhuma devolução encontrada.</td></tr>`}</tbody></table></div>

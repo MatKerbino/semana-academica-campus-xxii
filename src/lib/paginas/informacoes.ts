@@ -1,6 +1,7 @@
 import { esc } from "../api";
 import { aplicarConteudo, extrasTexto, obterConteudo, texto } from "../conteudo";
 
+/** Página Informações: seções editáveis (datas, edital, templates…). */
 export async function iniciar() {
   const c = await obterConteudo();
   const extras = await extrasTexto();

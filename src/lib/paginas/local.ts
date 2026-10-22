@@ -1,6 +1,7 @@
 import { esc } from "../api";
 import { aplicarConteudo, espacosDoEvento, extrasTexto, icone, obterConteudo, texto } from "../conteudo";
 
+/** Página Local: endereço, mapa e espaços usados pela programação. */
 export async function iniciar() {
   const c = await obterConteudo();
   const extras = await extrasTexto();

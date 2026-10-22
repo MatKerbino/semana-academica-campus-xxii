@@ -4,18 +4,20 @@
  *   data-slot="marca"            → innerHTML = ícone do slot (classe em data-classe)
  *   data-link="politica|termos|email|maps" → href (e some quando o link está vazio)
  */
-import opcoes from "../../data/opcoes.json";
 import { minuscula, obterForma } from "../forma-participacao";
 import { url } from "../url";
 import { iconeDoSlot } from "./icones";
+import { coresDaAparencia, type Cores } from "./paleta";
 import { linkPolitica, texto, type ExtrasTexto } from "./formatar";
-import type { Conteudo, SlotIcone } from "./tipos";
+import type { Aparencia, Conteudo, SlotIcone } from "./tipos";
 
-/** Cores da paleta escolhida como variáveis CSS (as classes do Tailwind leem `--color-*`). */
-export function aplicarPaleta(id: string) {
-  const p = opcoes.paletas.find((x) => x.id === id) ?? opcoes.paletas[0];
-  for (const [nome, valor] of Object.entries(p.cores)) document.documentElement.style.setProperty(`--color-${nome}`, valor);
+/** Aplica cores já resolvidas (`coresDaAparencia`) como variáveis CSS; as classes do Tailwind leem `--color-*`. */
+export function aplicarPaleta(cores: Cores) {
+  for (const [nome, valor] of Object.entries(cores)) document.documentElement.style.setProperty(`--color-${nome}`, valor);
 }
+
+/** Prévia ao vivo para o painel: aplica a paleta da aparência sem salvar nada (recarregar a página desfaz). */
+export const previa = (aparencia: Pick<Aparencia, "paleta" | "coresPersonalizadas">) => aplicarPaleta(coresDaAparencia(aparencia));
 
 /** Extras dos modelos de texto que dependem de outra chamada à API (forma de participação vigente). */
 export async function extrasTexto(): Promise<ExtrasTexto> {
@@ -24,8 +26,9 @@ export async function extrasTexto(): Promise<ExtrasTexto> {
 
 const externo = (h: string) => /^https?:/.test(h);
 
+/** Aplica paleta, título, textos (`data-t`), ícones (`data-slot`) e links (`data-link`) da página. */
 export function aplicarConteudo(c: Conteudo, extras: ExtrasTexto = {}) {
-  aplicarPaleta(c.aparencia.paleta);
+  aplicarPaleta(coresDaAparencia(c.aparencia));
   const titulo = document.documentElement.dataset.tituloPagina;
   if (titulo) document.title = `${titulo} · ${c.evento.nome}`;
 

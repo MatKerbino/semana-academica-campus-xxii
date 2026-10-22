@@ -40,18 +40,18 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
           const corpo = pg.itens
             .map(
               (l) => `<tr class="border-b border-borda last:border-0 hover:bg-palha">
-                <td class="px-3 py-3.5 text-sm leading-[1.4] font-semibold text-chumbo">${esc(l.login)}</td>
-                <td class="px-3 py-3.5 text-[13px] text-chumbo">${esc(l.nome ?? "Não informado")}</td>
-                <td class="px-3 py-3.5 text-[13px] text-chumbo whitespace-nowrap">${dataCurta(l.criadoEm)}</td>
-                <td class="px-3 py-3.5">${seloInscricao(l.statusInscricao)}</td>
-                <td class="px-3 py-3.5 text-[13px] text-chumbo">${l.insc?.dados.perfil ? rotuloPerfil[l.insc.dados.perfil] : "—"}</td>
-                <td class="px-3 py-3.5">${botaoOlho(`${url("/admin/participante")}?login=${encodeURIComponent(l.login)}`, `Ver participante ${l.login}`)}</td></tr>`,
+                <td data-rotulo="" class="px-3 py-3.5 text-sm leading-[1.4] font-semibold text-chumbo">${esc(l.login)}</td>
+                <td data-rotulo="Nome" class="px-3 py-3.5 text-[13px] text-chumbo">${esc(l.nome ?? "Não informado")}</td>
+                <td data-rotulo="Conta criada em" class="px-3 py-3.5 text-[13px] text-chumbo whitespace-nowrap">${dataCurta(l.criadoEm)}</td>
+                <td data-rotulo="Inscrição" class="px-3 py-3.5">${seloInscricao(l.statusInscricao)}</td>
+                <td data-rotulo="Perfil" class="px-3 py-3.5 text-[13px] text-chumbo">${l.insc?.dados.perfil ? rotuloPerfil[l.insc.dados.perfil] : "—"}</td>
+                <td data-rotulo="" class="px-3 py-3.5">${botaoOlho(`${url("/admin/participante")}?login=${encodeURIComponent(l.login)}`, `Ver participante ${l.login}`)}</td></tr>`,
             )
             .join("");
           raiz.innerHTML = `
             ${cabecalhoPagina("Participantes", "Pessoas com conta de acesso. Criar conta não gera inscrição: quem ainda não se inscreveu aparece como “Sem inscrição”.")}
             <div class="flex flex-wrap items-center gap-3">${buscaHtml("busca", estado.busca)}${filtroHtml("filtro", "Inscrição", OPCOES, estado.filtro, "todas")}</div>
-            <div class="overflow-x-auto rounded-cartao border border-borda bg-white"><table class="w-full min-w-[760px] border-collapse">
+            <div class="overflow-x-auto rounded-cartao border border-borda bg-white"><table class="tabela-cartoes w-full border-collapse xl:min-w-[760px]">
               <caption class="sr-only">Participantes com conta de acesso</caption>
               <thead class="border-b border-borda bg-creme/60"><tr>${["Login", "Nome", "Conta criada em", "Inscrição", "Perfil", "Ações"].map((t) => `<th scope="col" class="${cabecalhoColuna}">${t}</th>`).join("")}</tr></thead>
               <tbody>${corpo || `<tr><td colspan="6" class="px-3 py-8 text-center text-sm text-texto-suave">Nenhum participante encontrado.</td></tr>`}</tbody></table></div>

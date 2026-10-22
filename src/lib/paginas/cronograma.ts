@@ -21,7 +21,7 @@ function desenhar(c: Conteudo) {
   const raiz = document.querySelector<HTMLElement>("[data-cronograma]")!;
   const dias = diasDoEvento(c.evento);
   raiz.innerHTML = `<div role="tablist" aria-label="Dias do evento" class="flex flex-wrap gap-2">${dias
-    .map((d, i) => `<button type="button" role="tab" data-aba="${d.id}" aria-selected="${i === 0}" class="cursor-pointer rounded-full border border-verde-claro bg-white px-4 py-1.5 text-sm leading-[1.4] font-semibold text-verde-escuro aria-selected:border-verde-escuro aria-selected:bg-verde-escuro aria-selected:text-white">${esc(d.rotulo)}</button>`)
+    .map((d, i) => `<button type="button" role="tab" data-aba="${d.id}" aria-selected="${i === 0}" class="cursor-pointer rounded-full max-md:min-h-11 border border-verde-claro bg-white px-4 py-1.5 text-sm leading-[1.4] font-semibold text-verde-escuro aria-selected:border-verde-escuro aria-selected:bg-verde-escuro aria-selected:text-white">${esc(d.rotulo)}</button>`)
     .join("")}</div><div class="mt-5">${dias
     .map((d) => {
       const sessoes = sessoesDoDia(c, d.id);
@@ -42,4 +42,5 @@ function desenhar(c: Conteudo) {
   if (dias[0]) mostrar(dias[0].id);
 }
 
+/** Página Cronograma: uma aba por dia do evento com as sessões do dia. */
 export const iniciarCronograma = () => registrarPronto(obterConteudo().then(desenhar));

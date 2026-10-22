@@ -44,7 +44,9 @@ export type Evento = {
 };
 
 export type Aparencia = {
+  /** Id de `opcoes.paletas` ou "personalizada" (usa `coresPersonalizadas`). */
   paleta: string;
+  coresPersonalizadas: Record<string, string>;
   icones: Record<SlotIcone, string>;
   banner: { origem: "padrao" | "enviado" | "url"; url: string; alt: string; versao: string | null };
 };

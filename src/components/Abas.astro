@@ -21,8 +21,8 @@ const { abas, rotuloLista, tamanho = "pequeno" } = Astro.props;
           class:list={[
             "cursor-pointer rounded-full border font-semibold text-verde-escuro aria-selected:border-verde-escuro aria-selected:bg-verde-escuro aria-selected:text-white",
             tamanho === "grande"
-              ? "border-verde-claro bg-white px-4 py-1.5 text-sm leading-[1.4]"
-              : "border-verde-medio/40 bg-white px-4 py-1 text-[13px] leading-[1.5]",
+              ? "border-verde-claro bg-white px-4 py-1.5 max-md:min-h-11 text-sm leading-[1.4]"
+              : "border-verde-medio/40 bg-white px-4 py-1 max-md:min-h-11 text-[13px] leading-[1.5]",
           ]}
         >
           {aba.rotulo}

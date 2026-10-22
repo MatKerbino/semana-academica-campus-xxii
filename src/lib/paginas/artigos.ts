@@ -3,6 +3,7 @@ import { gtsTrabalhos } from "../../data/trabalhos-aprovados";
 import { aplicarConteudo, extrasTexto, horarioCompleto, icone, linkAtividade, obterConteudo, porTipo } from "../conteudo";
 import { url } from "../url";
 
+/** Página Artigos: sessões de apresentação (artigo/banner) e trabalhos aprovados. */
 export async function iniciar() {
   const c = await obterConteudo();
   aplicarConteudo(c, await extrasTexto());

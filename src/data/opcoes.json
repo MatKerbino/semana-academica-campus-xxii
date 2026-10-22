@@ -242,5 +242,16 @@
       "id": "artigo",
       "rotulo": "Apresentação de artigos"
     }
+  ],
+  "coresEditaveis": [
+    "verde-escuro",
+    "verde-medio",
+    "verde-cta",
+    "verde-claro",
+    "divisor",
+    "verde-noite",
+    "creme",
+    "palha",
+    "borda"
   ]
 }

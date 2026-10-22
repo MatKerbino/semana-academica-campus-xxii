@@ -73,6 +73,7 @@ function local(c: Conteudo) {
     <a href="${esc(l.mapsUrl)}" target="_blank" rel="noopener" class="flex items-center gap-2 rounded-full bg-azul px-[22px] py-3 text-[15px] leading-[1.3] font-bold text-white hover:opacity-90">${iconeDoSlot(c, "local", "size-[18px]")}Abrir no Google Maps</a></article>`;
 }
 
+/** Página inicial: hero, quadros "Sobre", passos de inscrição, resumo de atividades e local. */
 export function iniciarInicio() {
   registrarPronto(
     (async () => {

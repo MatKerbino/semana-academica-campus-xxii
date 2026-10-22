@@ -3,6 +3,7 @@ import { esc } from "../../api";
 import { obterConteudo, periodoTexto, type Conteudo, type Evento } from "../../conteudo";
 import { campo, secao, type Erros } from "./form";
 import { montarEditor } from "./editor";
+import { botaoRestaurar } from "./restaurar";
 
 type Estado = Evento & { deslocar: boolean };
 
@@ -10,7 +11,7 @@ export async function iniciarEvento(raiz: HTMLElement) {
   const c = await obterConteudo();
   let inicial = c.evento.dataInicio;
   const estado: Estado = { ...structuredClone(c.evento), deslocar: false };
-  const temAtividades = c.atividades.length > 0;
+  let temAtividades = c.atividades.length > 0;
 
   const desenhar = (e: Estado, erros: Erros) => {
     const mudouData = e.dataInicio !== inicial && temAtividades;
@@ -40,7 +41,15 @@ export async function iniciarEvento(raiz: HTMLElement) {
         campo(e, "links.politicaPrivacidade", "Link da Política de Privacidade", erros, { tipo: "url", placeholder: "https://…", ajuda: "Vazio = usa a página interna do site. Preenchido = todos os links da política passam a abrir este endereço." }),
         campo(e, "links.termos", "Link dos Termos e Condições", erros, { tipo: "url", placeholder: "https://…", ajuda: "Vazio = o link não é exibido." }),
       ].join("")),
+      secao("Zona de risco", `<div class="flex flex-wrap items-center justify-between gap-4"><p class="min-w-48 flex-1 text-[15px] leading-normal text-chumbo">Devolve evento, aparência (inclusive o banner enviado), atividades, palestrantes, quadros e informações aos valores de fábrica.</p>${botaoRestaurar("tudo", "Restaurar todo o conteúdo do site")}</div>`),
     ].join("");
+  };
+
+  /** Copia o evento do conteúdo para o estado do formulário. */
+  const recarregar = (novo: Conteudo) => {
+    Object.assign(estado, structuredClone(novo.evento), { deslocar: false });
+    inicial = novo.evento.dataInicio;
+    temAtividades = novo.atividades.length > 0;
   };
 
   const editor = montarEditor<Estado>({
@@ -69,9 +78,9 @@ export async function iniciarEvento(raiz: HTMLElement) {
       }
     },
     aoSalvar: (novo: Conteudo) => {
-      Object.assign(estado, structuredClone(novo.evento), { deslocar: false });
-      inicial = novo.evento.dataInicio;
+      recarregar(novo);
       editor.redesenhar();
     },
+    aoRestaurar: recarregar,
   });
 }

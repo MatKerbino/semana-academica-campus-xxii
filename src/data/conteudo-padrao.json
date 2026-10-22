@@ -28,6 +28,17 @@
   },
   "aparencia": {
     "paleta": "floresta",
+    "coresPersonalizadas": {
+      "verde-escuro": "#2c471e",
+      "verde-medio": "#218b21",
+      "verde-cta": "#33d40c",
+      "verde-claro": "#cfe3c2",
+      "divisor": "#4a6b39",
+      "verde-noite": "#0f2a08",
+      "creme": "#f8e8ce",
+      "palha": "#fdf6e9",
+      "borda": "#e4d9c3"
+    },
     "icones": {
       "marca": "leaf",
       "periodo": "calendar",

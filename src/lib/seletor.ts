@@ -72,7 +72,7 @@ export function montarSeletor({ raiz, catalogo, vagas, selecionadas, salvas = []
     const chips = [["todas", `Todas (${contagem("todas")})`], ...GRUPOS.map(([t, r]) => [t, `${r} (${contagem(t)})`])]
       .map(
         ([t, r]) =>
-          `<button type="button" data-filtro="${t}" aria-pressed="${filtro === t}" class="cursor-pointer rounded-full border px-3.5 py-1.5 text-[13px] leading-[1.3] font-semibold ${filtro === t ? "border-verde-escuro bg-verde-escuro text-white" : "border-borda bg-white text-verde-escuro hover:border-verde-medio"}">${r}</button>`,
+          `<button type="button" data-filtro="${t}" aria-pressed="${filtro === t}" class="cursor-pointer rounded-full max-md:min-h-11 border px-3.5 py-1.5 text-[13px] leading-[1.3] font-semibold ${filtro === t ? "border-verde-escuro bg-verde-escuro text-white" : "border-borda bg-white text-verde-escuro hover:border-verde-medio"}">${r}</button>`,
       )
       .join("");
     const grupos = GRUPOS.filter(([t]) => filtro === "todas" || filtro === t)

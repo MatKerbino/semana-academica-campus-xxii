@@ -19,8 +19,8 @@ export function toast(mensagem: string) {
 export function abrirModal(html: string) {
   const anterior = document.activeElement as HTMLElement | null;
   const fundo = document.createElement("div");
-  fundo.className = "fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-verde-noite/70 p-4";
-  fundo.innerHTML = `<div role="dialog" aria-modal="true" class="w-full max-w-[434px] rounded-[16px] bg-white p-6 shadow-2xl">${html}</div>`;
+  fundo.className = "fixed inset-0 z-50 flex items-center justify-center bg-verde-noite/70 p-4";
+  fundo.innerHTML = `<div role="dialog" aria-modal="true" class="my-auto max-h-[calc(100dvh-2rem)] w-full max-w-[434px] overflow-y-auto rounded-[16px] bg-white p-6 shadow-2xl max-md:p-4">${html}</div>`;
   const fechar = () => {
     fundo.remove();
     document.removeEventListener("keydown", tecla);

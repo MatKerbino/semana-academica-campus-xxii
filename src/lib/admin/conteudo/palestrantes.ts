@@ -5,8 +5,9 @@ import { CLASSES, cabecalhoPagina, normalizar } from "../componentes";
 import { criarPalestrante, editarPalestrante, excluirPalestrante } from "../conteudo-api";
 import { icone } from "../icones";
 import { toast } from "../interacao";
-import { botaoLinha, botaoLinhaPerigo, botoesForm, confirmarExclusao } from "./crud";
-import { caixaErro, campo, erroDe, ligar, type Erros } from "./form";
+import { barraBusca, botaoLinha, botaoLinhaPerigo, botoesForm, confirmarExclusao } from "./crud";
+import { caixaErro, campo, erroDe, ligar, MSG_CORRIGIR, type Erros } from "./form";
+import { botaoRestaurar, ligarRestauracao } from "./restaurar";
 
 const VAZIO = (): Palestrante => ({ slug: "", nome: "", cargo: "", lattes: "", bio: "", email: "" });
 
@@ -34,9 +35,8 @@ export async function iniciarPalestrantes(raiz: HTMLElement) {
   const desenhar = () => {
     if (editando === undefined) {
       raiz.innerHTML = `${cabecalhoPagina("Palestrantes e ministrantes", "Quem aparece na página Palestrantes e pode ser indicado como responsável por atividades.")}
-        <div class="flex flex-wrap items-center justify-between gap-3"><label class="flex h-12 w-full items-center gap-2.5 rounded-campo border-[1.5px] border-borda bg-white px-3.5 focus-within:border-verde-medio sm:w-80"><span class="sr-only">Buscar</span>${icone("search", "size-5 text-chumbo")}
-          <input id="busca" type="search" value="${esc(busca)}" placeholder="Buscar por nome ou cargo" class="${CLASSES.entrada}" /></label>
-          <button type="button" data-novo class="${CLASSES.botaoPrimario}">${icone("plus")}Novo palestrante</button></div>
+        <div class="flex flex-wrap items-center gap-3">${barraBusca(busca, "Buscar por nome ou cargo", "sm:w-80")}<span class="flex-1"></span>
+          ${botaoRestaurar("palestrantes")}<button type="button" data-novo class="${CLASSES.botaoPrimario}">${icone("plus")}Novo palestrante</button></div>
         <div id="lista" class="grid gap-3 lg:grid-cols-2"></div>`;
       desenharLista();
       return;
@@ -57,6 +57,7 @@ export async function iniciarPalestrantes(raiz: HTMLElement) {
   const voltar = (novo?: Conteudo) => { if (novo) c = novo; editando = undefined; desenhar(); };
 
   ligar(raiz, f, { aoEstrutura: desenhar });
+  ligarRestauracao(raiz, (novo) => voltar(novo));
   raiz.addEventListener("input", (e) => {
     if ((e.target as HTMLElement).id !== "busca") return;
     busca = (e.target as HTMLInputElement).value;
@@ -81,7 +82,7 @@ export async function iniciarPalestrantes(raiz: HTMLElement) {
     erros = {}; geral = "";
     if (!f.nome.trim()) erros.nome = "Informe o nome.";
     else if (f.lattes && !/^https?:\/\//.test(f.lattes)) erros.lattes = "Informe um endereço http:// ou https://.";
-    if (Object.keys(erros).length) { geral = "Corrija os campos destacados."; desenhar(); return; }
+    if (Object.keys(erros).length) { geral = MSG_CORRIGIR; desenhar(); return; }
     try {
       const novo = editando ? await editarPalestrante(editando, f) : await criarPalestrante(f);
       voltar(novo);

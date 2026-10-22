@@ -7,12 +7,19 @@ import { eStatusErro } from "../http";
 import { icone as iconeAdmin } from "../icones";
 
 export type Erros = Record<string, string>;
-export const obter = (o: any, c: string): any => c.split(".").reduce((a, k) => a?.[k], o);
-export function definir(o: any, c: string, v: unknown) {
+/** Estado de um editor: objeto lido e escrito por caminho ("local.nome", "sessoes.0.data"). */
+export type Estado = object;
+type No = Record<string, unknown>;
+
+export const obter = (o: Estado, c: string): unknown => c.split(".").reduce<unknown>((a, k) => (a as No | undefined)?.[k], o);
+export const obterLista = (o: Estado, c: string) => obter(o, c) as unknown[];
+export function definir(o: Estado, c: string, v: unknown) {
   const ps = c.split(".");
   const ultimo = ps.pop()!;
-  ps.reduce((a, k) => a[k], o)[ultimo] = v;
+  (ps.reduce<unknown>((a, k) => (a as No)[k], o) as No)[ultimo] = v;
 }
+
+export const MSG_CORRIGIR = "Corrija os campos destacados.";
 
 const CAMPO = "w-full rounded-campo border-[1.5px] border-borda bg-white px-3.5 text-[15px] text-chumbo outline-none focus:border-verde-medio";
 export const idDe = (nome: string) => `c-${nome.replace(/\./g, "-")}`;
@@ -23,9 +30,9 @@ export type OpcCampo = {
   lista?: "linhas" | "paragrafos"; classe?: string;
 };
 
-export function campo(estado: any, nome: string, rotulo: string, erros: Erros, o: OpcCampo = {}) {
+export function campo(estado: Estado, nome: string, rotulo: string, erros: Erros, o: OpcCampo = {}) {
   const bruto = obter(estado, nome);
-  const valor = Array.isArray(bruto) ? bruto.join(o.lista === "paragrafos" ? "\n\n" : "\n") : (bruto ?? "");
+  const valor = Array.isArray(bruto) ? bruto.join(o.lista === "paragrafos" ? "\n\n" : "\n") : String(bruto ?? "");
   const erro = erros[nome];
   const id = idDe(nome);
   const atributos = `id="${id}" name="${esc(nome)}" ${o.lista ? `data-lista="${o.lista}"` : ""} ${o.placeholder ? `placeholder="${esc(o.placeholder)}"` : ""} ${erro ? `aria-invalid="true" aria-describedby="e-${id}"` : o.ajuda ? `aria-describedby="e-${id}"` : ""}`;
@@ -36,7 +43,7 @@ export function campo(estado: any, nome: string, rotulo: string, erros: Erros, o
     ${erro ? `<p id="e-${id}" class="text-[13px] text-erro">${esc(erro)}</p>` : o.ajuda ? `<p id="e-${id}" class="text-[13px] leading-normal text-texto-suave">${esc(o.ajuda)}</p>` : ""}</div>`;
 }
 
-export function selecao(estado: any, nome: string, rotulo: string, itens: [string, string][], erros: Erros, classe = "") {
+export function selecao(estado: Estado, nome: string, rotulo: string, itens: [string, string][], erros: Erros, classe = "") {
   const atual = String(obter(estado, nome) ?? "");
   const id = idDe(nome);
   return `<div class="flex flex-col gap-1.5 ${classe}"><label for="${id}" class="text-sm leading-[1.4] font-semibold text-chumbo">${esc(rotulo)}</label>
@@ -47,7 +54,11 @@ export function selecao(estado: any, nome: string, rotulo: string, itens: [strin
 export const secao = (titulo: string, corpo: string, descricao = "") =>
   `<section class="${CLASSES.cartao} flex flex-col gap-4"><div><h2 class="${CLASSES.titulo}">${esc(titulo)}</h2>${descricao ? `<p class="mt-1 text-[13px] leading-normal text-texto-suave">${esc(descricao)}</p>` : ""}</div>${corpo}</section>`;
 
-export const botaoPeq = "flex cursor-pointer items-center gap-1.5 rounded-full border-2 border-borda bg-white px-3.5 py-1.5 text-[13px] font-bold text-verde-escuro hover:bg-palha disabled:opacity-40";
+/** Caixa de um item de lista editável (quadro, passo, grupo, seção...) com as ações de mover/remover abaixo. */
+export const caixaItem = (corpo: string, acoes: string) =>
+  `<div class="flex flex-col gap-3 rounded-campo border border-borda bg-palha p-4"><div class="flex flex-col gap-3">${corpo}</div><div class="flex justify-end">${acoes}</div></div>`;
+
+export const botaoPeq = "flex cursor-pointer items-center gap-1.5 rounded-full border-2 border-borda bg-white px-3.5 py-1.5 max-md:min-h-11 max-md:min-w-11 max-md:justify-center text-[13px] font-bold text-verde-escuro hover:bg-palha disabled:opacity-40";
 export const botaoAdicionar = (caminho: string, modelo: string, rotulo: string) =>
   `<button type="button" data-add="${esc(caminho)}" data-modelo="${modelo}" class="${botaoPeq} w-fit">${iconeAdmin("plus", "size-4")}${esc(rotulo)}</button>`;
 /** Remover / mover um item de lista (caminho do item, ex.: "inicioSobre.1"). */
@@ -87,7 +98,7 @@ const valorDe = (el: HTMLInputElement): unknown => {
 };
 
 /** Liga os campos [name] ao estado e trata adicionar/remover/mover itens de lista. */
-export function ligar(raiz: HTMLElement, estado: any, { modelos = {}, aoEstrutura, aoMudar }: Ligacao) {
+export function ligar(raiz: HTMLElement, estado: Estado, { modelos = {}, aoEstrutura, aoMudar }: Ligacao) {
   const aoAlterar = (e: Event) => {
     const el = e.target as HTMLInputElement;
     if (!el.name || (el.type === "radio" && !el.checked)) return;
@@ -107,14 +118,14 @@ export function ligar(raiz: HTMLElement, estado: any, { modelos = {}, aoEstrutur
     const alvo = (e.target as HTMLElement).closest<HTMLElement>("[data-add],[data-rm],[data-mover]");
     if (!alvo || (alvo as HTMLButtonElement).disabled) return;
     const separar = (c: string) => [c.slice(0, c.lastIndexOf(".")), Number(c.slice(c.lastIndexOf(".") + 1))] as const;
-    if (alvo.dataset.add) obter(estado, alvo.dataset.add).push(modelos[alvo.dataset.modelo!]());
+    if (alvo.dataset.add) obterLista(estado, alvo.dataset.add).push(modelos[alvo.dataset.modelo!]());
     else if (alvo.dataset.rm) {
       const [lista, i] = separar(alvo.dataset.rm);
-      obter(estado, lista).splice(i, 1);
+      obterLista(estado, lista).splice(i, 1);
     } else if (alvo.dataset.mover) {
       const [item, dir] = alvo.dataset.mover.split(":");
       const [lista, i] = separar(item);
-      const arr = obter(estado, lista);
+      const arr = obterLista(estado, lista);
       const j = i + Number(dir);
       if (j >= 0 && j < arr.length) [arr[i], arr[j]] = [arr[j], arr[i]];
     } else return;

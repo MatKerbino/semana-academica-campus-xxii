@@ -4,6 +4,7 @@ import { montarAbas } from "./abas";
 
 const colunas = (n: number) => (n <= 2 ? "sm:grid-cols-2" : n === 3 ? "sm:grid-cols-2 lg:grid-cols-3" : "sm:grid-cols-2 lg:grid-cols-4");
 
+/** Página Patrocinadores: grupos de realização e apoio. */
 export async function iniciar() {
   const c = await obterConteudo();
   aplicarConteudo(c, await extrasTexto());

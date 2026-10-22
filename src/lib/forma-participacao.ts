@@ -10,6 +10,7 @@ const VALIDADE_MS = 2 * 60 * 1000;
 
 export type Forma = { modalidade: Pagamento["modalidade"]; destaque: string; detalhe: string | null };
 
+/** Forma usada enquanto a API não responde. */
 export const FORMA_PADRAO: Forma = {
   modalidade: "nao_monetaria",
   destaque: "1 kg de alimento não perecível",
@@ -32,6 +33,7 @@ export function interpretar(p: Pagamento): Forma {
 
 let pendente: Promise<Forma> | null = null;
 
+/** Forma de participação vigente (cache de sessão por 2 min; erro → padrão). */
 export function obterForma(): Promise<Forma> {
   try {
     const guardado = JSON.parse(sessionStorage.getItem(CHAVE) ?? "null") as { em: number; forma: Forma } | null;
@@ -51,6 +53,7 @@ export function obterForma(): Promise<Forma> {
   return pendente;
 }
 
+/** Destaque da forma em minúscula quando é texto livre (para frases). */
 export const minuscula = (f: Forma) => (f.modalidade === "nao_monetaria" ? f.destaque.charAt(0).toLowerCase() + f.destaque.slice(1) : f.destaque);
 const frase = (t: string) => (/[.!?]$/.test(t) ? t : `${t}.`);
 

@@ -54,7 +54,7 @@ function desenhar(c: Conteudo) {
   const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
 
   $("[data-filtros]").innerHTML = FILTROS.map(
-    (f) => `<button type="button" data-filtro="${f.id}" aria-pressed="${f.id === "todas"}" class="cursor-pointer rounded-full border border-verde-claro bg-white px-3.5 py-1.5 text-sm leading-[1.4] font-semibold text-verde-escuro aria-pressed:border-verde-escuro aria-pressed:bg-verde-escuro aria-pressed:text-white">${f.rotulo} (${total(f)})</button>`,
+    (f) => `<button type="button" data-filtro="${f.id}" aria-pressed="${f.id === "todas"}" class="cursor-pointer rounded-full max-md:min-h-11 border border-verde-claro bg-white px-3.5 py-1.5 text-sm leading-[1.4] font-semibold text-verde-escuro aria-pressed:border-verde-escuro aria-pressed:bg-verde-escuro aria-pressed:text-white">${f.rotulo} (${total(f)})</button>`,
   ).join("");
 
   $("[data-lista]").innerHTML = diasDoEvento(c.evento)
@@ -120,4 +120,5 @@ function desenhar(c: Conteudo) {
   if (params.get("de") === "cronograma") $("[data-voltar]").hidden = false;
 }
 
+/** Página Atividades: filtro por tipo, lista por dia e detalhe da atividade selecionada. */
 export const iniciarAtividades = () => registrarPronto(obterConteudo().then(desenhar));

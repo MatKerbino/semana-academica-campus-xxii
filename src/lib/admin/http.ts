@@ -1,7 +1,8 @@
 /** Chamada à API do painel e tratamento de erros (contrato em semana-academica-api/docs/API.md). */
 import { ApiError, caminho, sair, sessao } from "../api";
 
-const BASE = ((import.meta.env.PUBLIC_API_URL as string | undefined) ?? "").replace(/\/+$/, "");
+/** Endereço base da API (PUBLIC_API_URL), sem barra final. */
+export const BASE = ((import.meta.env.PUBLIC_API_URL as string | undefined) ?? "").replace(/\/+$/, "");
 
 /** Chamada autenticada à API. Em 401 encerra a sessão e volta ao login do painel (exceto quando `sairEm401` é false). */
 export async function api<T = unknown>(rota: string, { metodo = "GET", corpo, sairEm401 = true }: { metodo?: string; corpo?: unknown; sairEm401?: boolean } = {}): Promise<T> {

@@ -1,14 +1,14 @@
 /** Fragmentos de tela renderizados no navegador (HTML como texto, sempre escapado com esc()). */
 import { esc, formatarCPF, formatarData, formatarDataHora, formatarMoeda, rotuloPerfil, type Dados, type Inscricao } from "./api";
 
-import { conteudoPadrao, icone as iconeConteudo, type Aparencia, type Conteudo, type ItemCatalogo } from "./conteudo";
+import { conteudoPadrao, tagTipo as tagTipoHtml, type Aparencia, type Conteudo, type ItemCatalogo } from "./conteudo";
 export type { ItemCatalogo };
 
 /** Ícones dos tipos vêm da aparência escolhida pelo admin (slot fixo por tipo). Chame ao carregar o conteúdo. */
 let aparencia: Aparencia = conteudoPadrao.aparencia;
 export const usarConteudo = (c: Conteudo) => void (aparencia = c.aparencia);
 
-/** Clona um ícone de <IconesCliente /> aplicando as classes. */
+/** Clona um ícone de <IconesCliente /> (ids em português: ok, pin, lista…) aplicando as classes. Os ícones editáveis do conteúdo usam `icone()` de conteudo/icones; os dois sistemas coexistem porque ícones de interface (ok, alerta, desfazer…) não fazem parte da biblioteca editável. */
 export function ico(nome: string, classe = "size-4"): string {
   const svg = document.querySelector(`#icones-cliente [data-icone="${nome}"] svg`)?.cloneNode(true) as SVGElement | undefined;
   if (!svg) return "";
@@ -17,18 +17,8 @@ export function ico(nome: string, classe = "size-4"): string {
   return svg.outerHTML;
 }
 
-const TAGS = {
-  palestra: ["Palestra", "text-verde-medio"],
-  minicurso: ["Minicurso", "text-info-texto"],
-  curso: ["Curso", "text-curso"],
-  banner: ["Exposição de Banners", "text-divisor"],
-  artigo: ["Apresentação de artigos", "text-chumbo"],
-} as const;
-
-export const tagTipo = (tipo: ItemCatalogo["tipo"]) => {
-  const [rotulo, cor] = TAGS[tipo];
-  return `<span class="flex items-center gap-1.5 text-xs leading-[1.3] font-bold tracking-[0.4px] uppercase ${cor}">${iconeConteudo(aparencia.icones[tipo], "size-3.5")}${esc(rotulo)}</span>`;
-};
+/** Tag de tipo com a aparência vigente (ver conteudo/tag-tipo). */
+export const tagTipo = (tipo: ItemCatalogo["tipo"]) => tagTipoHtml(aparencia, tipo);
 
 export const formatarTelefone = (v = "") => v.replace(/^(\d{2})(\d{4,5})(\d{4})$/, "($1) $2-$3");
 

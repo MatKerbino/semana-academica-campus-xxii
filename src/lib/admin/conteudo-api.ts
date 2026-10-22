@@ -9,9 +9,13 @@ const gravar = async (rota: string, metodo: string, corpo?: unknown) => {
   return c;
 };
 
-export const salvarParte = (parte: "evento" | "aparencia" | "quadros" | "informacoes", corpo: unknown) =>
-  gravar(`/admin/conteudo/${parte}`, "PUT", corpo);
-export const restaurarParte = (parte: string) => gravar("/admin/conteudo/restaurar", "POST", { parte });
+/** Partes do conteúdo que têm um editor de formulário único (PUT /admin/conteudo/<parte>). */
+export type ParteEditavel = "evento" | "aparencia" | "quadros" | "informacoes";
+/** Partes que podem voltar ao padrão de fábrica ("tudo" restaura as seis de uma vez). */
+export type ParteRestauravel = ParteEditavel | "atividades" | "palestrantes" | "tudo";
+
+export const salvarParte = (parte: ParteEditavel, corpo: unknown) => gravar(`/admin/conteudo/${parte}`, "PUT", corpo);
+export const restaurarParte = (parte: ParteRestauravel) => gravar("/admin/conteudo/restaurar", "POST", { parte });
 export const enviarBanner = (tipo: string, base64: string) => gravar("/admin/banner", "PUT", { tipo, base64 });
 export const removerBanner = () => gravar("/admin/banner", "DELETE");
 

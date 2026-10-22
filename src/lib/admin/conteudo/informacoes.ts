@@ -1,6 +1,6 @@
 /** Editor da página de informações do evento: título, descrição e seções com itens (rótulo, detalhe, link). */
 import { obterConteudo, type Informacoes } from "../../conteudo";
-import { acoesItem, botaoAdicionar, campo, secao, type Erros } from "./form";
+import { acoesItem, botaoAdicionar, caixaItem as caixa, campo, secao, type Erros } from "./form";
 import { AJUDA_MARCADORES } from "./quadros";
 import { montarEditor } from "./editor";
 
@@ -11,7 +11,6 @@ export async function iniciarInformacoes(raiz: HTMLElement) {
     secao: () => ({ titulo: "", texto: "", itens: [] }),
     item: () => ({ rotulo: "", detalhe: "", url: "" }),
   };
-  const caixa = (corpo: string, acoes: string) => `<div class="flex flex-col gap-3 rounded-campo border border-borda bg-palha p-4"><div class="flex flex-col gap-3">${corpo}</div><div class="flex justify-end">${acoes}</div></div>`;
 
   const desenhar = (e: Informacoes, erros: Erros) => [
     secao("Cabeçalho da página", campo(e, "titulo", "Título", erros, { obrigatorio: true }) + campo(e, "descricao", "Descrição", erros, { linhas: 2, ajuda: AJUDA_MARCADORES })),
@@ -27,6 +26,7 @@ export async function iniciarInformacoes(raiz: HTMLElement) {
   montarEditor<Informacoes>({
     raiz, parte: "informacoes", estado, desenhar, modelos,
     mensagem: "Informações salvas. A página de informações já foi atualizada.",
+    aoRestaurar: (novo) => Object.assign(estado, structuredClone(novo.informacoes)),
     validar: (e) => {
       const r: Erros = {};
       if (!e.titulo.trim()) r.titulo = "Informe o título.";

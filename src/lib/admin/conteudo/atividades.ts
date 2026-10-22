@@ -7,8 +7,9 @@ import { criarAtividade, editarAtividade, excluirAtividade } from "../conteudo-a
 import { icone } from "../icones";
 import { toast } from "../interacao";
 import { atividadeVazia, desenharFormulario, novaSessao, validarAtividade } from "./atividade-form";
-import { botaoLinha, botaoLinhaPerigo, confirmarExclusao } from "./crud";
-import { erroDe, ligar, type Erros } from "./form";
+import { barraBusca, botaoLinha, botaoLinhaPerigo, confirmarExclusao } from "./crud";
+import { erroDe, ligar, MSG_CORRIGIR, type Erros } from "./form";
+import { botaoRestaurar, ligarRestauracao } from "./restaurar";
 
 export async function iniciarAtividades(raiz: HTMLElement) {
   let c: Conteudo = await obterConteudo();
@@ -35,11 +36,10 @@ export async function iniciarAtividades(raiz: HTMLElement) {
   const desenhar = () => {
     if (editando === undefined) {
       raiz.innerHTML = `${cabecalhoPagina("Atividades", "Palestras, minicursos, cursos e demais atividades. O cronograma e a página Atividades são montados a partir daqui.")}
-        <div class="flex flex-wrap items-center gap-3"><label class="flex h-12 w-full items-center gap-2.5 rounded-campo border-[1.5px] border-borda bg-white px-3.5 focus-within:border-verde-medio sm:w-72"><span class="sr-only">Buscar</span>${icone("search", "size-5 text-chumbo")}
-          <input id="busca" type="search" value="${esc(filtro.busca)}" placeholder="Buscar por nome ou local" class="${CLASSES.entrada}" /></label>
+        <div class="flex flex-wrap items-center gap-3">${barraBusca(filtro.busca, "Buscar por nome ou local")}
           ${filtroHtml("f-tipo", "Tipo", [["todos", "Todos"], ...opcoes.tipos.map((t) => [t.id, t.rotulo] as [string, string])], filtro.tipo, "todos")}
           ${filtroHtml("f-dia", "Dia", [["todos", "Todos"], ...diasDoEvento(c.evento).map((d) => [d.id, d.curta] as [string, string])], filtro.dia, "todos")}
-          <span class="flex-1"></span><button type="button" data-novo class="${CLASSES.botaoPrimario}">${icone("plus")}Nova atividade</button></div>
+          <span class="flex-1"></span>${botaoRestaurar("atividades")}<button type="button" data-novo class="${CLASSES.botaoPrimario}">${icone("plus")}Nova atividade</button></div>
         <p id="total" class="text-[13px] text-texto-suave"></p><div id="lista" class="flex flex-col gap-3"></div>`;
       desenharLista();
       return;
@@ -55,6 +55,7 @@ export async function iniciarAtividades(raiz: HTMLElement) {
   const voltar = (novo?: Conteudo) => { if (novo) c = novo; editando = undefined; desenhar(); };
 
   ligar(raiz, f, { modelos: { sessao: () => novaSessao(c) }, aoEstrutura: desenhar });
+  ligarRestauracao(raiz, (novo) => voltar(novo));
   raiz.addEventListener("input", (e) => {
     if ((e.target as HTMLElement).id !== "busca") return;
     filtro.busca = (e.target as HTMLInputElement).value;
@@ -83,7 +84,7 @@ export async function iniciarAtividades(raiz: HTMLElement) {
   raiz.addEventListener("submit", async (e) => {
     e.preventDefault();
     erros = validarAtividade(f, c); geral = "";
-    if (Object.keys(erros).length) { geral = "Corrija os campos destacados."; desenhar(); raiz.querySelector<HTMLElement>("[aria-invalid=true]")?.focus(); return; }
+    if (Object.keys(erros).length) { geral = MSG_CORRIGIR; desenhar(); raiz.querySelector<HTMLElement>("[aria-invalid=true]")?.focus(); return; }
     try {
       const novo = editando ? await editarAtividade(editando, f) : await criarAtividade(f);
       voltar(novo);

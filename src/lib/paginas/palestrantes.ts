@@ -16,6 +16,7 @@ const iniciais = (nome: string) => {
 };
 const semPrefixo = (t: string) => t.replace(/^(Minicurso|Oficina|Curso|Mesa-redonda \d+):\s*/, "");
 
+/** Página Palestrantes: grupos por tipo de atividade ministrada. */
 export async function iniciar() {
   const c = await obterConteudo();
   aplicarConteudo(c, await extrasTexto());
