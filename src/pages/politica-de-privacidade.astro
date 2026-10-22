@@ -7,7 +7,7 @@ import PoliticaTexto from "../components/PoliticaTexto.astro";
 
 <Base titulo="Política de Privacidade" espaco="acesso">
   <div class="mx-auto w-full max-w-[720px]">
-    <PaginaCabecalho titulo="Política de Privacidade" descricao="Como a 1ª Semana Acadêmica do Campus XXII trata os dados de quem cria conta e se inscreve no evento." />
+    <PaginaCabecalho titulo="Política de Privacidade" descricao="Como o evento trata os dados de quem cria conta e se inscreve." />
     <div class="mt-5 rounded-cartao border border-borda bg-white p-8 shadow-[0_1px_3px_rgba(15,41,8,0.08)]">
       <PoliticaTexto />
     </div>
@@ -21,3 +21,12 @@ import PoliticaTexto from "../components/PoliticaTexto.astro";
     </button>
   </div>
 </Base>
+
+<script>
+  import { aplicarConteudo, extrasTexto, linkPolitica, obterConteudo } from "../lib/conteudo";
+
+  const c = await obterConteudo();
+  const externo = linkPolitica(c);
+  if (/^https?:/.test(externo)) location.replace(externo);
+  else aplicarConteudo(c, await extrasTexto());
+</script>

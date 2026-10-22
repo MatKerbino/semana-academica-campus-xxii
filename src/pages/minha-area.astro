@@ -28,11 +28,13 @@ import IconesCliente from "../components/IconesCliente.astro";
 </Base>
 
 <script>
-  import { api, ApiError, exigirLogin, formatarData, formatarDataHora, type Inscricao, type Pagamento } from "../lib/api";
+  import { api, ApiError, esc, exigirLogin, formatarData, formatarDataHora, type Inscricao, type Pagamento } from "../lib/api";
   import { blocoNovaInscricao, ligarNovaInscricao } from "../lib/nova-inscricao";
   import { btnContorno, btnPrimario, formaParticipacao, ico, passos, selo, seloInscricao } from "../lib/visao";
+  import { obterConteudo, texto, type Conteudo } from "../lib/conteudo";
   import { url } from "../lib/url";
 
+  let conteudo: Conteudo;
   const sessao = exigirLogin();
   if (sessao) {
     document.querySelectorAll("[data-login]").forEach((el) => (el.textContent = sessao.usuario.login));
@@ -54,7 +56,7 @@ import IconesCliente from "../components/IconesCliente.astro";
     if (!i)
       return `<div class="flex gap-4">${cabecalho("usuario-mais", "bg-verde-claro", "text-verde-escuro")}<div class="min-w-0 flex-1">
         ${selo("cinza", "proibido", "Sem inscrição")}
-        <h2 class="mt-1 text-[18px] leading-[1.4] font-semibold text-verde-escuro">Você ainda não tem inscrição na Semana Acadêmica</h2>
+        <h2 class="mt-1 text-[18px] leading-[1.4] font-semibold text-verde-escuro">Você ainda não tem inscrição na ${esc(texto(conteudo, "{{nome}}"))}</h2>
         <p class="mt-1 text-[15px] leading-normal text-chumbo">Sua conta está ativa, mas criar a conta não faz a inscrição. Inicie a inscrição para informar seus dados, aceitar a Política de Privacidade e escolher as atividades.</p>
         <a href="${url("/inscricao")}" class="${btnPrimario} mt-4">${ico("usuario-mais", "size-4")}Iniciar inscrição</a></div></div>`;
     if (i.status === "rascunho") {
@@ -77,6 +79,7 @@ import IconesCliente from "../components/IconesCliente.astro";
 
   async function carregar() {
     try {
+      conteudo = await obterConteudo();
       const [pagamento, inscricao, me] = await Promise.all([
         api<Pagamento>("/pagamento", { auth: false }),
         api<{ inscricao: Inscricao }>("/inscricao").then((r) => r.inscricao).catch((e) => {

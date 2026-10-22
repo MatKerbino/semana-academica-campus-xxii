@@ -10,7 +10,7 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
   import {
     CLASSES, contar, dataHora, erroCarregar, esc, formatarCPF, formatarTelefone, icone, iniciarPainel, participante, rotuloPerfil, seloInscricao,
     formatarData,
-    atividadesConhecidas,
+    atividadesConhecidas, conteudoPronto, nomeEvento,
   } from "../../lib/admin-api";
   import { url } from "../../lib/url";
 
@@ -20,7 +20,7 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
     const campo = (rotulo: string, valor: string) =>
       `<div><dt class="text-[13px] text-texto-suave">${rotulo}</dt><dd class="text-[15px] leading-normal text-chumbo">${esc(valor)}</dd></div>`;
 
-    participante(login)
+    conteudoPronto().then(() => participante(login))
       .then((p) => {
         const i = p.inscricao;
         const d = i?.dados ?? {};

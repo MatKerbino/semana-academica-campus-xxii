@@ -1,0 +1,12 @@
+---
+/* Biblioteca de ícones do conteúdo editável (ids = opcoes.icones). Clonada no navegador por lib/conteudo/icones.ts. */
+import * as Lucide from "@lucide/astro";
+import opcoes from "../data/opcoes.json";
+
+const pascal = (id: string) => id.split("-").map((p) => p[0].toUpperCase() + p.slice(1)).join("");
+const icones = opcoes.icones.map((id) => ({ id, Icone: (Lucide as Record<string, any>)[pascal(id)] })).filter((i) => i.Icone);
+---
+
+<div id="biblioteca-icones" hidden aria-hidden="true">
+  {icones.map(({ id, Icone }) => <span data-icone={id}><Icone /></span>)}
+</div>

@@ -1,0 +1,16 @@
+---
+import PaginaCabecalho from "../components/PaginaCabecalho.astro";
+import Base from "../layouts/Base.astro";
+---
+
+<Base titulo="Informações do evento" ativo="/informacoes">
+  <PaginaCabecalho titulo="Informações do evento" descricao="Datas, edital, templates e outras informações importantes." trilha={[{ href: "/", rotulo: "Início" }]} />
+  <h2 id="info-titulo" class="sr-only"></h2>
+  <p id="info-descricao" class="mb-3 text-[15px] text-chumbo"></p>
+  <div id="info-secoes" class="flex flex-col gap-4"></div>
+</Base>
+
+<script>
+  import { iniciar } from "../lib/paginas/informacoes";
+  iniciar();
+</script>

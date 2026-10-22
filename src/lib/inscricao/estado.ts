@@ -19,8 +19,7 @@ export type Estado = {
   indisponiveis: string[];
 };
 
-export function criarEstado(sessao: Sessao | null): Estado {
-  const catalogo = JSON.parse($("#catalogo").textContent!) as ItemCatalogo[];
+export function criarEstado(sessao: Sessao | null, catalogo: ItemCatalogo[]): Estado {
   return {
     sessao,
     catalogo,

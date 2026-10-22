@@ -11,7 +11,7 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
     abrirModal, atualizarPagamento, cartaoAtividade, CLASSES, dataHora, erroCarregar, esc, eStatusErro, formaPagamento,
     formatarCPF, formatarData, formatarMoeda, formatarTelefone, historicoLinhas, icone, iniciarPainel, inscricao, rotuloPerfil, seloDevolucao,
     seloInscricao, seloPagamento, toast, type FormaPagamento, type InscricaoAdmin,
-    atividadesConhecidas,
+    atividadesConhecidas, conteudoPronto, nomeEvento,
   } from "../../lib/admin-api";
   import { url } from "../../lib/url";
 
@@ -123,7 +123,7 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
       });
     }
 
-    Promise.all([inscricao(login), formaPagamento().catch(() => null)])
+    conteudoPronto().then(() => Promise.all([inscricao(login), formaPagamento().catch(() => null)]))
       .then(([i, f]) => {
         atual = i;
         forma = f;

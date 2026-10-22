@@ -1,0 +1,18 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+---
+
+<AdminLayout titulo="Evento" ativo="evento">
+  <div class="flex flex-col gap-1.5">
+    <h1 class="text-[32px] leading-[1.3] font-bold text-verde-escuro max-lg:text-[26px]">Evento</h1>
+    <p class="text-[15px] leading-normal text-chumbo">Nome, datas, local e documentos. Tudo o que for alterado aqui muda em todo o site.</p>
+  </div>
+  <div id="conteudo" class="flex flex-col gap-6" aria-live="polite"><p class="text-sm text-texto-suave">Carregando…</p></div>
+</AdminLayout>
+
+<script>
+  import { iniciarPainel } from "../../lib/admin-api";
+  import { iniciarEvento } from "../../lib/admin/conteudo/evento";
+
+  if (iniciarPainel()) iniciarEvento(document.getElementById("conteudo")!);
+</script>

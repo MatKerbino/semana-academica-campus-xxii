@@ -1,27 +1,43 @@
 /** Cartões e listas em HTML: atividades, histórico da inscrição e forma de participação. */
-import { atividades, dias, tagsTipo, type TipoAtividade } from "../../data/evento";
 import { esc } from "../api";
+import { conteudoPadrao, dataCurta, icone as iconeConteudo, obterConteudo, type Conteudo, type TipoAtividade } from "../conteudo";
 import { dataHora, formaTexto } from "./formatacao";
 import { icone } from "./icones";
 import type { FormaPagamento, InscricaoAdmin } from "./tipos";
 
+/** Conteúdo vigente para os cartões (síncronos). As telas chamam `conteudoPronto()` antes de desenhar. */
+let atual: Conteudo = conteudoPadrao;
+export const conteudoPronto = () => obterConteudo().then((c) => void (atual = c));
+
+const TAGS: Partial<Record<TipoAtividade, [slot: string, rotulo: string, cor: string]>> = {
+  palestra: ["palestra", "Palestra", "text-verde-medio"],
+  "mesa-redonda": ["palestra", "Palestra", "text-verde-medio"],
+  minicurso: ["minicurso", "Minicurso", "text-info-texto"],
+  curso: ["curso", "Curso", "text-curso"],
+  banner: ["banner", "Exposição de Banners", "text-divisor"],
+  artigo: ["artigo", "Apresentação de artigos", "text-chumbo"],
+};
+
 export function tagTipo(tipo: TipoAtividade) {
-  const tag = tagsTipo[tipo];
+  const tag = TAGS[tipo];
   if (!tag) return "";
-  const ic = { mic: "mic-vocal", apresentacao: "presentation", capelo: "graduation-cap", imagem: "image", arquivo: "file-text" }[tag.icone];
-  return `<span class="flex items-center gap-1.5 text-xs leading-[1.3] font-bold tracking-[0.4px] uppercase ${tag.cor}">${icone(ic, "size-3.5")}${esc(tag.rotulo)}</span>`;
+  const ic = atual.aparencia.icones[tag[0] as keyof Conteudo["aparencia"]["icones"]];
+  return `<span class="flex items-center gap-1.5 text-xs leading-[1.3] font-bold tracking-[0.4px] uppercase ${tag[2]}">${iconeConteudo(ic, "size-3.5")}${esc(tag[1])}</span>`;
 }
 
-/** Quantas das atividades da inscrição existem no catálogo atual (slugs antigos são ignorados). */
-export const atividadesConhecidas = (slugs: string[]) => slugs.filter((s) => atividades.some((a) => a.slug === s));
+export const nomeEvento = () => atual.evento.nome;
+
+/** Quantas das atividades da inscrição existem no catálogo atual (slugs removidos são ignorados). */
+export const atividadesConhecidas = (slugs: string[]) => slugs.filter((s) => atual.atividades.some((a) => a.slug === s));
 
 /** Cartão de atividade (dia/hora, tipo, título e local), como nas telas de detalhe. */
 export function cartaoAtividade(slug: string) {
-  const a = atividades.find((x) => x.slug === slug);
-  if (!a) return ""; // slug desconhecido (atividade de um catálogo antigo): não exibir
-  const dia = dias.find((d) => d.id === a.dia)!.rotulo.slice(0, 5);
+  const a = atual.atividades.find((x) => x.slug === slug);
+  if (!a) return ""; // slug desconhecido (atividade removida): não exibir
+  const sessao = [...a.sessoes].sort((x, y) => `${x.data}${x.inicio}`.localeCompare(`${y.data}${y.inicio}`))[0];
+  const dia = dataCurta(sessao.data);
   return `<li class="flex gap-4 rounded-campo border border-borda bg-white p-3.5">
-    <div class="w-11 shrink-0"><p class="text-sm leading-[1.4] font-semibold text-chumbo">${dia}</p><p class="text-[13px] text-texto-suave">${esc(a.hora)}</p></div>
+    <div class="w-11 shrink-0"><p class="text-sm leading-[1.4] font-semibold text-chumbo">${dia}</p><p class="text-[13px] text-texto-suave">${esc(sessao.inicio.replace(":", "h"))}</p></div>
     <div class="flex min-w-0 flex-col gap-1">${tagTipo(a.tipo)}<p class="text-sm leading-[1.4] font-semibold text-chumbo">${esc(a.titulo)}</p>
     ${a.local ? `<p class="flex items-center gap-1.5 text-[13px] text-texto-suave">${icone("map-pin", "size-3.5")}${esc(a.local)}</p>` : ""}</div></li>`;
 }

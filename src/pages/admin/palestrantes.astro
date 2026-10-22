@@ -1,0 +1,14 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+---
+
+<AdminLayout titulo="Palestrantes" ativo="palestrantes">
+  <div id="conteudo" class="flex flex-col gap-6" aria-live="polite"><p class="text-sm text-texto-suave">Carregando…</p></div>
+</AdminLayout>
+
+<script>
+  import { iniciarPainel } from "../../lib/admin-api";
+  import { iniciarPalestrantes } from "../../lib/admin/conteudo/palestrantes";
+
+  if (iniciarPainel()) iniciarPalestrantes(document.getElementById("conteudo")!);
+</script>

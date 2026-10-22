@@ -3,12 +3,10 @@ import { TriangleAlert } from "@lucide/astro";
 import IconesCliente from "../components/IconesCliente.astro";
 import PaginaCabecalho from "../components/PaginaCabecalho.astro";
 import Base from "../layouts/Base.astro";
-import { catalogoSelecionavel } from "../data/evento";
 import { url } from "../lib/url";
 ---
 
 <Base titulo="Minha inscrição" espaco="acesso">
-  <script type="application/json" id="catalogo" set:html={JSON.stringify(catalogoSelecionavel)} />
 
   <div id="conteudo" hidden class="mx-auto flex w-full max-w-[1120px] flex-col gap-5">
     <PaginaCabecalho titulo="Minha inscrição" trilha={[{ href: "/", rotulo: "Início" }, { href: "/minha-area", rotulo: "Minha área" }]}>
@@ -74,13 +72,14 @@ import { url } from "../lib/url";
 
 <script>
   import { api, exigirLogin, formatarData, formatarDataHora, formatarMoeda, type Inscricao, type Pagamento } from "../lib/api";
+  import { catalogoSelecionavel, obterConteudo } from "../lib/conteudo";
   import { url } from "../lib/url";
   import { blocoNovaInscricao, ligarNovaInscricao, secaoAnteriores } from "../lib/nova-inscricao";
-  import { aviso, formaParticipacao, gradeDados, historico, ico, linhaAtividade, selo, seloEmail, seloInscricao, type ItemCatalogo } from "../lib/visao";
+  import { aviso, formaParticipacao, usarConteudo, gradeDados, historico, ico, linhaAtividade, selo, seloEmail, seloInscricao, type ItemCatalogo } from "../lib/visao";
 
   const sessao = exigirLogin();
   const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
-  const catalogo = new Map((JSON.parse($("#catalogo").textContent!) as ItemCatalogo[]).map((a) => [a.slug, a]));
+  let catalogo = new Map<string, ItemCatalogo>();
   let insc: Inscricao;
   let cfg: Pagamento;
 
@@ -207,6 +206,9 @@ import { url } from "../lib/url";
   async function iniciar() {
     if (!sessao) return;
     try {
+      const conteudo = await obterConteudo();
+      usarConteudo(conteudo);
+      catalogo = new Map(catalogoSelecionavel(conteudo).map((a) => [a.slug, a]));
       [cfg, insc] = await Promise.all([api<Pagamento>("/pagamento", { auth: false }), api<{ inscricao: Inscricao }>("/inscricao").then((r) => r.inscricao)]);
       if (insc.status === "rascunho") return void (location.href = url("/inscricao"));
       desenhar();

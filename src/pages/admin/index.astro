@@ -10,13 +10,14 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
   import {
     botaoOlho, cabecalhoColuna, cabecalhoPagina, CLASSES, dataHora, erroCarregar, esc, formaParticipacaoCartao, formatarCPF, icone,
     iniciarPainel, resumo, rotuloPerfil, seloDevolucao, seloInscricao, seloPagamento, contar,
-    atividadesConhecidas,
+    atividadesConhecidas, conteudoPronto, nomeEvento,
   } from "../../lib/admin-api";
   import { url } from "../../lib/url";
 
   if (iniciarPainel()) {
     const raiz = document.getElementById("conteudo")!;
-    resumo()
+    conteudoPronto()
+      .then(() => resumo())
       .then((r) => {
         const cartao = (href: string | null, tom: string, ic: string, rotulo: string, n: number) => {
           const corpo = `<span class="flex items-center gap-3"><span class="flex size-10 shrink-0 items-center justify-center rounded-full ${tom}">${icone(ic, "size-5")}</span><span class="text-[15px] leading-normal text-texto-suave xl:whitespace-nowrap">${rotulo}</span></span><span class="text-[32px] leading-[1.3] font-bold text-verde-escuro">${n}</span>`;
@@ -35,7 +36,7 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
           .join("");
 
         raiz.innerHTML = `
-            ${cabecalhoPagina("Visão geral", `Resumo da 1ª Semana Acadêmica · atualizado em ${dataHora(r.atualizadoEm).replace(" ", " às ")}.`)}
+            ${cabecalhoPagina("Visão geral", `Resumo da ${esc(nomeEvento())} · atualizado em ${dataHora(r.atualizadoEm).replace(" ", " às ")}.`)}
             <div class="flex flex-wrap gap-4">
               ${cartao(null, "bg-verde-claro text-verde-escuro", "users", "Inscrições confirmadas", r.inscricoesConfirmadas)}
               ${cartao(`${url("/admin/inscricoes")}?pagamento=pendente`, "bg-pendente-fundo text-pendente-texto", "apple", "Compensações pendentes", r.compensacoesPendentes)}

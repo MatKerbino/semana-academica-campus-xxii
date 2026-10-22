@@ -96,7 +96,7 @@ Cabeçalho e rodapé são fixos e a rolagem acontece só dentro do conteúdo. Pa
 - Conteúdo dividido em **abas** (`src/components/Abas.astro`) na Página Inicial, no Cronograma e em Artigos, para caber em uma tela.
 - Botão "Realizar Inscrição" (verde #33d40c) fixo no cabeçalho em todas as páginas.
 - A página de Atividades mostra "Voltar para o Cronograma" quando aberta a partir dele (`?de=cronograma`).
-- Todo o conteúdo vem de um único arquivo: `src/data/evento.ts`.
+- O conteúdo é **editável pelo administrador** (ver "Conteúdo editável"); `src/data/conteudo-padrao.json` é só o ponto de partida.
 
 ## Rastreabilidade
 
@@ -127,3 +127,16 @@ O site continua estático, mas as telas de conta, inscrição e admin consomem a
 A URL vem de `PUBLIC_API_URL` (ver `.env.example`; `.env.development` aponta para `http://localhost:3000`, e `.env.production`
 deve conter a Function URL da Lambda). A sessão (token) fica em `localStorage` (`src/lib/api.ts`); a proteção de rotas no cliente é
 só conveniência — a autorização real é feita pela API.
+
+## Conteúdo editável (painel admin)
+
+Só o administrador altera o conteúdo (rotas `/admin/...` da API exigem token de admin). O site lê tudo em `GET /conteudo`
+(evento, datas, local, banner, paleta, ícones, atividades, palestrantes, quadros, página de informações, links de política e termos)
+e desenha as telas no navegador; sem API, usa a última cópia local e, por fim, `src/data/conteudo-padrao.json`.
+
+- Telas: `/admin/evento`, `/admin/aparencia`, `/admin/atividades`, `/admin/palestrantes`, `/admin/quadros`, `/admin/informacoes`.
+- Contrato e regras de consistência: `semana-academica-api/docs/CONTEUDO.md`. Opções (paletas, ícones, tipos): `src/data/opcoes.json`.
+- Textos livres aceitam marcadores `{{nome}} {{periodo}} {{local}} {{forma}} {{email}} {{ano}} {{lema}} {{organizacao}}`.
+- Base em `src/lib/conteudo/`; páginas em `src/lib/paginas/`; telas do painel em `src/lib/admin/conteudo/`.
+- Após mudar `conteudo-padrao.json` ou `opcoes.json`, rode `npm run sincronizar-padrao -- ../semana-academica-campus-xxii/src/data` na API (ver README dela).
+- Teste local: na API `PORT=3100 npm run local` (admin de desenvolvimento; a porta 3000 costuma estar ocupada) e aqui `PUBLIC_API_URL=http://localhost:3100 npx astro dev`.

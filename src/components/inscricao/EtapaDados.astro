@@ -38,9 +38,10 @@ import BotaoSalvarDepois from "./BotaoSalvarDepois.astro";
     <div>
       <label class="inline-flex cursor-pointer items-center gap-2.5 text-[15px] text-chumbo">
         <input type="checkbox" name="aceitePrivacidade" class="size-[18px] cursor-pointer rounded border-[1.5px] border-chumbo/60 accent-verde-medio aria-[invalid=true]:border-erro aria-[invalid=true]:border-2" />
-        <span>Li e aceito a <a href={url("/politica-de-privacidade")} target="_blank" rel="noopener" class="font-semibold text-azul underline">Política de Privacidade</a> *</span>
+        <span>Li e aceito a <a data-link="politica" href={url("/politica-de-privacidade")} target="_blank" rel="noopener" class="font-semibold text-azul underline">Política de Privacidade</a> *</span>
       </label>
       <p data-erro="aceitePrivacidade" class="mt-1 text-[13px] leading-normal text-erro empty:hidden"></p>
+      <p class="mt-1 text-[13px] leading-normal text-texto-suave">Leia também os <a data-link="termos" hidden href="#" class="font-semibold text-azul underline">Termos e Condições</a></p>
     </div>
   </section>
 

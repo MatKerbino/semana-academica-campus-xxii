@@ -1,0 +1,246 @@
+{
+  "tipos": [
+    {
+      "id": "palestra",
+      "rotulo": "Palestra",
+      "selecionavel": true
+    },
+    {
+      "id": "mesa-redonda",
+      "rotulo": "Mesa-redonda",
+      "selecionavel": true
+    },
+    {
+      "id": "minicurso",
+      "rotulo": "Minicurso / oficina",
+      "selecionavel": true
+    },
+    {
+      "id": "curso",
+      "rotulo": "Curso",
+      "selecionavel": true
+    },
+    {
+      "id": "banner",
+      "rotulo": "Exposição de banners",
+      "selecionavel": true
+    },
+    {
+      "id": "artigo",
+      "rotulo": "Apresentação de artigos",
+      "selecionavel": true
+    },
+    {
+      "id": "abertura",
+      "rotulo": "Abertura",
+      "selecionavel": false
+    },
+    {
+      "id": "encerramento",
+      "rotulo": "Encerramento",
+      "selecionavel": false
+    },
+    {
+      "id": "campanha",
+      "rotulo": "Campanha",
+      "selecionavel": false
+    },
+    {
+      "id": "exibicao",
+      "rotulo": "Exibição",
+      "selecionavel": false
+    },
+    {
+      "id": "mostra",
+      "rotulo": "Mostra",
+      "selecionavel": false
+    },
+    {
+      "id": "outro",
+      "rotulo": "Programação geral",
+      "selecionavel": false
+    }
+  ],
+  "paletas": [
+    {
+      "id": "floresta",
+      "rotulo": "Floresta (padrão)",
+      "cores": {
+        "verde-escuro": "#2c471e",
+        "verde-medio": "#218b21",
+        "verde-cta": "#33d40c",
+        "verde-claro": "#cfe3c2",
+        "divisor": "#4a6b39",
+        "verde-noite": "#0f2a08",
+        "creme": "#f8e8ce",
+        "palha": "#fdf6e9",
+        "borda": "#e4d9c3",
+        "entregue-fundo": "#cfe3c2",
+        "entregue-borda": "#8dbf78",
+        "entregue-texto": "#2c471e"
+      }
+    },
+    {
+      "id": "oceano",
+      "rotulo": "Oceano",
+      "cores": {
+        "verde-escuro": "#12355b",
+        "verde-medio": "#1f6fb2",
+        "verde-cta": "#38bdf8",
+        "verde-claro": "#cfe3f5",
+        "divisor": "#2f5b8a",
+        "verde-noite": "#071a2e",
+        "creme": "#e3eefa",
+        "palha": "#f5f9fd",
+        "borda": "#cfdcea",
+        "entregue-fundo": "#cfe3f5",
+        "entregue-borda": "#7fb0dc",
+        "entregue-texto": "#12355b"
+      }
+    },
+    {
+      "id": "rubi",
+      "rotulo": "Rubi",
+      "cores": {
+        "verde-escuro": "#5a1a2b",
+        "verde-medio": "#a3304f",
+        "verde-cta": "#f4b942",
+        "verde-claro": "#f3d2da",
+        "divisor": "#7d3248",
+        "verde-noite": "#2a0b13",
+        "creme": "#f8e3d6",
+        "palha": "#fdf6f1",
+        "borda": "#e8d2c6",
+        "entregue-fundo": "#f3d2da",
+        "entregue-borda": "#d58a9c",
+        "entregue-texto": "#5a1a2b"
+      }
+    },
+    {
+      "id": "violeta",
+      "rotulo": "Violeta",
+      "cores": {
+        "verde-escuro": "#3b2a63",
+        "verde-medio": "#6d4fc2",
+        "verde-cta": "#a3e635",
+        "verde-claro": "#ddd3f5",
+        "divisor": "#5a4491",
+        "verde-noite": "#1b1233",
+        "creme": "#ece6fa",
+        "palha": "#f8f6fd",
+        "borda": "#dcd3ef",
+        "entregue-fundo": "#ddd3f5",
+        "entregue-borda": "#a995e0",
+        "entregue-texto": "#3b2a63"
+      }
+    },
+    {
+      "id": "terra",
+      "rotulo": "Terra",
+      "cores": {
+        "verde-escuro": "#4a3417",
+        "verde-medio": "#b45f06",
+        "verde-cta": "#f59e0b",
+        "verde-claro": "#f1dcc0",
+        "divisor": "#6b4c26",
+        "verde-noite": "#2a1a05",
+        "creme": "#f6e7cf",
+        "palha": "#fdf8ee",
+        "borda": "#e6d6bb",
+        "entregue-fundo": "#f1dcc0",
+        "entregue-borda": "#d4a259",
+        "entregue-texto": "#4a3417"
+      }
+    }
+  ],
+  "icones": [
+    "leaf",
+    "sprout",
+    "tree-pine",
+    "flower-2",
+    "globe",
+    "graduation-cap",
+    "mic-vocal",
+    "presentation",
+    "image",
+    "file-text",
+    "calendar",
+    "calendar-days",
+    "map-pin",
+    "apple",
+    "users",
+    "book-open",
+    "flask-conical",
+    "laptop",
+    "heart-pulse",
+    "lightbulb",
+    "building-2",
+    "award",
+    "star",
+    "clock",
+    "school",
+    "microscope",
+    "atom",
+    "cpu",
+    "handshake",
+    "megaphone",
+    "palette",
+    "music",
+    "camera",
+    "newspaper",
+    "trophy",
+    "sun",
+    "droplets",
+    "recycle",
+    "stethoscope",
+    "clipboard-list",
+    "ticket",
+    "rocket",
+    "brain",
+    "code",
+    "key-round",
+    "mail"
+  ],
+  "slotsIcones": [
+    {
+      "id": "marca",
+      "rotulo": "Logotipo do cabeçalho"
+    },
+    {
+      "id": "periodo",
+      "rotulo": "Data e período (Início)"
+    },
+    {
+      "id": "local",
+      "rotulo": "Local (Início)"
+    },
+    {
+      "id": "participacao",
+      "rotulo": "Forma de participação (Início)"
+    },
+    {
+      "id": "publico",
+      "rotulo": "Público (Início)"
+    },
+    {
+      "id": "palestra",
+      "rotulo": "Palestras"
+    },
+    {
+      "id": "minicurso",
+      "rotulo": "Minicursos"
+    },
+    {
+      "id": "curso",
+      "rotulo": "Cursos"
+    },
+    {
+      "id": "banner",
+      "rotulo": "Exposição de banners"
+    },
+    {
+      "id": "artigo",
+      "rotulo": "Apresentação de artigos"
+    }
+  ]
+}

@@ -11,7 +11,7 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
     atualizarPagamento, buscaHtml, botaoConfirmarPagamento, botaoOlho, eStatusErro, toast, cabecalhoColuna, cabecalhoPagina, contar, erroCarregar, esc, filtroHtml, formatarCPF, icone, iniciarPainel, inscricoes,
     normalizar, paginar, rodapeTabela, rotuloPerfil, seloDevolucao, seloInscricao, seloPagamento, situacaoDevolucao, situacaoPagamento,
     type InscricaoAdmin,
-    atividadesConhecidas,
+    atividadesConhecidas, conteudoPronto, nomeEvento,
   } from "../../lib/admin-api";
   import { url } from "../../lib/url";
 
@@ -37,7 +37,8 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
     };
     let erroAcao = "";
 
-    inscricoes()
+    conteudoPronto()
+      .then(() => inscricoes())
       .then((todas) => {
         const lista = todas.filter((i) => i.status !== "rascunho");
         const rotulo = (i: InscricaoAdmin) => i.dados.nome ?? i.login;
@@ -81,7 +82,7 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
           const rodape = so ? `Mostrando ${pg.itens.length} de ${filtradas.length} inscrições com compensação pendente` : `Mostrando ${pg.itens.length} de ${filtradas.length} inscrições`;
 
           raiz.innerHTML = `
-            ${cabecalhoPagina("Inscrições", "Inscrições realizadas na 1ª Semana Acadêmica. Use a busca e os filtros para localizar uma inscrição.")}
+            ${cabecalhoPagina("Inscrições", "Inscrições realizadas na ${esc(nomeEvento())}. Use a busca e os filtros para localizar uma inscrição.")}
             ${erroAcao ? `<div role="alert" class="rounded-campo border border-erro-borda bg-erro-fundo p-4 text-sm font-semibold text-erro">${esc(erroAcao)}</div>` : ""}
             <div class="flex flex-wrap items-center gap-3">${buscaHtml("busca", estado.busca)}
               ${filtroHtml("f-inscricao", "Inscrição", F.inscricao, estado.inscricao, "todas", "max-md:order-2")}${filtroHtml("f-pagamento", "Pagamento/compensação", F.pagamento, estado.pagamento, "todos", "max-md:order-1")}

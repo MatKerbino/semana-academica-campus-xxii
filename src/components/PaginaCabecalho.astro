@@ -1,6 +1,12 @@
 ---
 import { url } from "../lib/url";
 import Ornamento from "./Ornamento.astro";
+import padrao from "../data/conteudo-padrao.json";
+import { texto } from "../lib/conteudo/formatar";
+import type { Conteudo } from "../lib/conteudo/tipos";
+
+/* Título e descrição aceitam {{marcadores}} (nome, periodo, local...); no navegador são trocados pelo conteúdo vigente. */
+const t = (m: string) => texto(padrao as unknown as Conteudo, m);
 
 interface Props {
   titulo: string;
@@ -22,10 +28,10 @@ const { titulo, descricao, trilha = [{ href: "/", rotulo: "Início" }], simples 
             <span class="text-[13px] text-texto-suave">/</span>
           </>
         ))}
-        <span class="text-[13px] text-texto-suave">{titulo}</span>
+        <span class="text-[13px] text-texto-suave">{t(titulo)}</span>
       </nav>
-      <h1 class="text-[32px] leading-[1.3] font-bold text-verde-escuro">{titulo}</h1>
-      {descricao && <p class="text-[15px] text-chumbo">{descricao}</p>}
+      <h1 data-t={titulo} class="text-[32px] leading-[1.3] font-bold text-verde-escuro">{t(titulo)}</h1>
+      {descricao && <p data-t={descricao} class="text-[15px] text-chumbo">{t(descricao)}</p>}
       <slot />
     </div>
   ) : (
@@ -39,10 +45,10 @@ const { titulo, descricao, trilha = [{ href: "/", rotulo: "Início" }], simples 
               <span class="mx-1.5 text-verde-medio/60">/</span>
             </>
           ))}
-          <span class="text-verde-escuro/70">{titulo}</span>
+          <span class="text-verde-escuro/70">{t(titulo)}</span>
         </nav>
-        <h1 class="pt-1 text-secao leading-[1.5] font-bold text-verde-escuro">{titulo}</h1>
-        {descricao && <p class="mt-1.5 max-w-[1000px] text-sm text-chumbo">{descricao}</p>}
+        <h1 data-t={titulo} class="pt-1 text-secao leading-[1.5] font-bold text-verde-escuro">{t(titulo)}</h1>
+        {descricao && <p data-t={descricao} class="mt-1.5 max-w-[1000px] text-sm text-chumbo">{t(descricao)}</p>}
         <slot />
       </div>
     </div>

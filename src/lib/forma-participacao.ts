@@ -51,7 +51,7 @@ export function obterForma(): Promise<Forma> {
   return pendente;
 }
 
-const minuscula = (f: Forma) => (f.modalidade === "nao_monetaria" ? f.destaque.charAt(0).toLowerCase() + f.destaque.slice(1) : f.destaque);
+export const minuscula = (f: Forma) => (f.modalidade === "nao_monetaria" ? f.destaque.charAt(0).toLowerCase() + f.destaque.slice(1) : f.destaque);
 const frase = (t: string) => (/[.!?]$/.test(t) ? t : `${t}.`);
 
 const textos: Record<string, (f: Forma) => string> = {

@@ -1,47 +1,18 @@
 ---
-import { Building2, ExternalLink } from "@lucide/astro";
-import Abas from "../components/Abas.astro";
 import PaginaCabecalho from "../components/PaginaCabecalho.astro";
 import Base from "../layouts/Base.astro";
-import { gruposApoio } from "../data/evento";
-
-const colunas = (n: number) =>
-  n <= 2 ? "sm:grid-cols-2" : n === 3 ? "sm:grid-cols-2 lg:grid-cols-3" : "sm:grid-cols-2 lg:grid-cols-4";
 ---
 
 <Base titulo="Patrocinadores e Apoiadores" ativo="/patrocinadores">
   <PaginaCabecalho
     titulo="Patrocinadores e Apoiadores"
-    descricao="Instituições que realizam e apoiam a 1ª Semana Acadêmica do Campus XXII."
+    descricao="Instituições que realizam e apoiam o evento."
     trilha={[{ href: "/", rotulo: "Início" }]}
   />
-
-  <Abas rotuloLista="Realização e apoio" abas={gruposApoio.map((g) => ({ id: g.id, rotulo: g.rotulo }))}>
-    {
-      gruposApoio.map((g) => (
-        <div data-painel={g.id} class:list={["grid gap-4", colunas(g.itens.length)]}>
-          {g.itens.map((p) => (
-            <article class="flex flex-col items-center rounded-cartao border border-borda bg-white p-4">
-              <span class="flex h-16 w-full items-center justify-center rounded-cartao bg-creme" aria-hidden="true">
-                <Building2 class="size-7 text-verde-medio" />
-              </span>
-              <h2 class="mt-3 text-center text-sm font-semibold text-verde-escuro">{p.nome}</h2>
-              {"detalhe" in p && p.detalhe && <p class="mt-1 text-center text-tabela text-chumbo/75">{p.detalhe}</p>}
-              {"url" in p && p.url && (
-                <a
-                  href={p.url}
-                  target="_blank"
-                  rel="noopener"
-                  class="mt-1.5 flex items-center gap-1.5 text-tabela font-semibold text-azul hover:underline"
-                >
-                  <ExternalLink class="size-3.5" aria-hidden="true" />
-                  Visitar site
-                </a>
-              )}
-            </article>
-          ))}
-        </div>
-      ))
-    }
-  </Abas>
+  <div id="abas"></div>
 </Base>
+
+<script>
+  import { iniciar } from "../lib/paginas/patrocinadores";
+  iniciar();
+</script>

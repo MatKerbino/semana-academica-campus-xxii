@@ -7,12 +7,9 @@ import EtapaDados from "../components/inscricao/EtapaDados.astro";
 import EtapaRevisao from "../components/inscricao/EtapaRevisao.astro";
 import PainelPolitica from "../components/inscricao/PainelPolitica.astro";
 import Base from "../layouts/Base.astro";
-import { catalogoSelecionavel } from "../data/evento";
 ---
 
 <Base titulo="Inscrição" espaco="acesso">
-  <script type="application/json" id="catalogo" set:html={JSON.stringify(catalogoSelecionavel)} />
-
   <div id="conteudo" hidden class="mx-auto flex w-full max-w-[1120px] flex-col gap-5">
     <CabecalhoInscricao />
     <EtapaDados />
