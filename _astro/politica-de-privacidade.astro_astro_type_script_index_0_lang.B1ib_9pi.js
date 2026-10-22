@@ -1,0 +1,1 @@
+import{S as e,g as t,m as n,p as r}from"./conteudo.CtkD0WEX.js";var i=await r(),a=e(i);/^https?:/.test(a)?location.replace(a):n(i,await t());

@@ -1,0 +1,1 @@
+import{J as e}from"./admin-api.5ads6g6F.js";import{n as t}from"./quadros.BeqCrZQh.js";e()&&t(document.getElementById(`conteudo`));
