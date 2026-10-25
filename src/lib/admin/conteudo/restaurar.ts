@@ -13,9 +13,10 @@ const AVISOS: Record<ParteRestauravel, { titulo: string; texto: string; pronto: 
   aparencia: { titulo: "Restaurar a aparência?", texto: "Banner, paleta (inclusive a personalizada) e ícones voltam ao padrão. A imagem de banner enviada será apagada.", pronto: "Aparência restaurada ao padrão." },
   atividades: { titulo: "Restaurar as atividades?", texto: "Todas as atividades voltam à programação de fábrica: as que você criou ou alterou se perdem. É recusado se houver inscrições confirmadas em atividades que deixariam de existir.", pronto: "Atividades restauradas ao padrão." },
   palestrantes: { titulo: "Restaurar os palestrantes?", texto: `Todos os palestrantes voltam à lista de fábrica: os que você criou ou alterou se perdem. ${SE_RECUSAR}`, pronto: "Palestrantes restaurados ao padrão." },
+  noticias: { titulo: "Restaurar as notícias?", texto: "Todas as notícias publicadas são apagadas: o padrão é nenhuma notícia.", pronto: "Notícias restauradas ao padrão." },
   quadros: { titulo: "Restaurar os quadros?", texto: "Os quadros da página inicial e os grupos de apoio voltam aos valores de fábrica.", pronto: "Quadros restaurados ao padrão." },
   informacoes: { titulo: "Restaurar as informações?", texto: "A página de informações do evento volta ao conteúdo de fábrica.", pronto: "Informações restauradas ao padrão." },
-  tudo: { titulo: "Restaurar todo o conteúdo do site?", texto: `Evento, aparência (inclusive o banner enviado), atividades, palestrantes, quadros e informações voltam aos valores de fábrica. ${SE_RECUSAR}`, pronto: "Todo o conteúdo do site foi restaurado ao padrão." },
+  tudo: { titulo: "Restaurar todo o conteúdo do site?", texto: `Evento, aparência (inclusive o banner enviado), atividades, palestrantes, notícias, quadros e informações voltam aos valores de fábrica. ${SE_RECUSAR}`, pronto: "Todo o conteúdo do site foi restaurado ao padrão." },
 };
 
 /** Botão que abre a confirmação (a ação é ligada por `ligarRestauracao`, por delegação). */

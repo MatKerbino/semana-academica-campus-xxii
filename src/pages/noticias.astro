@@ -1,0 +1,14 @@
+---
+import PaginaCabecalho from "../components/PaginaCabecalho.astro";
+import Base from "../layouts/Base.astro";
+---
+
+<Base titulo="Notícias" ativo="/noticias">
+  <PaginaCabecalho titulo="Notícias" descricao="Novidades e avisos sobre {{nome}}." trilha={[{ href: "/", rotulo: "Início" }]} />
+  <div id="noticias"></div>
+</Base>
+
+<script>
+  import { iniciar } from "../lib/paginas/noticias";
+  iniciar();
+</script>

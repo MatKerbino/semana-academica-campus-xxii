@@ -13,6 +13,7 @@ export const conteudoPadrao = padrao as unknown as Conteudo;
 
 const completo = (c: unknown): c is Conteudo => {
   const x = c as Partial<Conteudo> | null;
+  if (x && !x.noticias) x.noticias = []; // cópia local anterior às notícias
   return !!x && !!x.evento && !!x.aparencia && Array.isArray(x.atividades) && Array.isArray(x.palestrantes) && !!x.quadros && !!x.informacoes;
 };
 

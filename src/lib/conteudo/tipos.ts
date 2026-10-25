@@ -26,6 +26,9 @@ export type Atividade = {
   topicos: string[];
 };
 
+/** Notícia publicada pelo admin. `corpo` = parágrafos; `imagem` e `link` vazios ou http(s). */
+export type Noticia = { slug: string; titulo: string; resumo: string; corpo: string[]; data: string; imagem: string; imagemAlt: string; link: string };
+
 export type Palestrante = { slug: string; nome: string; cargo: string; lattes: string; bio: string; email: string };
 
 export type Evento = {
@@ -67,6 +70,7 @@ export type Conteudo = {
   aparencia: Aparencia;
   atividades: Atividade[];
   palestrantes: Palestrante[];
+  noticias: Noticia[];
   quadros: Quadros;
   informacoes: Informacoes;
 };

@@ -41,7 +41,7 @@ export async function iniciarEvento(raiz: HTMLElement) {
         campo(e, "links.politicaPrivacidade", "Link da Política de Privacidade", erros, { tipo: "url", placeholder: "https://…", ajuda: "Vazio = usa a página interna do site. Preenchido = todos os links da política passam a abrir este endereço." }),
         campo(e, "links.termos", "Link dos Termos e Condições", erros, { tipo: "url", placeholder: "https://…", ajuda: "Vazio = o link não é exibido." }),
       ].join("")),
-      secao("Zona de risco", `<div class="flex flex-wrap items-center justify-between gap-4"><p class="min-w-48 flex-1 text-[15px] leading-normal text-chumbo">Devolve evento, aparência (inclusive o banner enviado), atividades, palestrantes, quadros e informações aos valores de fábrica.</p>${botaoRestaurar("tudo", "Restaurar todo o conteúdo do site")}</div>`),
+      secao("Zona de risco", `<div class="flex flex-wrap items-center justify-between gap-4"><p class="min-w-48 flex-1 text-[15px] leading-normal text-chumbo">Devolve evento, aparência (inclusive o banner enviado), atividades, palestrantes, notícias, quadros e informações aos valores de fábrica.</p>${botaoRestaurar("tudo", "Restaurar todo o conteúdo do site")}</div>`),
     ].join("");
   };
 

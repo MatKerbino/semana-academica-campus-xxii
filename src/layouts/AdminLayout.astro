@@ -2,7 +2,7 @@
 import "../styles/global.css";
 import {
   Apple, ArrowLeft, Ban, Banknote, Check, ChevronDown, CircleCheck, CircleX, Clock, EllipsisVertical, Eye, FileText, GraduationCap,
-  History, Image, Info, LayoutDashboard, Leaf, ListChecks, Lock, LogOut, MapPin, Menu, MicVocal, Minus, PackageCheck, Pencil,
+  History, Image, Info, LayoutDashboard, Leaf, ListChecks, Lock, LogOut, MapPin, Menu, MicVocal, Minus, Newspaper, PackageCheck, Pencil,
   Plus, Presentation, Search, Palette, LayoutGrid, Settings, Sprout, Trash2, TriangleAlert, Undo2, User, UserCog, Users, Wallet, X, CalendarDays,
 } from "@lucide/astro";
 import { url } from "../lib/url";
@@ -10,7 +10,7 @@ import BibliotecaIcones from "../components/BibliotecaIcones.astro";
 
 interface Props {
   titulo: string;
-  ativo: "geral" | "participantes" | "inscricoes" | "devolucoes" | "pagamento" | "conta" | "evento" | "aparencia" | "atividades" | "palestrantes" | "quadros" | "informacoes";
+  ativo: "geral" | "participantes" | "inscricoes" | "devolucoes" | "pagamento" | "conta" | "evento" | "aparencia" | "atividades" | "palestrantes" | "noticias" | "quadros" | "informacoes";
 }
 const { titulo, ativo } = Astro.props;
 
@@ -29,6 +29,7 @@ const itensConteudo = [
   { id: "aparencia", href: "/admin/aparencia", rotulo: "Aparência", Icone: Palette },
   { id: "atividades", href: "/admin/atividades", rotulo: "Atividades", Icone: Presentation },
   { id: "palestrantes", href: "/admin/palestrantes", rotulo: "Palestrantes", Icone: MicVocal },
+  { id: "noticias", href: "/admin/noticias", rotulo: "Notícias", Icone: Newspaper },
   { id: "quadros", href: "/admin/quadros", rotulo: "Quadros", Icone: LayoutGrid },
   { id: "informacoes", href: "/admin/informacoes", rotulo: "Informações", Icone: Info },
 ] as const;

@@ -85,6 +85,14 @@ const botaoSecundario =
 
       <div data-painel="local" data-local></div>
     </Abas>
+
+    <section data-noticias hidden class="flex flex-col gap-4">
+      <div class="flex items-center justify-between gap-3">
+        <h2 class="text-xl leading-[1.4] font-bold text-verde-escuro">Últimas notícias</h2>
+        <a href={url("/noticias")} class="shrink-0 text-sm font-semibold text-azul hover:underline">Ver todas →</a>
+      </div>
+      <div data-noticias-lista class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+    </section>
   </div>
 </Base>
 

@@ -1,5 +1,5 @@
 /** Escritas do conteúdo editável (somente administrador). Toda resposta é o conteúdo completo. */
-import type { Atividade, Conteudo, Palestrante } from "../conteudo";
+import type { Atividade, Conteudo, Noticia, Palestrante } from "../conteudo";
 import { limparConteudo } from "../conteudo";
 import { api } from "./http";
 
@@ -11,8 +11,8 @@ const gravar = async (rota: string, metodo: string, corpo?: unknown) => {
 
 /** Partes do conteúdo que têm um editor de formulário único (PUT /admin/conteudo/<parte>). */
 export type ParteEditavel = "evento" | "aparencia" | "quadros" | "informacoes";
-/** Partes que podem voltar ao padrão de fábrica ("tudo" restaura as seis de uma vez). */
-export type ParteRestauravel = ParteEditavel | "atividades" | "palestrantes" | "tudo";
+/** Partes que podem voltar ao padrão de fábrica ("tudo" restaura as sete de uma vez). */
+export type ParteRestauravel = ParteEditavel | "atividades" | "palestrantes" | "noticias" | "tudo";
 
 export const salvarParte = (parte: ParteEditavel, corpo: unknown) => gravar(`/admin/conteudo/${parte}`, "PUT", corpo);
 export const restaurarParte = (parte: ParteRestauravel) => gravar("/admin/conteudo/restaurar", "POST", { parte });
@@ -26,3 +26,7 @@ export const excluirAtividade = (slug: string) => gravar(`/admin/atividades/${en
 export const criarPalestrante = (p: Partial<Palestrante>) => gravar("/admin/palestrantes", "POST", p);
 export const editarPalestrante = (slug: string, p: Partial<Palestrante>) => gravar(`/admin/palestrantes/${encodeURIComponent(slug)}`, "PUT", p);
 export const excluirPalestrante = (slug: string) => gravar(`/admin/palestrantes/${encodeURIComponent(slug)}`, "DELETE");
+
+export const criarNoticia = (n: Partial<Noticia>) => gravar("/admin/noticias", "POST", n);
+export const editarNoticia = (slug: string, n: Partial<Noticia>) => gravar(`/admin/noticias/${encodeURIComponent(slug)}`, "PUT", n);
+export const excluirNoticia = (slug: string) => gravar(`/admin/noticias/${encodeURIComponent(slug)}`, "DELETE");

@@ -4,6 +4,7 @@ import { atividadesListadas, extrasTexto, icone, iconeDoSlot, obterConteudo, tex
 import { obterForma } from "../forma-participacao";
 import { url } from "../url";
 import { registrarPronto } from "./comum";
+import { cartaoNoticia, noticiasRecentes } from "./noticias";
 
 const cartao = "flex flex-col gap-3.5 rounded-cartao border border-borda bg-white p-[22px] shadow-[0_1px_3px_rgba(15,41,8,0.08)]";
 const titulo = "text-lg leading-[1.4] font-semibold text-verde-escuro";
@@ -73,6 +74,12 @@ function local(c: Conteudo) {
     <a href="${esc(l.mapsUrl)}" target="_blank" rel="noopener" class="flex items-center gap-2 rounded-full bg-azul px-[22px] py-3 text-[15px] leading-[1.3] font-bold text-white hover:opacity-90">${iconeDoSlot(c, "local", "size-[18px]")}Abrir no Google Maps</a></article>`;
 }
 
+function noticias(c: Conteudo, extras: Awaited<ReturnType<typeof extrasTexto>>) {
+  const recentes = noticiasRecentes(c).slice(0, 3);
+  document.querySelector<HTMLElement>("[data-noticias]")!.hidden = !recentes.length;
+  document.querySelector("[data-noticias-lista]")!.innerHTML = recentes.map((n) => cartaoNoticia(c, n, extras)).join("");
+}
+
 /** Página inicial: hero, quadros "Sobre", passos de inscrição, resumo de atividades e local. */
 export function iniciarInicio() {
   registrarPronto(
@@ -82,6 +89,7 @@ export function iniciarInicio() {
       quadros(c, extras);
       grupos(c);
       local(c);
+      noticias(c, extras);
     })(),
   );
 }
