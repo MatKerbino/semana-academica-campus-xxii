@@ -1,0 +1,1 @@
+import{t as e}from"./conteudo.Hkie4P02.js";var t=[],n=e=>void t.push(e),r=()=>Promise.allSettled(t),i=(t,n)=>e(t.aparencia,n);export{i as n,r,n as t};

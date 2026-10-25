@@ -1,0 +1,1 @@
+import{n as e}from"./noticias.DLGrer-0.js";e();

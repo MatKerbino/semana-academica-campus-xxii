@@ -1,0 +1,6 @@
+import{o as e}from"./api.Ctn0ZKft.js";import{A as t,g as n,h as r,m as i}from"./conteudo.Hkie4P02.js";import{t as a}from"./abas.BbNS7Gmj.js";var o=e=>e<=2?`sm:grid-cols-2`:e===3?`sm:grid-cols-2 lg:grid-cols-3`:`sm:grid-cols-2 lg:grid-cols-4`;async function s(){let s=await i();r(s,await n());let c=s.quadros.apoio.filter(e=>e.itens.length),l=document.getElementById(`abas`);if(!c.length)return void(l.innerHTML=`<p class="text-sm text-texto-suave">Nenhuma instituição cadastrada.</p>`);a(l,`Realização e apoio`,c.map(n=>({id:n.id,rotulo:n.rotulo,classe:`grid gap-4 ${o(n.itens.length)}`,html:n.itens.map(n=>`<article class="flex flex-col items-center rounded-cartao border border-borda bg-white p-4">
+      <span class="flex h-16 w-full items-center justify-center rounded-cartao bg-creme" aria-hidden="true">${t(`building-2`,`size-7 text-verde-medio`)}</span>
+      <h2 class="mt-3 text-center text-sm font-semibold text-verde-escuro">${e(n.nome)}</h2>
+      ${n.detalhe?`<p class="mt-1 text-center text-tabela text-chumbo/75">${e(n.detalhe)}</p>`:``}
+      ${n.url?`<a href="${e(n.url)}" target="_blank" rel="noopener" class="mt-1.5 flex items-center gap-1.5 text-tabela font-semibold text-azul hover:underline">Visitar site ↗</a>`:``}
+    </article>`).join(``)})))}s();

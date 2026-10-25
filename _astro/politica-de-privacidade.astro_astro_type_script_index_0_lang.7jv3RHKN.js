@@ -1,0 +1,1 @@
+import{g as e,h as t,m as n,w as r}from"./conteudo.Hkie4P02.js";var i=await n(),a=r(i);/^https?:/.test(a)?location.replace(a):t(i,await e());
