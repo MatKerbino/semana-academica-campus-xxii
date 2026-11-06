@@ -32,11 +32,14 @@ export async function montarLista(raiz: HTMLElement) {
   };
 
   async function abrirAlocacao(a: ArtigoAdmin) {
-    const avaliadores = (await usuarios()).filter((u) => u.avaliador);
+    const habilitados = (await usuarios()).filter((u) => u.avaliador);
+    const avaliadores = habilitados.filter((u) => u.login !== a.autorLogin);
+    const autorHabilitado = habilitados.length > avaliadores.length;
     const marcados = new Set(a.avaliadores.map((x) => x.login));
     const { dialogo, fechar } = abrirModal(`<h2 class="${CLASSES.titulo} !text-[20px]">Avaliadores do artigo</h2>
       <p class="mt-1 text-[13px] text-texto-suave">${esc(a.titulo)}</p>
-      ${avaliadores.length ? `<fieldset class="mt-4 flex max-h-72 flex-col gap-2 overflow-y-auto"><legend class="sr-only">Avaliadores</legend>${avaliadores.map((u) => `<label class="flex cursor-pointer items-center gap-2.5 text-[15px] text-chumbo"><input type="checkbox" value="${esc(u.login)}" ${marcados.has(u.login) ? "checked" : ""} class="size-5 accent-verde-medio" />${esc(u.nome ?? u.login)}${u.nome ? `<span class="text-[13px] text-texto-suave">${esc(u.login)}</span>` : ""}</label>`).join("")}</fieldset>` : `<p class="mt-4 text-[15px] text-chumbo">Nenhum usuário foi habilitado como avaliador. Habilite em Avaliadores.</p>`}
+      ${autorHabilitado ? `<p class="mt-3 rounded-campo border border-borda bg-palha p-3 text-[13px] leading-normal text-chumbo">A conta <strong>${esc(a.autorLogin)}</strong> enviou este artigo e, por isso, não pode ser escolhida para avaliá-lo.</p>` : ""}
+      ${avaliadores.length ? `<fieldset class="mt-4 flex max-h-72 flex-col gap-2 overflow-y-auto"><legend class="sr-only">Avaliadores</legend>${avaliadores.map((u) => `<label class="flex cursor-pointer items-center gap-2.5 text-[15px] text-chumbo"><input type="checkbox" value="${esc(u.login)}" ${marcados.has(u.login) ? "checked" : ""} class="size-5 accent-verde-medio" />${esc(u.nome ?? u.login)}${u.nome ? `<span class="text-[13px] text-texto-suave">${esc(u.login)}</span>` : ""}</label>`).join("")}</fieldset>` : `<p class="mt-4 text-[15px] text-chumbo">${autorHabilitado ? "Não há outro avaliador habilitado além do autor do artigo." : "Nenhum usuário foi habilitado como avaliador."} Habilite mais pessoas em Avaliadores.</p>`}
       <div data-erro-modal hidden role="alert" class="mt-4 rounded-campo border border-erro-borda bg-erro-fundo p-4 text-sm font-semibold text-erro"></div>
       <div class="mt-6 flex flex-wrap justify-end gap-3"><button type="button" data-voltar class="${CLASSES.botaoContorno}">Cancelar</button>${avaliadores.length ? `<button type="button" data-salvar class="${CLASSES.botaoPrimario}">Salvar</button>` : ""}</div>`);
     dialogo.querySelector("[data-voltar]")!.addEventListener("click", fechar);
