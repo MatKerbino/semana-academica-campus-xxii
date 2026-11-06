@@ -14,7 +14,7 @@ const imagem = (n: Noticia, classe: string) =>
   http(n.imagem) ? `<img src="${esc(http(n.imagem))}" alt="${esc(n.imagemAlt)}" loading="lazy" class="${classe}" />` : "";
 
 /** Cartão da lista (também usado na página inicial). */
-export function cartaoNoticia(c: Conteudo, n: Noticia, extras: ExtrasTexto) {
+function cartaoNoticia(c: Conteudo, n: Noticia, extras: ExtrasTexto) {
   const t = (s: string) => esc(texto(c, s, extras));
   return `<article class="flex min-w-0 flex-col overflow-hidden rounded-cartao border border-borda bg-white shadow-[0_1px_3px_rgba(15,41,8,0.08)]">
     ${imagem(n, "h-40 w-full object-cover")}

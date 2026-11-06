@@ -36,7 +36,7 @@ export async function iniciarNoticias(raiz: HTMLElement) {
   };
   const desenhar = () => {
     if (editando === undefined) {
-      raiz.innerHTML = `${cabecalhoPagina("Notícias", "Aparecem na página Notícias e as três mais recentes na página inicial.")}
+      raiz.innerHTML = `${cabecalhoPagina("Notícias", "Aparecem na página Notícias.")}
         <div class="flex flex-wrap items-center gap-3">${barraBusca(busca, "Buscar por título ou resumo", "sm:w-80")}<span class="flex-1"></span>
           ${botaoRestaurar("noticias")}<button type="button" data-novo class="${CLASSES.botaoPrimario}">${icone("plus")}Nova notícia</button></div>
         <div id="lista" class="grid gap-3 lg:grid-cols-2"></div>`;

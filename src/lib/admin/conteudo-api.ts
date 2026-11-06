@@ -1,11 +1,12 @@
 /** Escritas do conteúdo editável (somente administrador). Toda resposta é o conteúdo completo. */
 import type { Atividade, Conteudo, Noticia, Palestrante } from "../conteudo";
-import { limparConteudo } from "../conteudo";
+import { aplicarConteudo, limparConteudo } from "../conteudo";
 import { api } from "./http";
 
 const gravar = async (rota: string, metodo: string, corpo?: unknown) => {
   const c = await api<Conteudo>(rota, { metodo, corpo });
   limparConteudo(c);
+  aplicarConteudo(c); // o cabeçalho do painel acompanha o que foi salvo, sem recarregar
   return c;
 };
 
