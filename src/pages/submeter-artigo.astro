@@ -1,0 +1,16 @@
+---
+import PaginaCabecalho from "../components/PaginaCabecalho.astro";
+import Base from "../layouts/Base.astro";
+---
+
+<Base titulo="Submeter artigo" espaco="acesso">
+  <div class="mx-auto flex w-full max-w-[880px] flex-col gap-5">
+    <PaginaCabecalho titulo="Submeter artigo" descricao="Envie seu trabalho em PDF para avaliação." trilha={[{ href: "/", rotulo: "Início" }, { href: "/minha-area", rotulo: "Minha área" }]} />
+    <section id="formulario" tabindex="-1" aria-live="polite" class="rounded-cartao border border-borda bg-white p-6 shadow-[0_1px_3px_rgba(15,41,8,0.08)]"><p class="text-sm text-texto-suave">Carregando…</p></section>
+  </div>
+</Base>
+
+<script>
+  import { iniciar } from "../lib/paginas/submeter-artigo";
+  iniciar();
+</script>

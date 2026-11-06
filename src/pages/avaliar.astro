@@ -1,0 +1,16 @@
+---
+import PaginaCabecalho from "../components/PaginaCabecalho.astro";
+import Base from "../layouts/Base.astro";
+---
+
+<Base titulo="Avaliar artigos" espaco="acesso">
+  <div class="mx-auto flex w-full max-w-[880px] flex-col gap-5">
+    <PaginaCabecalho titulo="Avaliar artigos" descricao="Artigos alocados para você e os critérios de avaliação." trilha={[{ href: "/", rotulo: "Início" }, { href: "/minha-area", rotulo: "Minha área" }]} />
+    <div id="lista" aria-live="polite" class="flex flex-col gap-5"><p class="text-sm text-texto-suave">Carregando…</p></div>
+  </div>
+</Base>
+
+<script>
+  import { iniciar } from "../lib/paginas/avaliar";
+  iniciar();
+</script>

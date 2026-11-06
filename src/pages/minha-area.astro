@@ -2,6 +2,7 @@
 import PaginaCabecalho from "../components/PaginaCabecalho.astro";
 import Base from "../layouts/Base.astro";
 import IconesCliente from "../components/IconesCliente.astro";
+import { url } from "../lib/url";
 ---
 
 <Base titulo="Minha área" espaco="acesso">
@@ -14,6 +15,14 @@ import IconesCliente from "../components/IconesCliente.astro";
       <h2 class="text-[18px] leading-[1.4] font-semibold text-verde-escuro">Forma de participação</h2>
       <div id="forma" class="mt-4"></div>
       <p class="mt-4 text-[13px] leading-normal text-texto-suave">Forma de participação vigente, definida pela organização e igual para todos os inscritos.</p>
+    </section>
+    <section class="rounded-cartao border border-borda bg-white p-6 shadow-[0_1px_3px_rgba(15,41,8,0.08)]">
+      <h2 class="text-[18px] leading-[1.4] font-semibold text-verde-escuro">Artigos</h2>
+      <div class="mt-4 flex flex-wrap gap-3">
+        <a href={url("/submeter-artigo")} class="flex items-center justify-center gap-2 rounded-full border-2 border-verde-escuro bg-white px-[22px] py-2.5 text-[15px] font-bold text-verde-escuro hover:bg-palha">Submeter artigo</a>
+        <a href={url("/meus-artigos")} class="flex items-center justify-center gap-2 rounded-full border-2 border-verde-escuro bg-white px-[22px] py-2.5 text-[15px] font-bold text-verde-escuro hover:bg-palha">Meus artigos</a>
+        <a id="link-avaliar" hidden href={url("/avaliar")} class="items-center justify-center gap-2 rounded-full border-2 border-verde-escuro bg-white px-[22px] py-2.5 text-[15px] font-bold text-verde-escuro hover:bg-palha [&:not([hidden])]:flex">Avaliar artigos</a>
+      </div>
     </section>
     <section class="rounded-cartao border border-borda bg-white p-6 shadow-[0_1px_3px_rgba(15,41,8,0.08)]">
       <h2 class="text-[18px] leading-[1.4] font-semibold text-verde-escuro">Minha conta</h2>
@@ -86,10 +95,11 @@ import IconesCliente from "../components/IconesCliente.astro";
           if (e instanceof ApiError && e.status === 404) return null;
           throw e;
         }),
-        api<{ criadoEm?: string }>("/me").catch(() => ({}) as { criadoEm?: string }),
+        api<{ criadoEm?: string; avaliador?: boolean }>("/me").catch(() => ({}) as { criadoEm?: string; avaliador?: boolean }),
       ]);
       document.getElementById("estado")!.innerHTML = cartaoEstado(inscricao);
       document.getElementById("forma")!.innerHTML = formaParticipacao(inscricao?.pagamento ?? pagamento);
+      document.getElementById("link-avaliar")!.hidden = !me.avaliador;
       if (me.criadoEm) {
         document.querySelector("[data-criada-em]")!.textContent = formatarData(me.criadoEm);
         document.getElementById("criada-em")!.hidden = false;

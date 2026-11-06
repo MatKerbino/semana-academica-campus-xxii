@@ -1,0 +1,23 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+---
+
+<AdminLayout titulo="Artigos" ativo="artigos">
+  <div class="flex flex-col gap-1.5">
+    <h1 class="text-[32px] leading-[1.3] font-bold text-verde-escuro max-lg:text-[26px]">Artigos</h1>
+    <p class="text-[15px] leading-normal text-chumbo">Submissão, avaliadores e liberação das avaliações.</p>
+  </div>
+  <div id="config" aria-live="polite"><p class="text-sm text-texto-suave">Carregando…</p></div>
+  <div id="lista" aria-live="polite"></div>
+</AdminLayout>
+
+<script>
+  import { iniciarPainel } from "../../lib/admin-api";
+  import { montarConfiguracao } from "../../lib/admin/artigos/configuracao";
+  import { montarLista } from "../../lib/admin/artigos/lista";
+
+  if (iniciarPainel()) {
+    montarConfiguracao(document.getElementById("config")!);
+    montarLista(document.getElementById("lista")!);
+  }
+</script>
