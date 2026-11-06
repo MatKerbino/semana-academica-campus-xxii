@@ -1,7 +1,7 @@
 /** Meus artigos: lista, edição (com troca do PDF) e avaliações liberadas pela organização. */
 import { esc, exigirLogin } from "../api";
 import {
-  abrirArquivo, configuracao, meusArtigos, minhasAvaliacoes, rotuloResultado, texto, urlDoArquivo,
+  abrirArquivo, configuracao, meusArtigos, minhasAvaliacoes, rotuloResultado, urlDoArquivo,
   type Artigo, type ConfigArtigos,
 } from "../artigos/api";
 import { avisoErro, avisoInfo, CARTAO, LINK_BOTAO, mostrarErroPagina, motivoFechado } from "../artigos/comum";
@@ -32,8 +32,7 @@ export async function iniciar() {
   };
 
   const cartao = (a: Artigo) => `<article class="${CARTAO} flex flex-col gap-3" aria-labelledby="t-${esc(a.id)}">
-    <div><h2 id="t-${esc(a.id)}" class="text-[18px] leading-[1.4] font-semibold text-verde-escuro">${esc(a.titulo)}</h2><p class="text-[13px] text-texto-suave">${esc(texto(a.autores))}</p></div>
-    <p class="text-[15px] leading-normal text-chumbo">${esc(a.resumo)}</p>
+    <div><h2 id="t-${esc(a.id)}" class="text-[18px] leading-[1.4] font-semibold text-verde-escuro">${esc(a.titulo)}</h2></div>
     <div class="flex flex-wrap gap-3"><button type="button" data-pdf="${esc(a.id)}" class="${LINK_BOTAO} cursor-pointer">Abrir PDF${a.arquivo ? ` (${esc(a.arquivo.nome)})` : ""}</button>
       ${motivoFechado(config, "edicao") ? "" : `<button type="button" data-editar="${esc(a.id)}" class="${LINK_BOTAO} cursor-pointer">Editar</button>`}</div>
     <div class="flex flex-col gap-2 border-t border-borda pt-3"><h3 class="text-sm font-semibold text-chumbo">Avaliações</h3>${blocoAvaliacoes(a.id)}</div></article>`;

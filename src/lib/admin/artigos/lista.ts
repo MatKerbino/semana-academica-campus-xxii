@@ -1,6 +1,6 @@
 /** Artigos submetidos: alocação de avaliadores e liberação geral das avaliações. */
 import { esc } from "../../api";
-import { abrirArquivo, alocar, artigosAdmin, liberarAvaliacoes, texto, urlDoArquivo, usuarios, type ArtigoAdmin } from "../../artigos/api";
+import { abrirArquivo, alocar, artigosAdmin, liberarAvaliacoes, urlDoArquivo, usuarios, type ArtigoAdmin } from "../../artigos/api";
 import { CLASSES, erroCarregar } from "../componentes";
 import { botaoLinha, confirmarAcao } from "../conteudo/crud";
 import { secao } from "../conteudo/form";
@@ -13,8 +13,7 @@ const chip = (a: { login: string; status: string }) =>
 const linha = (a: ArtigoAdmin) =>
   `<article class="${CLASSES.cartao} flex flex-col gap-3 !p-4">
     <div><p class="text-base font-semibold text-verde-escuro">${esc(a.titulo)}</p>
-      <p class="text-[13px] text-texto-suave">${esc(texto(a.autores))} · conta ${esc(a.autorLogin)}</p></div>
-    <p class="line-clamp-3 text-[15px] leading-normal text-chumbo">${esc(a.resumo)}</p>
+      <p class="text-[13px] text-texto-suave">conta ${esc(a.autorLogin)}</p></div>
     <div class="flex flex-wrap items-center gap-1.5"><span class="text-[13px] font-semibold text-texto-suave">Avaliadores:</span>${a.avaliadores.length ? a.avaliadores.map(chip).join("") : `<span class="text-[13px] text-texto-suave">nenhum</span>`}</div>
     <div class="flex flex-wrap gap-2"><button type="button" data-pdf="${esc(a.id)}" class="${botaoLinha}">${icone("file-text", "size-4")}Abrir PDF</button>
       <button type="button" data-alocar="${esc(a.id)}" class="${botaoLinha}">${icone("users", "size-4")}Definir avaliadores</button></div></article>`;

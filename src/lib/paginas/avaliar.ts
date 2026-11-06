@@ -1,7 +1,7 @@
 /** Área do avaliador: artigos alocados, critérios e formulário de avaliação. */
 import { ApiError, erroCampos, esc, exigirLogin, limparErro, mostrarErro } from "../api";
 import {
-  abrirArquivo, artigosDoAvaliador, enviarAvaliacao, rotuloResultado, texto, urlDoArquivoAvaliador,
+  abrirArquivo, artigosDoAvaliador, enviarAvaliacao, rotuloResultado, urlDoArquivoAvaliador,
   type ArtigoAvaliador, type Resultado,
 } from "../artigos/api";
 import { avisoErro, avisoInfo, CARTAO, LINK_BOTAO, mostrarErroPagina } from "../artigos/comum";
@@ -22,10 +22,8 @@ function cartao(a: ArtigoAvaliador) {
     .map(([v, r]) => `<label class="flex cursor-pointer items-center gap-2 text-[15px] text-chumbo"><input type="radio" name="resultado" value="${v}" ${m?.resultado === v ? "checked" : ""} class="size-4 accent-verde-medio" />${r}</label>`)
     .join("");
   return `<article class="${CARTAO} flex flex-col gap-4" data-artigo="${esc(a.id)}">
-    <div class="flex flex-wrap items-start justify-between gap-3"><div class="min-w-0 flex-1"><h2 class="text-[18px] leading-[1.4] font-semibold text-verde-escuro">${esc(a.titulo)}</h2>
-      <p class="text-[13px] text-texto-suave">${esc(texto(a.autores))}</p></div>
+    <div class="flex flex-wrap items-start justify-between gap-3"><div class="min-w-0 flex-1"><h2 class="text-[18px] leading-[1.4] font-semibold text-verde-escuro">${esc(a.titulo)}</h2></div>
       <span data-situacao class="rounded-full border px-2.5 py-1 text-xs font-bold tracking-[0.4px] uppercase ${m ? "border-entregue-borda bg-entregue-fundo text-entregue-texto" : "border-pendente-borda bg-pendente-fundo text-pendente-texto"}">${m ? "Avaliação concluída" : "Pendente"}</span></div>
-    <p class="text-[15px] leading-normal text-chumbo">${esc(a.resumo)}</p>
     <button type="button" data-pdf class="${LINK_BOTAO} cursor-pointer">Abrir PDF do artigo</button>
     <form novalidate class="flex flex-col gap-4 border-t border-borda pt-4">
       ${caixaGeral("Não foi possível salvar a avaliação")}

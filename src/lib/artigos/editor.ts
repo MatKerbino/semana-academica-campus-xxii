@@ -1,6 +1,6 @@
 /** Formulário de artigo (submissão e edição): campos, validação local e envio do PDF direto ao armazenamento. */
 import { ApiError, erroCampos, esc, limparErro, mostrarErro } from "../api";
-import { criarArtigo, editarArtigo, megabytes, solicitarUpload, texto, type Artigo, type ConfigArtigos } from "./api";
+import { criarArtigo, editarArtigo, megabytes, solicitarUpload, type Artigo, type ConfigArtigos } from "./api";
 
 const CAMPO = "w-full rounded-campo border-[1.5px] border-borda bg-white px-3.5 text-[15px] text-chumbo outline-none focus:border-azul aria-[invalid=true]:border-2 aria-[invalid=true]:border-erro";
 export const BOTAO = "flex cursor-pointer items-center justify-center gap-2 rounded-full bg-verde-cta px-[22px] py-3 text-[15px] leading-[1.3] font-bold text-verde-noite hover:brightness-95 disabled:opacity-60";
@@ -27,9 +27,6 @@ export function montarEditor(raiz: HTMLElement, o: { config: ConfigArtigos; arti
   raiz.innerHTML = `<form novalidate class="flex flex-col gap-4">
     ${caixaGeral("Não foi possível salvar o artigo")}
     ${entrada("titulo", "Título *", artigo?.titulo ?? "", { maxlength: 250 })}
-    ${entrada("autores", "Autores *", texto(artigo?.autores), { maxlength: 500, ajuda: "Nomes separados por vírgula." })}
-    ${entrada("resumo", "Resumo *", artigo?.resumo ?? "", { linhas: 6, maxlength: 3000 })}
-    ${entrada("palavrasChave", "Palavras-chave", texto(artigo?.palavrasChave), { maxlength: 300, ajuda: "Separadas por vírgula." })}
     <div class="flex flex-col gap-1.5"><label for="artigo-arquivo" class="text-sm leading-[1.4] font-semibold text-chumbo">Arquivo do artigo (PDF)${artigo ? "" : " *"}</label>
       <input id="artigo-arquivo" name="arquivo" type="file" accept="application/pdf,.pdf" aria-describedby="artigo-arquivo-ajuda artigo-arquivo-erro" class="text-[15px] text-chumbo file:mr-3 file:cursor-pointer file:rounded-full file:border-0 file:bg-verde-claro file:px-4 file:py-2 file:text-sm file:font-bold file:text-verde-escuro" />
       <p id="artigo-arquivo-ajuda" class="text-[13px] leading-normal text-texto-suave">Tamanho máximo: ${limite}.${artigo?.arquivo ? ` Arquivo atual: ${esc(artigo.arquivo.nome)}. Envie outro só se quiser substituí-lo.` : ""}</p>
@@ -45,9 +42,7 @@ export function montarEditor(raiz: HTMLElement, o: { config: ConfigArtigos; arti
     const arquivo = d.arquivo as File;
     const temArquivo = arquivo.size > 0;
     const campos: Record<string, string> = {};
-    for (const [k, msg] of [["titulo", "Informe o título."], ["autores", "Informe os autores."], ["resumo", "Informe o resumo."]] as const) {
-      if (!String(d[k]).trim()) campos[k] = msg;
-    }
+    if (!String(d.titulo).trim()) campos.titulo = "Informe o título.";
     if (!temArquivo && !artigo) campos.arquivo = "Selecione o arquivo em PDF.";
     else if (temArquivo && !ehPdf(arquivo)) campos.arquivo = "O arquivo precisa estar em PDF.";
     else if (temArquivo && arquivo.size > config.limiteBytes) campos.arquivo = `O arquivo tem ${megabytes(arquivo.size)}; o máximo é ${limite}.`;
@@ -58,7 +53,7 @@ export function montarEditor(raiz: HTMLElement, o: { config: ConfigArtigos; arti
     botao.textContent = temArquivo ? "Enviando arquivo…" : "Salvando…";
     try {
       const corpo = {
-        titulo: String(d.titulo).trim(), resumo: String(d.resumo).trim(), autores: String(d.autores).trim(), palavrasChave: String(d.palavrasChave).trim(),
+        titulo: String(d.titulo).trim(),
         ...(temArquivo && { arquivo: await enviarArquivo(arquivo) }),
       };
       o.aoSalvar(artigo ? await editarArtigo(artigo.id, corpo) : await criarArtigo(corpo));

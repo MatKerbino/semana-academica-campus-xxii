@@ -19,9 +19,6 @@ export type ArquivoArtigo = { nome: string; tamanho: number };
 export type Artigo = {
   id: string;
   titulo: string;
-  resumo: string;
-  autores: string | string[];
-  palavrasChave?: string | string[];
   arquivo?: ArquivoArtigo | null;
   atualizadoEm?: string;
 };
@@ -37,8 +34,8 @@ export type AvaliacaoAdmin = {
   liberada: boolean;
 };
 export type MinhaAvaliacao = { resultado: Resultado; observacoesAutor: string; observacoesAdmin: string };
-export type ArtigoAvaliador = { id: string; titulo: string; resumo: string; autores: string | string[]; minhaAvaliacao: MinhaAvaliacao | null };
-export type CorpoArtigo = { titulo: string; resumo: string; autores: string; palavrasChave: string; arquivo?: { chave: string; nome: string; tamanho: number } };
+export type ArtigoAvaliador = { id: string; titulo: string; minhaAvaliacao: MinhaAvaliacao | null };
+export type CorpoArtigo = { titulo: string; arquivo?: { chave: string; nome: string; tamanho: number } };
 
 const enc = encodeURIComponent;
 const put = (rota: string, corpo: unknown) => api(rota, { metodo: "PUT", corpo });
@@ -69,7 +66,6 @@ export const artigosDoAvaliador = () => api<{ criterios: string[]; artigos: Arti
 export const urlDoArquivoAvaliador = (id: string) => api<{ url: string }>(`/avaliador/artigos/${enc(id)}/arquivo`).then((r) => r.url);
 export const enviarAvaliacao = (id: string, corpo: MinhaAvaliacao) => put(`/avaliador/artigos/${enc(id)}/avaliacao`, corpo);
 
-export const texto = (v?: string | string[] | null) => (Array.isArray(v) ? v.join(", ") : (v ?? ""));
 export const megabytes = (bytes: number) => `${(bytes / 1048576).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} MB`;
 
 /** Abre o PDF numa nova aba: a URL assinada é pedida no clique, por expirar em minutos. */
