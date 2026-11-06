@@ -13,10 +13,16 @@ import Base from "../layouts/Base.astro";
   />
 
   <div class="flex flex-col gap-5">
-    <a href={url("/informacoes")} class="flex w-fit items-center gap-2 rounded-full border-2 border-verde-escuro bg-white px-[22px] py-2.5 text-[15px] font-bold text-verde-escuro hover:bg-palha">
-      Edital, templates e prazos de submissão
-      <ArrowRight class="size-4" aria-hidden="true" />
-    </a>
+    <div class="flex flex-wrap items-center gap-3">
+      <a href={url("/submeter-artigo")} class="flex w-fit items-center gap-2 rounded-full bg-verde-cta px-[22px] py-3 text-[15px] leading-[1.3] font-bold text-verde-noite hover:brightness-95">
+        Submeter artigo
+        <ArrowRight class="size-4" aria-hidden="true" />
+      </a>
+      <a href={url("/informacoes")} class="flex w-fit items-center gap-2 rounded-full border-2 border-verde-escuro bg-white px-[22px] py-2.5 text-[15px] font-bold text-verde-escuro hover:bg-palha">
+        Edital, templates e prazos de submissão
+        <ArrowRight class="size-4" aria-hidden="true" />
+      </a>
+    </div>
     <div id="sessoes" class="grid gap-5 md:grid-cols-2"></div>
     <section class="flex flex-col gap-3">
       <h2 class="text-xl font-semibold text-verde-escuro">Trabalhos aprovados</h2>
